@@ -9,8 +9,12 @@ Basic usage
 
 * filter selected fields
 
-    cat samples.jsonl | pyq '{id: x.id, subject: x.fields.subject}'
+    cat samples.jsonl | pyq 'map({id: x.id, subject: x.fields.subject})'
+
+* filter selected items
+
+    cat samples.jsonl | pyq 'map({id: x.id, subject: x.fields.subject}), filter(x.id == "12")'
 
 * filter selected values
 
-    cat samples.jsonl | pyq 'id: x.id'
+    cat samples.jsonl | pyq 'map(id: x.id)'
