@@ -3,12 +3,11 @@ import sys
 import json
 import logging
 from functools import reduce
-logger = logging.getLogger(__name__)
-FORMAT = '%(asctime)-15s %(message)s'
+FORMAT = '%(levelname)s %(name)s : %(message)s'
 logging.basicConfig(format=FORMAT)
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 
 
 namere = re.compile(r'([{,] *)([^{} "\',]+):')
@@ -33,6 +32,10 @@ def to_struct(v):
 
 toStruct = lambda arr: map(to_struct, arr)
 
+class StructEncoder(json.JSONEncoder):
+  def default(self, o):
+    return o.__dict__
+
 class genProcessor:
   def __init__(self, igen, filters=[]):
     self.igen = igen
@@ -55,4 +58,4 @@ def run_query(query, data, sort_keys=False):
 if __name__ == "__main__":
   inq = (json.loads(d) for d in sys.stdin)
   for out in run_query(sys.argv[1], inq):
-    print(out.__dict__)
+    print(json.dumps(out, cls=StructEncoder))
