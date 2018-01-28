@@ -2,6 +2,7 @@ import re
 import sys
 import json
 import logging
+from functools import reduce
 logger = logging.getLogger(__name__)
 FORMAT = '%(asctime)-15s %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -47,7 +48,7 @@ def run_query(query, data, sort_keys=False):
   query = lambdare.sub(r'lambda arr: \1(lambda x: \2, arr)', query)
   query = "gp(x, [" + query + "]).process()" #Make it a list
   logger.debug(query)
-  for it in eval(query, {"x": data, "gp": genProcessor}):
+  for it in eval(query, {"x": data, "gp": genProcessor, "reduce": reduce}):
     yield it
 
 
