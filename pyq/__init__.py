@@ -1,8 +1,17 @@
 import re
 import sys
 import json
+import logging
+logger = logging.getLogger(__name__)
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
 
-namere = re.compile(r'([^{} "\',]+):')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+
+namere = re.compile(r'([{,] *)([^{} "\',]+):')
+lambdare = re.compile("([a-zA-Z][^ ,]+)\(([^)]+)\)")
 
 class Struct:
   def __init__(self, **entries):
@@ -11,12 +20,8 @@ class Struct:
         self.__dict__[k] = to_struct(v)
       else:
         self.__dict__[k] = v
-    #self.__dict__.update(entries)
-  def __repr__(self):
-    return self__dict
   def __getitem__(self, item):
     return self.__dict__[item]
-
 
 def to_struct(v):
   if type(v) == dict:
@@ -25,12 +30,28 @@ def to_struct(v):
     return [to_struct(a) for a in v]
   return v
 
+toStruct = lambda arr: map(to_struct, arr)
 
-def run_query(query, data):
-  query = namere.sub(r'"\1":', query)
-  return json.dumps(eval(query, {"x": to_struct(data)}))
+class genProcessor:
+  def __init__(self, igen, filters=[]):
+    self.igen = igen
+    self._filters = filters
+  def process(self):
+    pipeline = self.igen
+    for f in self._filters:
+      pipeline = f(toStruct(pipeline))
+    return pipeline
+
+def run_query(query, data, sort_keys=False):
+  query = namere.sub(r'\1"\2":', query)
+  query = lambdare.sub(r'lambda arr: \1(lambda x: \2, arr)', query)
+  query = "gp(x, [" + query + "]).process()" #Make it a list
+  logger.debug(query)
+  for it in eval(query, {"x": data, "gp": genProcessor}):
+    yield it
 
 
 if __name__ == "__main__":
-  for d in sys.stdin:
-    print(run_query(sys.argv[1], json.loads(d)))
+  inq = (json.loads(d) for d in sys.stdin)
+  for out in run_query(sys.argv[1], inq):
+    print(out.__dict__)
