@@ -4,7 +4,8 @@ import re
 import argparse
 import logging
 import html
-from __init__ import *
+from pyq import *
+#from __init__ import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -19,7 +20,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-if __name__ == "__main__":
+def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("query", help="query string for extracting wanted information")
   parser.add_argument("--debug", help="print debug messages", action="store_true")
@@ -47,3 +48,6 @@ if __name__ == "__main__":
       for key, value in colors.items():
         ret = key.sub(value[0] + r'\1' + value[1] + r"\2", ret)
     print(ret)
+
+if __name__ == "__main__":
+  main()
