@@ -10,14 +10,19 @@ Basic usage
 filter selected fields
 
     $ cat samples.jsonl | pyq 'map({id: x.id, subject: x.fields.subject})'
+    {"id": "87086895", "subject": "Swedish children stories"}
+    {"id": "87114792", "subject": "New Finnish storybooks"}
 
 filter selected items
 
-    $ cat samples.jsonl | pyq 'map({id: x.id, subject: x.fields.subject}), filter(x.id == "12")'
+    $ cat samples.jsonl | pyq 'map({id: x.id, subject: x.fields.subject}), filter(x.id == "87114792")'
+    {"id": "87114792", "subject": "New Finnish storybooks"}
 
 filter selected values
 
     $ cat samples.jsonl | pyq 'map(x.id)'
+    "87086895"
+    "87114792"
 
 filter items by age (and output yaml)
 
