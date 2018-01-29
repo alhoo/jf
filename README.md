@@ -36,3 +36,11 @@ Installing
 ==
 
     pip install git+https://github.com/alhoo/pyq
+
+
+Known bugs
+==
+
+* Does not support all json formats (ex. jq . sample.jsonl|pyq '')
+* Datetime-recognition is crude and will probably make mistakes
+

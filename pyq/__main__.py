@@ -32,9 +32,44 @@ def main():
 
   if args.debug:
     logging.getLogger('pyq').setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
 
 #  inq = (json.loads(d) for d in sys.stdin)
-  inq = (json.loads(d) for d in fileinput.input(files=args.files if len(args.files) > 0 else ('-', )))
+  def read_jsonl_or_json(args):
+    data = ''
+    inf = fileinput.input(files=args.files if len(args.files) > 0 else ('-', ))
+    try:
+      for d in inf:
+        data += d
+        ind = json.loads(d)
+        if type(ind) == list:
+          for it in ind:
+            logger.info("Yielding %s", it)
+            yield it
+        else:
+          logger.info("Yielding %s", ind)
+          yield ind
+        #yield it
+        data = ''
+    except:
+      logger.info("Got an exception while trying to interpret jsonl")
+      logger.info("Switching to json-mode")
+      logger.info("Data so far: '%s'", data)
+      data += "".join(inf)
+      logger.info("Full data: '%s'", data)
+      pass
+      #yield json.loads(data)
+    if len(data) > 0:
+      ind = json.loads(data)
+      if type(ind) == list:
+        for it in ind:
+          logger.info("Yielding %s", it)
+          yield it
+      else:
+        yield ind
+
+  #inq = (json.loads(d) for d in fileinput.input(files=args.files if len(args.files) > 0 else ('-', )))
+  inq = read_jsonl_or_json(args)
   lexertype = 'json'
   out_kw_args = {"sort_keys": args.sort_keys,
                  "indent": args.indent,

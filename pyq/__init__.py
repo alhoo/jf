@@ -72,6 +72,11 @@ class StructEncoder(json.JSONEncoder):
     except:
       return o.__str__()
 
+def pipelogger(arr):
+  for it in arr:
+    logger.debug("'%s' goes through the pipeline", it)
+    yield it
+
 class genProcessor:
   """Make a generator pipeline"""
   def __init__(self, igen, filters=[]):
@@ -79,6 +84,7 @@ class genProcessor:
     self._filters = filters
   def process(self):
     pipeline = self.igen
+    pipeline = pipelogger(pipeline)
     for f in self._filters:
       pipeline = f(toStruct(pipeline))
     return pipeline
@@ -94,20 +100,27 @@ def run_query(query, data, sort_keys=False):
   logger.debug(query)
   query = nowre.sub(r'datetime.now(timezone.utc)', query)
   logger.debug(query)
-  query = "gp(x, [" + query + "]).process()" #Make it a list
+  query = "gp(data, [" + query + "]).process()" #Make it a list
   logger.debug(query)
   globalscope = {
-      "x": data,
+      "data": data,
       "gp": genProcessor,
       "age": age,
       "reduce": reduce,
       "datetime": datetime,
       "timezone": timezone}
-  for it in eval(query, globalscope):
-    yield it
+  res = eval(query, globalscope)
+  try:
+    for it in res:
+      yield it
+  except TypeError as ex:
+    yield res
+  except Exception as ex:
+    logger.warning("Got an unexpected exception while yielding results")
+    logger.warning("Exception: %s", ex)
 
 
-if __name__ == "__main__":
-  inq = (json.loads(d) for d in sys.stdin)
-  for out in run_query(sys.argv[1], inq):
-    print(json.dumps(out, cls=StructEncoder))
+#if __name__ == "__main__":
+#  inq = (json.loads(d) for d in sys.stdin)
+#  for out in run_query(sys.argv[1], inq):
+#    print(json.dumps(out, cls=StructEncoder))
