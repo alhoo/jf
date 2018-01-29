@@ -10,10 +10,10 @@ setup(
   maintainer='Lasse Hyyrynen',
   maintainer_email='leh@protonmail.com',
   setup_requires=[
-    'setuptools_scm>=1.10.1',
     'setuptools>=20.2.2'
   ],
   install_requires=[
+    'pygments>=2.0.0'
   ],
   tests_require=[
     'nose>=1.3.0'
