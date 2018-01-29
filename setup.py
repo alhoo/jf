@@ -15,10 +15,15 @@ setup(
   download_url = 'https://github.com/alhoo/pyq/archive/0.1.tar.gz',
   url = 'https://github.com/alhoo/pyq',
   setup_requires = [
-    'setuptools_scm> = 1.10.1',
     'setuptools> = 20.2.2'
   ],
+  packages=find_packages(where='.'),
   install_requires = [
+    'pygments>=2.0.0',
+    'regex>=2016.3.2',
+    'python-dateutil>=2.6.1',
+    'PyYAML>=3.12',
+    'dateparser>=0.6.0'
   ],
   tests_require = [
     'nose> = 1.3.0'
