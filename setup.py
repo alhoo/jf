@@ -9,11 +9,13 @@ setup(
   author_email='leh@protonmail.com',
   maintainer='Lasse Hyyrynen',
   maintainer_email='leh@protonmail.com',
+  packages=find_packages(where='.'),
   setup_requires=[
     'setuptools>=20.2.2'
   ],
   install_requires=[
-    'pygments>=2.0.0'
+    'pygments>=2.0.0',
+    'regex>=2016.3.2'
   ],
   tests_require=[
     'nose>=1.3.0'

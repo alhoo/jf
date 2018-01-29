@@ -1,4 +1,4 @@
-import re
+import regex as re
 import sys
 import json
 import logging
@@ -15,8 +15,10 @@ logger.setLevel(logging.WARNING)
 
 
 namere = re.compile(r'([{,] *)([^{} "\',]+):')
-indented_str = '(\([^)]*\))'
-lambdare = re.compile("([a-zA-Z][^() ,]+)\(([^()]*("+indented_str+"?[^()]*)+)\)")
+makexre = re.compile('([ (])(\.[a-zA-Z])')
+#indented_str = '(\([^()]*(?1)?\))'
+#lambdare = re.compile("([a-zA-Z][^() ,]+)\(([^()]*("+indented_str+"?[^()]*)+)\)")
+lambdare = re.compile("([a-zA-Z][^() ,]+)(\([^()]*((?2)?[^()]*)+\))")
 nowre = re.compile("NOW\(\)")
 
 #age = lambda x: datetime.now() - dateparser.parse(x)
@@ -33,14 +35,14 @@ def age(x):
 #parse_timedelta = lambda x: datetime.now() - dateparser.parse(x)
 
 def parse_value(v):
-  logger.debug("Parsing: '%s'", v)
+#  logger.debug("Parsing: '%s'", v)
   try:
-    if len(v) > 3:
+    if len(v) > 10:
       time = dateutil.parse(v)
     else:
       return v
     #time = dateparser.parse(v)
-    logger.info("Found a timestamp: %s", v)
+#    logger.info("Found a timestamp: %s", v)
     return time
   except:
     return v
@@ -85,7 +87,9 @@ def run_query(query, data, sort_keys=False):
   logger.debug(query)
   query = namere.sub(r'\1"\2":', query)
   logger.debug(query)
-  query = lambdare.sub(r'lambda arr: \1(lambda x: \2, arr)', query)
+  query = makexre.sub(r'\1x\2', query)
+  logger.debug(query)
+  query = lambdare.sub(r'lambda arr: \1(lambda x, *rest: \2, arr)', query)
   logger.debug(query)
   query = nowre.sub(r'datetime.now(timezone.utc)', query)
   logger.debug(query)
