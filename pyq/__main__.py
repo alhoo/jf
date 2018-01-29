@@ -5,6 +5,7 @@ import argparse
 import logging
 import html
 import yaml
+import fileinput
 from pyq import *
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
@@ -26,12 +27,14 @@ def main():
   parser.add_argument("-r", "--raw", help="raw output", action="store_true", default=False)
   parser.add_argument("-a", "--ensure_ascii", help="ensure ascii only characters", action="store_true", default=False)
   parser.add_argument("--html_unescape", help="unescape html entities", action="store_true", default=False)
+  parser.add_argument('files', metavar='FILE', nargs='*', help='files to read, if empty, stdin is used')
   args = parser.parse_args()
 
   if args.debug:
     logging.getLogger('pyq').setLevel(logging.DEBUG)
 
-  inq = (json.loads(d) for d in sys.stdin)
+#  inq = (json.loads(d) for d in sys.stdin)
+  inq = (json.loads(d) for d in fileinput.input(files=args.files if len(args.files) > 0 else ('-', )))
   lexertype = 'json'
   out_kw_args = {"sort_keys": args.sort_keys,
                  "indent": args.indent,
