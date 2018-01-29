@@ -31,6 +31,25 @@ filter items by age (and output yaml)
     datetime: '2016-10-29 10:55:42+03:00'
     id: '87086895'
 
+Sort items by age and print their id, length and age
+
+    $ cat test.jsonl|pyq 'map(x.update({age: age(x["content-datetime"])})), sorted(x.age), map(.id, "length: %d" % len(.content), .age)' --indent=3 --yaml
+    - '14941692'
+    - 'length: 63'
+    - 184 days, 0:02:20.421829
+    - '90332110'
+    - 'length: 191'
+    - 215 days, 22:15:46.403613
+    - '88773908'
+    - 'length: 80'
+    - 350 days, 3:11:06.412088
+    - '14558799'
+    - 'length: 1228'
+    - 450 days, 6:30:54.419461
+    - '87182405'
+    - 'length: 251'
+
+
 
 Installing
 ==

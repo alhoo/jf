@@ -107,6 +107,7 @@ def run_query(query, data, sort_keys=False):
       "gp": genProcessor,
       "age": age,
       "reduce": reduce,
+      "sorted": lambda x, arr: sorted(arr, key=x),
       "datetime": datetime,
       "timezone": timezone}
   res = eval(query, globalscope)
