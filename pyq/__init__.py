@@ -10,19 +10,16 @@ FORMAT = '%(levelname)s %(name)s : %(message)s'
 logging.basicConfig(format=FORMAT)
 
 logger = logging.getLogger(__name__)
-#logger.setLevel(logging.DEBUG)
 logger.setLevel(logging.WARNING)
 
 
 namere = re.compile(r'([{,] *)([^{} "\',]+):')
 makexre = re.compile('([ (])(\.[a-zA-Z])')
-#indented_str = '(\([^()]*(?1)?\))'
-#lambdare = re.compile("([a-zA-Z][^() ,]+)\(([^()]*("+indented_str+"?[^()]*)+)\)")
 lambdare = re.compile("([a-zA-Z][^() ,]+)(\([^()]*((?2)?[^()]*)+\))")
 nowre = re.compile("NOW\(\)")
 
-#age = lambda x: datetime.now() - dateparser.parse(x)
 def age(x):
+    """Try to guess the age of x"""
     logger.debug("Calculating the age of '%s'", x)
     ret = 0
     try:
@@ -32,22 +29,19 @@ def age(x):
     logger.debug("Age of '%s' is %s", x, repr(ret))
     return ret
 
-#parse_timedelta = lambda x: datetime.now() - dateparser.parse(x)
-
 def parse_value(v):
-#  logger.debug("Parsing: '%s'", v)
+  """Parse value to complex types"""
   try:
     if len(v) > 10:
       time = dateutil.parse(v)
     else:
       return v
-    #time = dateparser.parse(v)
-#    logger.info("Found a timestamp: %s", v)
     return time
   except:
     return v
 
 class Struct:
+  """Class representation of dict"""
   def __init__(self, **entries):
     for k, v in entries.items():
       if type(v) in (list, dict):
@@ -58,6 +52,7 @@ class Struct:
     return self.__dict__[item]
 
 def to_struct(v):
+  """Convert v to a class representing v"""
   if type(v) == dict:
     return Struct(**v)
   if type(v) == list:
@@ -67,6 +62,7 @@ def to_struct(v):
 toStruct = lambda arr: map(to_struct, arr)
 
 class StructEncoder(json.JSONEncoder):
+  """Try to convert everything to json"""
   def default(self, o):
     try:
       return o.__dict__
@@ -74,6 +70,7 @@ class StructEncoder(json.JSONEncoder):
       return o.__str__()
 
 class genProcessor:
+  """Make a generator pipeline"""
   def __init__(self, igen, filters=[]):
     self.igen = igen
     self._filters = filters
@@ -84,6 +81,7 @@ class genProcessor:
     return pipeline
 
 def run_query(query, data, sort_keys=False):
+  """Run a query against given data"""
   logger.debug(query)
   query = namere.sub(r'\1"\2":', query)
   logger.debug(query)
