@@ -4,7 +4,6 @@ from setuptools import find_packages, setup
 
 setup(
   name = 'pyq',
-  packages = ['pyq'],
   version = '0.1',
   description = 'Python jsonl query engine',
   author = 'Lasse Hyyrynen',
@@ -15,9 +14,9 @@ setup(
   download_url = 'https://github.com/alhoo/pyq/archive/0.1.tar.gz',
   url = 'https://github.com/alhoo/pyq',
   setup_requires = [
-    'setuptools> = 20.2.2'
+    'setuptools>=20.2.2'
   ],
-  packages=find_packages(where='.'),
+  packages = ['pyq'],
   install_requires = [
     'pygments>=2.0.0',
     'regex>=2016.3.2',
@@ -26,12 +25,12 @@ setup(
     'dateparser>=0.6.0'
   ],
   tests_require = [
-    'nose> = 1.3.0'
+    'nose>=1.3.0'
   ],
   test_suite = 'tests',
   zip_safe = True,
   entry_points = {
-    'console_scripts': ['pyq = pyq.__main__:main']
+    'console_scripts': ['pyq=pyq.__main__:main']
   }
 )
 
