@@ -10,6 +10,7 @@ setup(
   author_email = 'leh@protonmail.com',
   maintainer = 'Lasse Hyyrynen',
   maintainer_email = 'leh@protonmail.com',
+  license = 'MIT',
   keywords = ['json', 'yaml', 'jq'],
   download_url = 'https://github.com/alhoo/pyq/archive/0.1.tar.gz',
   url = 'https://github.com/alhoo/pyq',
