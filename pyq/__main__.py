@@ -29,7 +29,7 @@ def main():
   args = parser.parse_args()
 
   if args.debug:
-    logger.setLevel(logging.DEBUG)
+    logging.getLogger('pyq').setLevel(logging.DEBUG)
 
   inq = (json.loads(d) for d in sys.stdin)
   lexertype = 'json'
