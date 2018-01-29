@@ -17,4 +17,4 @@ Basic usage
 
 * filter selected values
 
-    cat samples.jsonl | pyq 'map(id: x.id)'
+    cat samples.jsonl | pyq 'map(x.id)'
