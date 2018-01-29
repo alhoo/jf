@@ -18,7 +18,7 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("query", help="query string for extracting wanted information", default='')
   parser.add_argument("-d", "--debug", help="print debug messages", action="store_true")
-  parser.add_argument("-i", "--indent", help="output indent level", type=int, default=None)
+  parser.add_argument("-i", "--indent", help="pretty-printed with given indent level", type=int, default=None)
   parser.add_argument("-y", "--yaml", help="output yaml", action='store_true')
   parser.add_argument("-j", "--json", help="output json", action='store_true')
   parser.add_argument("-s", "--sort_keys", help="sort json output values", action="store_true")
