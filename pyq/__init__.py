@@ -43,13 +43,16 @@ def parse_value(v):
 class Struct:
   """Class representation of dict"""
   def __init__(self, **entries):
-    for k, v in entries.items():
+    self.update(entries)
+  def __getitem__(self, item):
+    return self.__dict__[item]
+  def update(self, dct):
+    for k, v in dct.items():
       if type(v) in (list, dict):
         self.__dict__[k] = to_struct(v)
       else:
         self.__dict__[k] = parse_value(v)
-  def __getitem__(self, item):
-    return self.__dict__[item]
+    return self
 
 def to_struct(v):
   """Convert v to a class representing v"""
