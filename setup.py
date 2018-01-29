@@ -17,6 +17,7 @@ setup(
     'pygments>=2.0.0',
     'regex>=2016.3.2',
     'python-dateutil>=2.6.1',
+    'PyYAML>=3.12',
     'dateparser>=0.6.0'
   ],
   tests_require=[
