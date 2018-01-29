@@ -15,7 +15,9 @@ setup(
   ],
   install_requires=[
     'pygments>=2.0.0',
-    'regex>=2016.3.2'
+    'regex>=2016.3.2',
+    'python-dateutil>=2.6.1',
+    'dateparser>=0.6.0'
   ],
   tests_require=[
     'nose>=1.3.0'
