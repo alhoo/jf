@@ -38,11 +38,17 @@ def parse_value(v):
 class Struct:
   """Class representation of dict"""
   def __init__(self, **entries):
+    self.__PYQ_struct_hidden_fields = ["_Struct__PYQ_struct_hidden_fields"]
     self.update(entries)
   def __getitem__(self, item):
     if item in self.__dict__:
       return self.__dict__[item]
     return None
+  def dict(self):
+    return {k: v for k, v in self.__dict__.items() if k not in self.__PYQ_struct_hidden_fields}
+  def hide(self, dct):
+    self.__PYQ_struct_hidden_fields.extend(dct)
+    return self
   def update(self, dct):
     for k, v in dct.items():
       if type(v) in (list, dict):
@@ -65,9 +71,12 @@ class StructEncoder(json.JSONEncoder):
   """Try to convert everything to json"""
   def default(self, o):
     try:
-      return o.__dict__
+      return o.dict()
     except:
-      return o.__str__()
+      try:
+        return o.__dict__
+      except:
+        return o.__str__()
 
 def pipelogger(arr):
   for it in arr:
@@ -97,7 +106,18 @@ def pyqislice(*args):
         step = 1
     print(start, stop, step)
     return islice(arr, start, stop, step)
-    
+
+def hide(x, arr):
+    logger.info("Using hide-pipeline")
+    for it in arr:
+      try:
+        it.hide(x(it))
+      except Exception as ex:
+        logger.warning("Got an exception while hiding")
+        logger.warning("Exception %s", repr(ex))
+      yield it
+    #return map(lambda it: it.hide(x(it)), arr)
+
     #lambda *x, arr: islice(arr, *x),
 def first(*args):
     arr = args[-1]
@@ -152,6 +172,7 @@ def run_query(query, data, sort_keys=False):
       "first": first,
       "last": last,
       "age": age,
+      "hide": hide,
       "reduce": reduce,
       "sorted": lambda x, arr: sorted(arr, key=x),
       "datetime": datetime,
