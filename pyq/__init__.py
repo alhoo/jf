@@ -4,6 +4,7 @@ import json
 import logging
 from dateutil import parser as dateutil
 from datetime import datetime, timezone
+from itertools import islice
 import dateparser
 from functools import reduce
 FORMAT = '%(levelname)s %(name)s : %(message)s'
@@ -77,6 +78,22 @@ def pipelogger(arr):
     logger.debug("'%s' goes through the pipeline", it)
     yield it
 
+def first(*args):
+    arr = args[-1]
+    if len(args) == 2:
+        N = args[0](arr)
+    if type(N) != int:
+        N = 1
+    return islice(arr, 0, N)
+
+def last(*args):
+    arr = args[-1]
+    if len(args) == 2:
+        N = args[0](arr)
+    if type(N) != int:
+        N = 1
+    return list(arr)[-N:]
+
 class genProcessor:
   """Make a generator pipeline"""
   def __init__(self, igen, filters=[]):
@@ -101,10 +118,13 @@ def run_query(query, data, sort_keys=False):
   query = nowre.sub(r'datetime.now(timezone.utc)', query)
   logger.debug(query)
   query = "gp(data, [" + query + "]).process()" #Make it a list
-  logger.debug(query)
+  logger.debug("Final query '%s'", query)
   globalscope = {
       "data": data,
       "gp": genProcessor,
+      "islice": lambda *x, arr: islice(arr, *x),
+      "first": first,
+      "last": last,
       "age": age,
       "reduce": reduce,
       "sorted": lambda x, arr: sorted(arr, key=x),
