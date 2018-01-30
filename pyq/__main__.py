@@ -25,8 +25,11 @@ def main(args=None):
   parser.add_argument("-r", "--raw", help="raw output", action="store_true", default=False)
   parser.add_argument("-a", "--ensure_ascii", help="ensure ascii only characters", action="store_true", default=False)
   parser.add_argument("--html_unescape", help="unescape html entities", action="store_true", default=False)
-  parser.add_argument('files', metavar='FILE', nargs='*', help='files to read, if empty, stdin is used')
+  parser.add_argument('files', metavar='FILE', type = argparse.FileType('r'), nargs='*', help='files to read, if empty, stdin is used', default="-")
   args = parser.parse_args(args)
+
+  if len(args.files) == 1 and args.files[0] == '-' and sys.stdin.isatty():
+    return parser.print_help()
 
   if args.debug:
     logging.getLogger('pyq').setLevel(logging.DEBUG)
