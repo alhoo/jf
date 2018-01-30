@@ -1,8 +1,6 @@
-import regex as re
 import sys
 import json
 import logging
-from dateutil import parser as dateutil
 from datetime import datetime, timezone
 from itertools import islice
 #from dateparser import parse as parsedate
@@ -12,12 +10,6 @@ logging.basicConfig(format=FORMAT)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
-
-
-namere = re.compile(r'([{,] *)([^{} "\',]+):')
-makexre = re.compile('([ (])(\.[a-zA-Z])')
-lambdare = re.compile("([a-zA-Z][^() ,]+)(\([^()]*((?2)?[^()]*)+\))")
-nowre = re.compile("NOW\(\)")
 
 def age(x):
     """Try to guess the age of x"""
@@ -33,6 +25,7 @@ def age(x):
 
 def parse_value(v):
   """Parse value to complex types"""
+  from dateutil import parser as dateutil
   try:
     if len(v) > 10:
       time = dateutil.parse(v)
@@ -134,6 +127,11 @@ class genProcessor:
 
 def run_query(query, data, sort_keys=False):
   """Run a query against given data"""
+  import regex as re
+  namere = re.compile(r'([{,] *)([^{} "\',]+):')
+  makexre = re.compile('([ (])(\.[a-zA-Z])')
+  lambdare = re.compile("([a-zA-Z][^() ,]+)(\([^()]*((?2)?[^()]*)+\))")
+  nowre = re.compile("NOW\(\)")
   logger.debug(query)
   query = namere.sub(r'\1"\2":', query)
   logger.debug(query)

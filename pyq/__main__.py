@@ -1,10 +1,8 @@
 import sys
 import json
-import re
 import argparse
 import logging
 import html
-import yaml
 import fileinput
 from pyq import *
 from pygments import highlight
@@ -77,6 +75,7 @@ def main(args=None):
                  "ensure_ascii": args.ensure_ascii}
   outfmt = json.dumps
   if args.yaml and not args.json:
+     import yaml
      outfmt = yaml.dump
      out_kw_args = {"allow_unicode": not args.ensure_ascii,
                     "indent": args.indent,
