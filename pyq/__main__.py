@@ -30,6 +30,8 @@ def main(args=None):
 
   if len(args.files) == 1 and args.files[0] == '-' and sys.stdin.isatty():
     return parser.print_help()
+  if args.indent < 0:
+    args.indent = None
 
   if args.debug:
     logging.getLogger('pyq').setLevel(logging.DEBUG)
