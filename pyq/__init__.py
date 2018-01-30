@@ -78,6 +78,31 @@ def pipelogger(arr):
     logger.debug("'%s' goes through the pipeline", it)
     yield it
 
+def pyqislice(*args):
+    arr = args[-1]
+    args = args[0](0)
+    start = None
+    step = None
+    stop = 1 
+    if type(args) == int:
+        args = [args]
+    if len(args) > 0:
+        stop = args[0]
+    if type(stop) != int:
+        stop = 1
+    if len(args) > 1:
+        start = stop
+        stop = args[1]
+    if type(stop) != int:
+        stop = 1
+    if len(args) > 2:
+        step = args[2]
+    if type(step) != int:
+        step = 1
+    print(start, stop, step)
+    return islice(arr, start, stop, step)
+    
+    #lambda *x, arr: islice(arr, *x),
 def first(*args):
     arr = args[-1]
     if len(args) == 2:
@@ -122,7 +147,7 @@ def run_query(query, data, sort_keys=False):
   globalscope = {
       "data": data,
       "gp": genProcessor,
-      "islice": lambda *x, arr: islice(arr, *x),
+      "islice": pyqislice,
       "first": first,
       "last": last,
       "age": age,
