@@ -15,7 +15,7 @@ from pygments.formatters import TerminalFormatter
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
-def main():
+def main(args=None):
   parser = argparse.ArgumentParser()
   parser.add_argument("query", help="query string for extracting wanted information", default='', nargs='?')
   parser.add_argument("-d", "--debug", help="print debug messages", action="store_true")
@@ -28,7 +28,7 @@ def main():
   parser.add_argument("-a", "--ensure_ascii", help="ensure ascii only characters", action="store_true", default=False)
   parser.add_argument("--html_unescape", help="unescape html entities", action="store_true", default=False)
   parser.add_argument('files', metavar='FILE', nargs='*', help='files to read, if empty, stdin is used')
-  args = parser.parse_args()
+  args = parser.parse_args(args)
 
   if args.debug:
     logging.getLogger('pyq').setLevel(logging.DEBUG)

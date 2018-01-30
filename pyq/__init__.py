@@ -5,7 +5,7 @@ import logging
 from dateutil import parser as dateutil
 from datetime import datetime, timezone
 from itertools import islice
-import dateparser
+#from dateparser import parse as parsedate
 from functools import reduce
 FORMAT = '%(levelname)s %(name)s : %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -21,12 +21,13 @@ nowre = re.compile("NOW\(\)")
 
 def age(x):
     """Try to guess the age of x"""
+    from dateparser import parse as parsedate
     logger.debug("Calculating the age of '%s'", x)
     ret = 0
     try:
-        ret = datetime.now() - dateparser.parse(str(x))
+        ret = datetime.now() - parsedate(str(x))
     except:
-        ret = datetime.now(timezone.utc) - dateparser.parse(str(x))
+        ret = datetime.now(timezone.utc) - parsedate(str(x))
     logger.debug("Age of '%s' is %s", x, repr(ret))
     return ret
 
