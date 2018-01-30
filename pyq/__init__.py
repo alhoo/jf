@@ -120,7 +120,7 @@ class genProcessor:
     self._filters = filters
   def process(self):
     pipeline = self.igen
-    pipeline = pipelogger(pipeline)
+#    pipeline = pipelogger(pipeline)
     for f in self._filters:
       pipeline = f(toStruct(pipeline))
     return pipeline

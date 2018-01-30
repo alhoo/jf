@@ -45,26 +45,18 @@ def main(args=None):
         ind = json.loads(d)
         if type(ind) == list:
           for it in ind:
-            logger.info("Yielding %s", it)
             yield it
         else:
-          logger.info("Yielding %s", ind)
           yield ind
         #yield it
         data = ''
     except:
-      logger.info("Got an exception while trying to interpret jsonl")
-      logger.info("Switching to json-mode")
-      logger.info("Data so far: '%s'", data)
       data += "".join(inf)
-      logger.info("Full data: '%s'", data)
       pass
-      #yield json.loads(data)
     if len(data) > 0:
       ind = json.loads(data)
       if type(ind) == list:
         for it in ind:
-          logger.info("Yielding %s", it)
           yield it
       else:
         yield ind
