@@ -40,7 +40,9 @@ class Struct:
   def __init__(self, **entries):
     self.update(entries)
   def __getitem__(self, item):
-    return self.__dict__[item]
+    if item in self.__dict__:
+      return self.__dict__[item]
+    return None
   def update(self, dct):
     for k, v in dct.items():
       if type(v) in (list, dict):
@@ -154,15 +156,20 @@ def run_query(query, data, sort_keys=False):
       "sorted": lambda x, arr: sorted(arr, key=x),
       "datetime": datetime,
       "timezone": timezone}
-  res = eval(query, globalscope)
   try:
+    res = eval(query, globalscope)
     for it in res:
       yield it
   except TypeError as ex:
     yield res
+  except KeyError as ex:
+    logger.warning("Got an exception while yielding results")
+    logger.warning("Exception: %s", repr(ex))
+    logger.warning("You might have typoed an attribute")
   except Exception as ex:
     logger.warning("Got an unexpected exception while yielding results")
-    logger.warning("Exception: %s", ex)
+    logger.warning("Exception: %s", repr(ex))
+    raise
 
 
 #if __name__ == "__main__":

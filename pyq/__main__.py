@@ -56,12 +56,16 @@ def main(args=None):
       data += "".join(inf)
       pass
     if len(data) > 0:
-      ind = json.loads(data)
-      if type(ind) == list:
-        for it in ind:
-          yield it
-      else:
-        yield ind
+      try:
+        ind = json.loads(data)
+        if type(ind) == list:
+          for it in ind:
+            yield it
+        else:
+          yield ind
+      except Exception as ex:
+        logger.warning("Got an unexpected exception while producing input data")
+        logger.warning("Exception %s", repr(ex))
 
   #inq = (json.loads(d) for d in fileinput.input(files=args.files if len(args.files) > 0 else ('-', )))
   inq = read_jsonl_or_json(args)
@@ -82,19 +86,23 @@ def main(args=None):
   formatter = TerminalFormatter()
   if not sys.stdout.isatty():
     args.bw = True
-  for out in run_query(args.query, inq):
-    out = json.loads(json.dumps(out, cls=StructEncoder))
-    ret = outfmt(out, **out_kw_args)
-    if not args.raw:
-      if args.html_unescape:
-        ret = html.unescape(ret)
-      if not args.bw:
-        ret = highlight(ret, lexer, formatter).rstrip()
-    else:
-        ret = eval(ret)
-        if type(ret) == dict:
-            ret = outfmt(ret, **out_kw_args)
-    print(ret)
+  try:
+    for out in run_query(args.query, inq):
+      out = json.loads(json.dumps(out, cls=StructEncoder))
+      ret = outfmt(out, **out_kw_args)
+      if not args.raw:
+        if args.html_unescape:
+          ret = html.unescape(ret)
+        if not args.bw:
+          ret = highlight(ret, lexer, formatter).rstrip()
+      else:
+          ret = eval(ret)
+          if type(ret) == dict:
+              ret = outfmt(ret, **out_kw_args)
+      print(ret)
+  except Exception as ex:
+    logger.warning("Got an unexpected exception while trying to produce results")
+    logger.warning("Exception %s", repr(ex))
 
 if __name__ == "__main__":
   main()
