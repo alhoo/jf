@@ -30,7 +30,7 @@ setup(
     'Programming Language :: Python :: 3.5',
     'Topic :: Utilities'
   ],
-  packages = find_packages('pyq'),
+  packages = ['pyq'],
   setup_requires = [
     'setuptools>=20.2.2'
   ],
