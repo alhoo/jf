@@ -131,7 +131,7 @@ Features
 * access json dict as classes with dot-notation for attributes
 * datetime and timedelta comparison
   * age() for timedelta between datetime and current time
-* first(N=1), last(N=1), islice(start, stop, step)
+* first(N), last(N), islice(start, stop, step)
 * import your own modules for more complex filtering
   * Support stateful classes for complex interactions between items
 
