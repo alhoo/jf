@@ -1,7 +1,7 @@
-pyq
+jf
 ==
 
-pyq, aka πq, is a jq-clone written in python. It supports evaluation of python oneliners, making it
+jf, aka πq, is a jq-clone written in python. It supports evaluation of python oneliners, making it
 especially appealing for data scientists who are used to python.
 
 Basic usage
@@ -9,24 +9,24 @@ Basic usage
 
 Filter selected fields
 
-    $ cat samples.jsonl | pyq 'map({id: x.id, subject: x.fields.subject})'
+    $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject})'
     {"id": "87086895", "subject": "Swedish children stories"}
     {"id": "87114792", "subject": "New Finnish storybooks"}
 
 Filter selected items
 
-    $ cat samples.jsonl | pyq 'map({id: x.id, subject: x.fields.subject}), filter(x.id == "87114792")'
+    $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject}), filter(x.id == "87114792")'
     {"id": "87114792", "subject": "New Finnish storybooks"}
 
 Filter selected values
 
-    $ cat samples.jsonl | pyq 'map(x.id)'
+    $ cat samples.jsonl | jf 'map(x.id)'
     "87086895"
     "87114792"
 
 Filter items by age (and output yaml)
 
-    $ cat samples.jsonl | pyq 'map({id: x.id, datetime: x["content-datetime"]}), filter(age(x.datetime) > age("456 days")),
+    $ cat samples.jsonl | jf 'map({id: x.id, datetime: x["content-datetime"]}), filter(age(x.datetime) > age("456 days")),
             map(.update({age: age(x.datetime)}))' --indent=5 --yaml
     age: 457 days, 4:07:54.932587
     datetime: '2016-10-29 10:55:42+03:00'
@@ -34,7 +34,7 @@ Filter items by age (and output yaml)
 
 Sort items by age and print their id, length and age
 
-    $ cat samples.jsonl|pyq 'map(x.update({age: age(x["content-datetime"])})),
+    $ cat samples.jsonl|jf 'map(x.update({age: age(x["content-datetime"])})),
             sorted(x.age),
             map(.id, "length: %d" % len(.content), .age)' --indent=3 --yaml
     - '14941692'
@@ -54,25 +54,25 @@ Sort items by age and print their id, length and age
 
 Import your own modules and hide fields:
 
-    $ cat test.json|pyq --import demomodule --yaml 'map(x.update({id: x.sha})),
+    $ cat test.json|jf --import demomodule --yaml 'map(x.update({id: x.sha})),
             demomodule.timestamppipe(),
             hide("sha", "committer", "parents", "html_url", "author", "commit", "comments_url"),
             islice(3,5)'
     - Pipemod: was here at 2018-01-31 09:26:12.366465
       id: f5f879dd7303c35fa3712586af1e7df884a5b98b
-      url: https://api.github.com/repos/alhoo/pyq/commits/f5f879dd7303c35fa3712586af1e7df884a5b98b
+      url: https://api.github.com/repos/alhoo/jf/commits/f5f879dd7303c35fa3712586af1e7df884a5b98b
     - Pipemod: was here at 2018-01-31 09:26:12.368438
       id: b393d09215efc4fc0382dd82ec3f38ae59a287e5
-      url: https://api.github.com/repos/alhoo/pyq/commits/b393d09215efc4fc0382dd82ec3f38ae59a287e5
+      url: https://api.github.com/repos/alhoo/jf/commits/b393d09215efc4fc0382dd82ec3f38ae59a287e5
 
 Read yaml:
 
-    $ cat test.yaml | pyq --yamli 'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
+    $ cat test.yaml | jf --yamli 'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
             filter(x.age < age("1 days"))' --indent=2 --yaml
 
 Group duplicates (age is within the same hour):
 
-    $ cat test.json|pyq --import demomodule 'map(x.update({id: x.sha})),
+    $ cat test.json|jf --import demomodule 'map(x.update({id: x.sha})),
             sorted(.commit.author.date, reverse=True),
             demomodule.DuplicateRemover(int(age(.commit.author.date).total_seconds()/3600),
             group=1).process(lambda x: {"duplicate": x.id}),
@@ -120,7 +120,7 @@ Group duplicates (age is within the same hour):
 Installing
 ==
 
-    pip install git+https://github.com/alhoo/pyq
+    pip install git+https://github.com/alhoo/jf
 
 
 Features

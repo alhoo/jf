@@ -10,7 +10,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-  name = 'pyq',
+  name = 'jf',
   version = '0.2',
   description = 'Python jsonl query engine',
   long_description=long_description,
@@ -20,8 +20,8 @@ setup(
   maintainer_email = 'leh@protonmail.com',
   license = 'MIT',
   keywords = ['json', 'yaml', 'jq'],
-  download_url = 'https://github.com/alhoo/pyq/archive/0.2.tar.gz',
-  url = 'https://github.com/alhoo/pyq',
+  download_url = 'https://github.com/alhoo/jf/archive/0.2.tar.gz',
+  url = 'https://github.com/alhoo/jf',
   classifier=[
     'Development Status :: 2 - Pre-Alpha',
     'Intended Audience :: Developers',
@@ -30,7 +30,7 @@ setup(
     'Programming Language :: Python :: 3.5',
     'Topic :: Utilities'
   ],
-  packages = ['pyq'],
+  packages = ['jf'],
   setup_requires = [
     'setuptools>=20.2.2'
   ],
@@ -47,7 +47,7 @@ setup(
   test_suite = 'tests',
   zip_safe = True,
   entry_points = {
-    'console_scripts': ['pyq=pyq.__main__:main']
+    'console_scripts': ['jf=jf.__main__:main']
   }
 )
 

@@ -3,34 +3,34 @@
 import unittest
 import json
 
-import pyq
+import jf
 
 
 def tolist(igen):
     """Convert gen to list"""
-    return json.dumps([x for x in igen], cls=pyq.StructEncoder, sort_keys=True)
+    return json.dumps([x for x in igen], cls=jf.StructEncoder, sort_keys=True)
 
 
 class TestPyq(unittest.TestCase):
-    """Basic pyq testcases"""
+    """Basic jf testcases"""
 
     def test_get_item(self):
         """Test simple query"""
 
         data = [{"a": 1}]
-        self.assertEqual(tolist(pyq.run_query('map(x["a"])', data)), '[1]')
+        self.assertEqual(tolist(jf.run_query('map(x["a"])', data)), '[1]')
 
     def test_get_null_item(self):
         """Test simple query"""
 
         data = [{"a": 1}]
-        self.assertEqual(tolist(pyq.run_query('map(x["b"])', data)), '[null]')
+        self.assertEqual(tolist(jf.run_query('map(x["b"])', data)), '[null]')
 
     def test_simple_query(self):
         """Test simple query"""
 
         data = [{"a": 1}]
-        self.assertEqual(tolist(pyq.run_query("map(x.a)", data)), '[1]')
+        self.assertEqual(tolist(jf.run_query("map(x.a)", data)), '[1]')
 
     def test_hide_many(self):
         """Test complex query"""
@@ -40,7 +40,7 @@ class TestPyq(unittest.TestCase):
         cmd = 'map({"id": x.a, "c": x.b.c, "data": x.b.d, "x": x["f"]}),' + \
               'hide("data", "c")'
         expected = '[{"id": 1, "x": null}, {"id": 2, "x": 4}]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_hide(self):
@@ -49,7 +49,7 @@ class TestPyq(unittest.TestCase):
         data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({"id": x.a, "data": x.b.d}), hide("data")'
         expected = '[{"id": 1}]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_complex_query(self):
@@ -58,7 +58,7 @@ class TestPyq(unittest.TestCase):
         data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({"id": x.a, "data": x.b.d})'
         expected = '[{"data": [1, 2, 3, 4], "id": 1}]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_non_json_query(self):
@@ -67,7 +67,7 @@ class TestPyq(unittest.TestCase):
         data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({id: x.a, data: x.b.d})'
         expected = '[{"data": [1, 2, 3, 4], "id": 1}]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_sorting_query(self):
@@ -79,12 +79,12 @@ class TestPyq(unittest.TestCase):
         cmd = 'map({id: x.a, data: x.b.d[0]}), sorted(.id, reverse=True)'
         expected = '[{"data": 5, "id": 5}, {"data": 1, "id": 2}, ' + \
                    '{"data": 3, "id": 1}]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_age(self):
         """
-        $ cat test.yaml | pyq --yamli
+        $ cat test.yaml | jf --yamli
             'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
              filter(x.age < age("1 days"))' --indent=2 --yaml
         """
@@ -97,7 +97,7 @@ class TestPyq(unittest.TestCase):
               'sorted(age(.date), reverse=True),' + \
               'map(.id)'
         expected = '[3, 1, 5, 2]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_age_tz(self):
@@ -109,7 +109,7 @@ class TestPyq(unittest.TestCase):
         cmd = 'map({id: x.a, date: x.b}),' + \
               'sorted(age(.date), reverse=True), map(.id)'
         expected = '[3, 5, 1, 2]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_islice(self):
@@ -121,7 +121,7 @@ class TestPyq(unittest.TestCase):
         cmd = 'map({id: x.a, date: x.b}),' + \
               'sorted(age(.date), reverse=True), map(.id), islice(1, 4, 2)'
         expected = '[5, 2]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_last(self):
@@ -133,7 +133,7 @@ class TestPyq(unittest.TestCase):
         cmd = 'map({id: x.a, date: x.b}),' + \
               'sorted(age(.date), reverse=True), map(.id), last(2)'
         expected = '[1, 2]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_first(self):
@@ -145,7 +145,7 @@ class TestPyq(unittest.TestCase):
         cmd = 'map({id: x.a, date: x.b}),' + \
               'sorted(age(.date), reverse=True), map(.id), first()'
         expected = '[3]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
     def test_last_two_with_sort(self):
@@ -157,5 +157,5 @@ class TestPyq(unittest.TestCase):
         cmd = 'map({id: x.a, date: x.b}),' + \
               'sorted(age(.date), reverse=False), map(.id), first(2)'
         expected = '[2, 1]'
-        result = tolist(list(pyq.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)

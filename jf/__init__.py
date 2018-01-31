@@ -42,7 +42,7 @@ class Struct:
     """Class representation of dict"""
 
     def __init__(self, **entries):
-        self.__pyq_struct_hidden_fields = ["_Struct__pyq_struct_hidden_fields"]
+        self.__jf_struct_hidden_fields = ["_Struct__jf_struct_hidden_fields"]
         self.update(entries)
 
     def __getitem__(self, item):
@@ -53,16 +53,16 @@ class Struct:
 
     def dict(self):
         """Convert item to dict"""
-        print("To dict", self.__pyq_struct_hidden_fields)
+        print("To dict", self.__jf_struct_hidden_fields)
         return {k: v for k, v in self.__dict__.items()
-                if k not in self.__pyq_struct_hidden_fields}
+                if k not in self.__jf_struct_hidden_fields}
 
     def hide(self, dct):
         """Mark item attribute as hidden"""
         if isinstance(dct, (list, set, tuple)):
-            self.__pyq_struct_hidden_fields.extend(dct)
+            self.__jf_struct_hidden_fields.extend(dct)
         else:
-            self.__pyq_struct_hidden_fields.append(dct)
+            self.__jf_struct_hidden_fields.append(dct)
         return self
 
     def update(self, dct):
@@ -109,8 +109,8 @@ def pipelogger(arr):
         yield val
 
 
-def pyqislice(*args):
-    """pyq wrapper for itertools.islice"""
+def jfislice(*args):
+    """jf wrapper for itertools.islice"""
     arr = args[-1]
     args = args[0](0)
     start = None
@@ -235,7 +235,7 @@ def run_query(query, data, imports=None):
     globalscope = {
         "data": data,
         "gp": GenProcessor,
-        "islice": pyqislice,
+        "islice": jfislice,
         "first": first,
         "last": last,
         "age": age,

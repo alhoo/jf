@@ -10,7 +10,7 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import TerminalFormatter
 
-from pyq import run_query, StructEncoder
+from jf import run_query, StructEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ def yield_json_and_json_lines(inp):
 def set_loggers(debug=False):
     """Setup loggers"""
     logger_handler = logging.StreamHandler()
-    liblogger = logging.getLogger('pyq')
+    liblogger = logging.getLogger('jf')
     liblogger.addHandler(logger_handler)
     if debug:
         liblogger.setLevel(logging.DEBUG)
