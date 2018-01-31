@@ -11,7 +11,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
   name = 'pyq',
-  version = '0.1',
+  version = '0.2',
   description = 'Python jsonl query engine',
   long_description=long_description,
   author = 'Lasse Hyyrynen',
@@ -20,7 +20,7 @@ setup(
   maintainer_email = 'leh@protonmail.com',
   license = 'MIT',
   keywords = ['json', 'yaml', 'jq'],
-  download_url = 'https://github.com/alhoo/pyq/archive/0.1.tar.gz',
+  download_url = 'https://github.com/alhoo/pyq/archive/0.2.tar.gz',
   url = 'https://github.com/alhoo/pyq',
   classifier=[
     'Development Status :: 2 - Pre-Alpha',
