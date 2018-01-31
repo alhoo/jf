@@ -1,14 +1,27 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-#from pyq import run_query
 import pyq
 import json
 
+
 def tolist(igen):
-  return json.dumps([x for x in igen], sort_keys=True)
+    return json.dumps([x for x in igen], sort_keys=True, cls=pyq.StructEncoder)
+
 
 class Test_pyq(unittest.TestCase):
+
+    def test_get_item(self):
+        """Test simple query"""
+
+        data = [{"a": 1}]
+        self.assertEqual(tolist(pyq.run_query('map(x["a"])', data)), '[1]')
+
+    def test_get_null_item(self):
+        """Test simple query"""
+
+        data = [{"a": 1}]
+        self.assertEqual(tolist(pyq.run_query('map(x["b"])', data)), '[null]')
 
     def test_simple_query(self):
         """Test simple query"""
@@ -16,19 +29,125 @@ class Test_pyq(unittest.TestCase):
         data = [{"a": 1}]
         self.assertEqual(tolist(pyq.run_query("map(x.a)", data)), '[1]')
 
+    def test_hide_many(self):
+        """Test complex query"""
+
+        data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}},
+                {"a": 2, "f": 4, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
+        cmd = 'map({"id": x.a, "c": x.b.c, "data": x.b.d, "x": x["f"]}),' + \
+              'hide("data", "c")'
+        expected = '[{"id": 1, "x": null}, {"id": 2, "x": 4}]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(expected, expected)
+
+    def test_hide(self):
+        """Test complex query"""
+
+        data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
+        cmd = 'map({"id": x.a, "data": x.b.d}), hide("data")'
+        expected = '[{"id": 1}]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
+
     def test_complex_query(self):
         """Test complex query"""
 
-        data = [{"a": 1, 'b': {'c': 632, 'd': [1,2,3,4]}}]
+        data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({"id": x.a, "data": x.b.d})'
-        result = '[{"data": [1, 2, 3, 4], "id": 1}]'
-        self.assertEqual(tolist(list(pyq.run_query(cmd, data, sort_keys=True))), result)
+        expected = '[{"data": [1, 2, 3, 4], "id": 1}]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
 
     def test_non_json_query(self):
         """Test complex query"""
 
-        data = [{"a": 1, 'b': {'c': 632, 'd': [1,2,3,4]}}]
+        data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({id: x.a, data: x.b.d})'
-        result = '[{"data": [1, 2, 3, 4], "id": 1}]'
-        self.assertEqual(tolist(pyq.run_query(cmd, data, sort_keys=True)), result)
+        expected = '[{"data": [1, 2, 3, 4], "id": 1}]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
 
+    def test_sorting_query(self):
+        """Test complex query"""
+
+        data = [{"a": 2, 'b': {'c': 632, 'd': [1, 2, 3, 4]}},
+                {"a": 1, 'b': {'c': 632, 'd': [3, 4, 5, 6]}},
+                {"a": 5, 'b': {'c': 632, 'd': [5, 6, 7, 8]}}]
+        cmd = 'map({id: x.a, data: x.b.d[0]}), sorted(.id, reverse=True)'
+        expected = '[{"data": 5, "id": 5}, {"data": 1, "id": 2}, ' + \
+                   '{"data": 3, "id": 1}]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
+
+    def test_age(self):
+        """
+        $ cat test.yaml | pyq --yamli
+            'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
+             filter(x.age < age("1 days"))' --indent=2 --yaml
+        """
+
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+00:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True),' + \
+              'map(.id)'
+        expected = '[3, 1, 5, 2]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
+
+    def test_age_tz(self):
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id)'
+        expected = '[3, 5, 1, 2]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
+
+    def test_islice(self):
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id), islice(1, 4, 2)'
+        expected = '[5, 2]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
+
+    def test_last(self):
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id), last(2)'
+        expected = '[1, 2]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
+
+    def test_first(self):
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id), first()'
+        expected = '[3]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
+
+    def test_first_2(self):
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=False), map(.id), first(2)'
+        expected = '[2, 1]'
+        result = tolist(list(pyq.run_query(cmd, data, sort_keys=True)))
+        self.assertEqual(result, expected)
