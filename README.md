@@ -120,7 +120,7 @@ Group duplicates (age is within the same hour):
 Installing
 ==
 
-    pip install git+https://github.com/alhoo/jf
+    pip install jf
 
 
 Features
