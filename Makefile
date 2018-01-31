@@ -4,6 +4,9 @@ test:
 readme:
 	pandoc README.md | sed 's/<code/<code style="color:cyan;"/g'| elinks -dump -dump-color-mode 1 | sed -r 's/^/ /g;s/ *$$//' | (echo && cat && echo)
 
+README.rst:
+	pandoc -f markdown -t rst README.md >README.rst
+
 pylint:
 	pylint --output-format=parseable jf tests
 
