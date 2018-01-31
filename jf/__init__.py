@@ -53,7 +53,6 @@ class Struct:
 
     def dict(self):
         """Convert item to dict"""
-        print("To dict", self.__jf_struct_hidden_fields)
         return {k: v for k, v in self.__dict__.items()
                 if k not in self.__jf_struct_hidden_fields}
 
