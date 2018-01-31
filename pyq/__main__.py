@@ -195,7 +195,7 @@ def main(args=None):
                 if not args.bw:
                     ret = highlight(ret, lexer, formatter).rstrip()
             else:
-#                ret = eval(ret)
+                # ret = eval(ret)
                 if isinstance(ret, dict):
                     ret = outfmt(ret, **out_kw_args)
             print(ret)
@@ -207,7 +207,7 @@ def main(args=None):
                 if not args.bw:
                     ret = highlight(ret, lexer, formatter).rstrip()
             else:
-#                ret = eval(ret)
+                # ret = eval(ret)
                 if isinstance(ret, dict):
                     ret = outfmt(ret, **out_kw_args)
             print(ret)

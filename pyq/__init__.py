@@ -195,6 +195,7 @@ class GenProcessor:
             pipeline = fun(to_struct_gen(pipeline))
         return pipeline
 
+
 def query_convert(query):
     """Convert query for evaluation"""
     import regex as re
@@ -224,6 +225,7 @@ def query_convert(query):
     query = "gp(data, [" + query + "]).process()"
     logger.debug("Final query '%s'", query)
     return query
+
 
 def run_query(query, data, imports=None):
     """Run a query against given data"""
