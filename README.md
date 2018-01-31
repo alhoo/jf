@@ -1,7 +1,7 @@
 jf
 ==
 
-jf, aka πq, is a jq-clone written in python. It supports evaluation of python oneliners, making it
+jf, aka json filter pipeline, is a jq-clone written in python. It supports evaluation of python oneliners, making it
 especially appealing for data scientists who are used to python.
 
 Basic usage
