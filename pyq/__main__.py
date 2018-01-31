@@ -1,14 +1,16 @@
+"""Pyq main executable"""
+
 import sys
 import json
 import argparse
 import logging
 import html
 import fileinput
-from pyq import run_query, StructEncoder
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import TerminalFormatter
 
+from pyq import run_query, StructEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -18,37 +20,39 @@ DEBUGFORMAT = '%(levelname)s %(name)s:%(lineno)d: %(message)s'
 UEE = 'Got an unexpected exception'
 
 
-def read_jsonl_json_or_yaml(args):
+def read_jsonl_json_or_yaml(inp, args):
+    """Read json, jsonl and yaml data from file defined in args"""
     data = ''
     inf = fileinput.input(files=args.files)
     if args.yamli:
         data = "\n".join([l for l in inf])
     else:
-        for it in yield_json_and_json_lines(inf):
-            yield it
+        for val in yield_json_and_json_lines(inf):
+            yield val
     if len(data) > 0:
         try:
             ind = inp(data)
-            if type(ind) == list:
-                for it in ind:
-                    yield it
+            if isinstance(ind, list):
+                for val in ind:
+                    yield val
             else:
                 yield ind
-        except Exception as ex:
+        except ValueError as ex:
             logger.warning("%s while producing input data", UEE)
             logger.warning("Exception %s", repr(ex))
 
 
 def yield_json_and_json_lines(inp):
+    """Yield  json and json lines"""
     alldata = ''
     item = -1
     state = [0, 0, 0, 0]
     pos = -1
     for line in inp:
-        for c in line:
+        for char in line:
             pos = pos + 1
-            alldata += c
-            if c == '"':
+            alldata += char
+            if char == '"':
                 if state[3] < 2:
                     if item < 0:
                         item = pos
@@ -58,7 +62,7 @@ def yield_json_and_json_lines(inp):
                 state[0] = 1 - state[0]
             if state[0] > 0:
                 continue
-            if c == "'":
+            if char == "'":
                 if state[3] < 2:
                     if item < 0:
                         item = pos
@@ -68,45 +72,53 @@ def yield_json_and_json_lines(inp):
                 state[1] = 1 - state[1]
             if state[1] > 0:
                 continue
-            if c == '}':
+            if char == '}':
                 state[2] -= 1
-                if state[2] == 0:
-                    if not (item < 0) and alldata[item] == '{':
-                        try:
-                            yield json.loads(alldata[item:pos + 1])
-                            item = -pos
-                        except Exception as ex:
-                            logger.warning("%s while yielding '%s'", UEE,
-                                           alldata[item:pos + 1])
-                            logger.warning("Exception %s", repr(ex))
-                            pass
-            elif c == '{':
+                if state[2] == 0 and (not (item < 0) and alldata[item] == '{'):
+                    try:
+                        yield json.loads(alldata[item:pos + 1])
+                        item = -pos
+                    except json.JSONDecodeError as ex:
+                        logger.warning("%s while yielding '%s'", UEE,
+                                       alldata[item:pos + 1])
+                        logger.warning("Exception %s", repr(ex))
+            elif char == '{':
                 if item < 0:
                     item = pos
                 state[2] += 1
-                if item == '':
-                    item += c
-            elif c == '[':
+            elif char == '[':
                 state[3] += 1
                 if state[3] > 1 and item < 0:
                     item = pos
-            elif c == ']':
+            elif char == ']':
                 state[3] -= 1
-                if state[3] == 1:
-                    if not (item < 0) and alldata[item] == '[':
-                        try:
-                            yield json.loads(alldata[item:pos + 1])
-                            item = -pos
-                        except Exception as ex:
-                            logger.warning("%s while yielding '%s'", UEE,
-                                           alldata[item:pos + 1])
-                            logger.warning("Exception %s", repr(ex))
-                            pass
+                if state[3] == 1 and (not (item < 0) and alldata[item] == '['):
+                    try:
+                        yield json.loads(alldata[item:pos + 1])
+                        item = -pos
+                    except json.JSONDecodeError as ex:
+                        logger.warning("%s while yielding '%s'", UEE,
+                                       alldata[item:pos + 1])
+                        logger.warning("Exception %s", repr(ex))
     if item == -1 and item < pos:
         yield json.loads(alldata[0:pos + 1])
 
 
+def set_loggers(debug=False):
+    """Setup loggers"""
+    logger_handler = logging.StreamHandler()
+    liblogger = logging.getLogger('pyq')
+    liblogger.addHandler(logger_handler)
+    if debug:
+        liblogger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
+        logger_handler.setFormatter(logging.Formatter(DEBUGFORMAT))
+    else:
+        logger_handler.setFormatter(logging.Formatter(NORMALFORMAT))
+
+
 def main(args=None):
+    """Main PYQ execution function"""
     parser = argparse.ArgumentParser()
     parser.add_argument("query", default='', nargs='?',
                         help="query string for extracting wanted information")
@@ -141,15 +153,7 @@ def main(args=None):
     if args.indent < 0:
         args.indent = None
 
-    logger_handler = logging.StreamHandler()
-    liblogger = logging.getLogger('pyq')
-    liblogger.addHandler(logger_handler)
-    if args.debug:
-        liblogger.setLevel(logging.DEBUG)
-        logger.setLevel(logging.DEBUG)
-        logger_handler.setFormatter(logging.Formatter(DEBUGFORMAT))
-    else:
-        logger_handler.setFormatter(logging.Formatter(NORMALFORMAT))
+    set_loggers(args.debug)
 
 #    inq = (json.loads(d) for d in sys.stdin)
     inp = json.loads
@@ -157,7 +161,7 @@ def main(args=None):
         import yaml
         inp = yaml.load
 
-    inq = read_jsonl_json_or_yaml(args)
+    inq = read_jsonl_json_or_yaml(inp, args)
     lexertype = 'json'
     out_kw_args = {"sort_keys": args.sort_keys,
                    "indent": args.indent,
@@ -191,9 +195,9 @@ def main(args=None):
                 if not args.bw:
                     ret = highlight(ret, lexer, formatter).rstrip()
             else:
-                    ret = eval(ret)
-                    if type(ret) == dict:
-                            ret = outfmt(ret, **out_kw_args)
+#                ret = eval(ret)
+                if isinstance(ret, dict):
+                    ret = outfmt(ret, **out_kw_args)
             print(ret)
         if args.list:
             ret = outfmt(retlist, **out_kw_args)
@@ -203,14 +207,15 @@ def main(args=None):
                 if not args.bw:
                     ret = highlight(ret, lexer, formatter).rstrip()
             else:
-                    ret = eval(ret)
-                    if type(ret) == dict:
-                            ret = outfmt(ret, **out_kw_args)
+#                ret = eval(ret)
+                if isinstance(ret, dict):
+                    ret = outfmt(ret, **out_kw_args)
             print(ret)
     except Exception as ex:
         logger.warning("%s while trying to produce results", UEE)
         logger.warning("Exception %s", repr(ex))
         raise
+
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,5 @@
+"""Pyq python json/yaml query engine"""
+
 import sys
 import json
 import logging
@@ -8,36 +10,39 @@ from functools import reduce
 logger = logging.getLogger(__name__)
 
 
-def age(x):
-    """Try to guess the age of x"""
+def age(datestr):
+    """Try to guess the age of datestr"""
     from dateparser import parse as parsedate
-    logger.debug("Calculating the age of '%s'", x)
+    logger.debug("Calculating the age of '%s'", datestr)
     ret = 0
     try:
-        ret = datetime.now() - parsedate(str(x))
-    except:
-        ret = datetime.now(timezone.utc) - parsedate(str(x))
-    logger.debug("Age of '%s' is %s", x, repr(ret))
+        ret = datetime.now() - parsedate(str(datestr))
+    except TypeError:
+        ret = datetime.now(timezone.utc) - parsedate(str(datestr))
+    logger.debug("Age of '%s' is %s", datestr, repr(ret))
     return ret
 
 
-def parse_value(v):
+def parse_value(val):
     """Parse value to complex types"""
     from dateutil import parser as dateutil
     try:
-        if len(v) > 10:
-            time = dateutil.parse(v)
+        if len(val) > 10:
+            time = dateutil.parse(val)
         else:
-            return v
+            return val
         return time
-    except:
-        return v
+    except ValueError:
+        return val
+    except TypeError:
+        return val
 
 
 class Struct:
     """Class representation of dict"""
+
     def __init__(self, **entries):
-        self.__PYQ_struct_hidden_fields = ["_Struct__PYQ_struct_hidden_fields"]
+        self.__pyq_struct_hidden_fields = ["_Struct__pyq_struct_hidden_fields"]
         self.update(entries)
 
     def __getitem__(self, item):
@@ -48,150 +53,164 @@ class Struct:
 
     def dict(self):
         """Convert item to dict"""
-        print("To dict", self.__PYQ_struct_hidden_fields)
+        print("To dict", self.__pyq_struct_hidden_fields)
         return {k: v for k, v in self.__dict__.items()
-                if k not in self.__PYQ_struct_hidden_fields}
+                if k not in self.__pyq_struct_hidden_fields}
 
     def hide(self, dct):
         """Mark item attribute as hidden"""
-        if type(dct) in (list, set, tuple):
-            self.__PYQ_struct_hidden_fields.extend(dct)
+        if isinstance(dct, (list, set, tuple)):
+            self.__pyq_struct_hidden_fields.extend(dct)
         else:
-            self.__PYQ_struct_hidden_fields.append(dct)
+            self.__pyq_struct_hidden_fields.append(dct)
         return self
 
     def update(self, dct):
         """Update item with key/values from a dict"""
-        for k, v in dct.items():
-            if type(v) in (list, dict):
-                self.__dict__[k] = to_struct(v)
+        for key, val in dct.items():
+            if isinstance(val, (list, dict)):
+                self.__dict__[key] = to_struct(val)
             else:
-                self.__dict__[k] = parse_value(v)
+                self.__dict__[key] = parse_value(val)
         return self
 
 
-def to_struct(v):
+def to_struct(val):
     """Convert v to a class representing v"""
-    if type(v) == dict:
-        return Struct(**v)
-    if type(v) == list:
-        return [to_struct(a) for a in v]
-    return v
+    if isinstance(val, dict):
+        return Struct(**val)
+    if isinstance(val, list):
+        return [to_struct(a) for a in val]
+    return val
 
 
 def to_struct_gen(arr):
-    return map(to_struct, arr)
+    """Convert all items in arr to struct"""
+    return (to_struct(x) for x in arr)
 
 
 class StructEncoder(json.JSONEncoder):
     """Try to convert everything to json"""
-    def default(self, o):
+
+    def default(self, obj):
         try:
-            return o.dict()
-        except:
+            return obj.dict()
+        except AttributeError:
             try:
-                return o.__dict__
-            except:
-                return o.__str__()
+                return obj.__dict__
+            except AttributeError:
+                return obj.__str__()
 
 
 def pipelogger(arr):
-    for it in arr:
-        logger.debug("'%s' goes through the pipeline", it)
-        yield it
+    """Log pipe items"""
+    for val in arr:
+        logger.debug("'%s' goes through the pipeline", val)
+        yield val
 
 
 def pyqislice(*args):
+    """pyq wrapper for itertools.islice"""
     arr = args[-1]
     args = args[0](0)
     start = None
     step = None
     stop = 1
-    if type(args) == int:
+    if isinstance(args, int):
         args = [args]
     if len(args) > 0:
         stop = args[0]
-    if type(stop) != int:
+    if not isinstance(stop, int):
         stop = 1
     if len(args) > 1:
         start = stop
         stop = args[1]
-    if type(stop) != int:
+    if not isinstance(stop, int):
         stop = 1
     if len(args) > 2:
         step = args[2]
-    if type(step) != int:
+    if not isinstance(step, int):
         step = 1
     return islice(arr, start, stop, step)
 
 
-def reduce_list(x, arr):
+def reduce_list(_, arr):
+    """Reduce array to a single list"""
     ret = []
-    for it in arr:
-        ret.append(it)
+    for val in arr:
+        ret.append(val)
     return [ret]
 
 
-def hide(x, arr):
+def hide(elements, arr):
+    """Hide elements from items"""
     logger.info("Using hide-pipeline")
-    for it in arr:
-        try:
-            it.hide(x(it))
-        except Exception as ex:
-            logger.warning("Got an exception while hiding")
-            logger.warning("Exception %s", repr(ex))
-        yield it
+    for item in arr:
+        item.hide(elements(item))
+#        try:
+#            item.hide(items(item))
+#        except Exception as ex:
+#            logger.warning("Got an exception while hiding")
+#            logger.warning("Exception %s", repr(ex))
+        yield item
 
 
 def first(*args):
+    """Show first (N) items"""
     arr = args[-1]
     if len(args) == 2:
-        N = args[0](arr)
-    if type(N) != int:
-        N = 1
-    return islice(arr, 0, N)
+        shown = args[0](arr)
+    if not isinstance(shown, int):
+        shown = 1
+    return islice(arr, 0, shown)
 
 
 def last(*args):
+    """Show last (N) items"""
     arr = args[-1]
     if len(args) == 2:
-        N = args[0](arr)
-    if type(N) != int:
-        N = 1
-    return list(arr)[-N:]
+        shown = args[0](arr)
+    if not isinstance(shown, int):
+        shown = 1
+    return list(arr)[-shown:]
 
 
-class genProcessor:
+class GenProcessor:
     """Make a generator pipeline"""
-    def __init__(self, igen, filters=[]):
+
+    def __init__(self, igen, filters):
         """Initialize item processor"""
         self.igen = igen
         self._filters = filters
+
+    def add_filter(self, fun):
+        """Add filter to pipeline"""
+        self._filters.append(fun)
 
     def process(self):
         """Process items"""
         pipeline = self.igen
 #        pipeline = pipelogger(pipeline)
-        for f in self._filters:
-            pipeline = f(to_struct_gen(pipeline))
+        for fun in self._filters:
+            pipeline = fun(to_struct_gen(pipeline))
         return pipeline
 
-
-def run_query(query, data, sort_keys=False, imports=None):
-    """Run a query against given data"""
+def query_convert(query):
+    """Convert query for evaluation"""
     import regex as re
-    import importlib
-    # To anyone reading: I'm sorry. I'm a terrible person...
-    fnre = r'([a-zA-Z][^()]+)'
-    argsre = r'(\([^()=]*(\(([^()]*(?3)?[^()]*)*\))?)'
-    kwargsre = r'(, [^()]+)?'
-    classfn = r'(\.[^ ]*)?'
-    lambdare_str = r'%s%s%s\)%s' % (fnre, argsre, kwargsre, classfn)
+    res = {
+        "fnre": r'([a-zA-Z][^()]+)',
+        "argsre": r'(\([^()=]*(\(([^()]*(?3)?[^()]*)*\))?)',
+        "kwargsre": r'(, [^()]+)?',
+        "classfn": r'(\.[^ ]*)?',
+    }
+    lambdare_str = r'%s%s%s\)%s' % (res["fnre"], res["argsre"],
+                                    res["kwargsre"], res["classfn"])
     lambdasub = r'lambda arr: \1(lambda x, *rest: \2), arr\5)\6'
     namere = re.compile(r'([{,] *)([^{} "\',]+):')
-    makexre = re.compile('([ (])(\.[a-zA-Z])')
+    makexre = re.compile(r'([ (])(\.[a-zA-Z])')
     lambdare = re.compile(lambdare_str)
-    nowre = re.compile("NOW\(\)")
+    nowre = re.compile(r"NOW\(\)")
     logger.debug("Before conversion: %s", query)
     query = namere.sub(r'\1"\2":', query)
     logger.debug("After namere: %s", query)
@@ -204,26 +223,33 @@ def run_query(query, data, sort_keys=False, imports=None):
     logger.debug("After nowre: %s", query)
     query = "gp(data, [" + query + "]).process()"
     logger.debug("Final query '%s'", query)
+    return query
+
+def run_query(query, data, imports=None):
+    """Run a query against given data"""
+    import importlib
+    query = query_convert(query)
+    # To anyone reading: I'm sorry. I'm a terrible person...
     globalscope = {
-            "data": data,
-            "gp": genProcessor,
-            "islice": pyqislice,
-            "first": first,
-            "last": last,
-            "age": age,
-            "hide": hide,
-            "reduce": reduce,
-            "reduce_list": reduce_list,
-            "sorted": lambda x, arr, **kwargs: sorted(arr, key=x, **kwargs),
-            "datetime": datetime,
-            "timezone": timezone}
+        "data": data,
+        "gp": GenProcessor,
+        "islice": pyqislice,
+        "first": first,
+        "last": last,
+        "age": age,
+        "hide": hide,
+        "reduce": reduce,
+        "reduce_list": reduce_list,
+        "sorted": lambda x, arr, **kwargs: sorted(arr, key=x, **kwargs),
+        "datetime": datetime,
+        "timezone": timezone}
     if imports:
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
     try:
         res = eval(query, globalscope)
-        for it in res:
-            yield it
+        for val in res:
+            yield val
     except TypeError as ex:
         yield res
     except KeyError as ex:
