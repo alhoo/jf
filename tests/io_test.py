@@ -37,24 +37,28 @@ class TestJfIO(unittest.TestCase):
         """Test simple query"""
         test_str = '["a", {"a": 2353, "b": "sdaf\\"}f32"}, {"a": 646}]'
         result = list(yield_json_and_json_lines([test_str]))
-        self.assertEqual(result, ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}'])
+        expected = ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}']
+        self.assertEqual(result, expected)
 
     def test_escaped_jsonl(self):
         """Test simple query"""
         test_str = '"a", {"a": 2353, "b": "sdaf\\"}f32"}, {"a": 646}'
         result = list(yield_json_and_json_lines([test_str]))
-        self.assertEqual(result, ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}'])
+        expected = ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}']
+        self.assertEqual(result, expected)
 
     def test_escaped_json_2(self):
         """Test simple query"""
         test_obj = ["a", {"a": 2353, "b": "sdaf\"}f32"}, {"a": 646}]
         test_str = json.dumps(test_obj, sort_keys=True)
         result = list(yield_json_and_json_lines([test_str]))
-        self.assertEqual(result, ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}'])
+        expected = ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}']
+        self.assertEqual(result, expected)
 
     def test_escaped_jsonl_2(self):
         """Test simple query"""
         test_obj = ["a", {"a": 2353, "b": "sdaf\"}f32"}, {"a": 646}]
         test_str = json.dumps(test_obj, sort_keys=True)
         result = list(yield_json_and_json_lines([test_str]))
-        self.assertEqual(result, ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}'])
+        expected = ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}']
+        self.assertEqual(result, expected)

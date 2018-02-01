@@ -1,6 +1,7 @@
 import json
 import fileinput
 
+
 def read_jsonl_json_or_yaml(inp, args):
     """Read json, jsonl and yaml data from file defined in args"""
     data = ''
