@@ -52,6 +52,13 @@ def yield_json_and_json_lines(inp):
         for char in line:
             pos = pos + 1
             alldata += char
+            #print(char, state, char == '\\')
+            if char == '\\':
+                state[1] = 1
+                continue
+            if state[1] > 0:
+                state[1] = 0
+                continue
             if char == '"':
                 if state[3] < 2:
                     if item < 0:
@@ -61,16 +68,6 @@ def yield_json_and_json_lines(inp):
                         item = -pos
                 state[0] = 1 - state[0]
             if state[0] > 0:
-                continue
-            if char == "'":
-                if state[3] < 2:
-                    if item < 0:
-                        item = pos
-                    elif state[2] == 0:
-                        yield json.loads(alldata[item:pos + 1])
-                        item = -pos
-                state[1] = 1 - state[1]
-            if state[1] > 0:
                 continue
             if char == '}':
                 state[2] -= 1
