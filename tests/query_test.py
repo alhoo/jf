@@ -11,7 +11,7 @@ def tolist(igen):
     return json.dumps([x for x in igen], cls=jf.StructEncoder, sort_keys=True)
 
 
-class TestPyq(unittest.TestCase):
+class TestJf(unittest.TestCase):
     """Basic jf testcases"""
 
     def test_get_item(self):

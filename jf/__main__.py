@@ -11,7 +11,7 @@ from pygments.lexers import get_lexer_by_name
 from pygments.formatters import TerminalFormatter
 
 from jf import run_query, StructEncoder, ipy
-from jf.jf_io import read_jsonl_json_or_yaml
+from jf.io import read_jsonl_json_or_yaml
 
 logger = logging.getLogger(__name__)
 
