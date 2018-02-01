@@ -10,7 +10,7 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import TerminalFormatter
 
-from jf import run_query, StructEncoder
+from jf import run_query, StructEncoder, ipy
 
 logger = logging.getLogger(__name__)
 
@@ -142,6 +142,8 @@ def main(args=None):
                         help="raw output")
     parser.add_argument("-a", "--ensure_ascii", action="store_true",
                         default=False, help="ensure ascii only characters")
+    parser.add_argument("-p", "--ipy", action="store_true",
+                        default=False, help="start IPython shell with data")
     parser.add_argument("--html_unescape", action="store_true", default=False,
                         help="unescape html entities")
     parser.add_argument('files', metavar='FILE', nargs='*', default="-",
@@ -181,6 +183,24 @@ def main(args=None):
         args.bw = True
     try:
         retlist = []
+        if args.ipy:
+            banner = ''
+            data = run_query(args.query, inq,
+                             imports=args.imports)
+            from IPython import embed
+            if not sys.stdin.isatty():
+                banner = '\nNotice: You are inputting data from stdin!\n' + \
+                         'This might cause some trouble since jf will try ' + \
+                         'to get some input from you also.\n' + \
+                         'To get the full benefit of jf and IPython, ' + \
+                         'consider giving the input as a file instead.\n\n' + \
+                         'To prevent any unexpected behaviour, jk will ' + \
+                         'load the full dataset in memory.\n' + \
+                         'This might take a while...\n'
+                data = list(data)
+                sys.stdin = open('/dev/tty')
+            ipy(banner, data)
+            return
         for out in run_query(args.query, inq, imports=args.imports):
             out = json.loads(json.dumps(out, cls=StructEncoder))
             if args.list:

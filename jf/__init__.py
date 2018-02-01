@@ -133,6 +133,17 @@ def jfislice(*args):
     return islice(arr, start, stop, step)
 
 
+def ipy(banner, data):
+    from IPython import embed
+    if not isinstance(banner, str):
+        banner = ''
+    banner += '\nJf instance is now dropping into IPython\n'
+    banner += 'Your filtered dataset is loaded in a iterable variable '
+    banner += 'named "data"\n\n'
+    cleaner = lambda val: json.loads(json.dumps(val, cls=StructEncoder))
+    data = map(cleaner, data)
+    embed(banner1=banner)
+
 def reduce_list(_, arr):
     """Reduce array to a single list"""
     ret = []
@@ -239,6 +250,7 @@ def run_query(query, data, imports=None):
         "last": last,
         "age": age,
         "hide": hide,
+        "ipy": ipy,
         "reduce": reduce,
         "reduce_list": reduce_list,
         "sorted": lambda x, arr, **kwargs: sorted(arr, key=x, **kwargs),
