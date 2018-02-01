@@ -4,7 +4,7 @@ import sys
 import json
 import logging
 from datetime import datetime, timezone
-from itertools import islice
+from itertools import islice, chain
 from functools import reduce
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,14 @@ def age(datestr):
         ret = datetime.now(timezone.utc) - parsedate(str(datestr))
     logger.debug("Age of '%s' is %s", datestr, repr(ret))
     return ret
+
+
+def peek(data, count=100):
+    """Slice and memoize data head"""
+    head = list(islice(data, 0, count))
+    if isinstance(data, (list, tuple, dict)):
+        data = islice(data, count, None)
+    return head, chain(head, data)
 
 
 def parse_value(val):
@@ -143,8 +151,9 @@ def ipy(banner, data):
         banner = ''
     banner += '\nJf instance is now dropping into IPython\n'
     banner += 'Your filtered dataset is loaded in a iterable variable '
-    banner += 'named "data"\n\n'
-    data = map(result_cleaner, data)
+    banner += 'named "data"\n\ndata sample:\n'
+    head, data = peek(map(result_cleaner, data), 1)
+    banner += json.dumps(head[0], indent=2, sort_keys=True) + "\n\n"
     embed(banner1=banner)
 
 
