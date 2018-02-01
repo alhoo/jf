@@ -53,6 +53,10 @@ class Struct:
         self.__jf_struct_hidden_fields = ["_Struct__jf_struct_hidden_fields"]
         self.update(entries)
 
+    def __getattr__(self, item):
+        """Return item attribute if exists"""
+        return self.__getitem__(item)
+
     def __getitem__(self, item):
         """Return item attribute if exists"""
         if item in self.__dict__:
@@ -78,7 +82,7 @@ class Struct:
             if isinstance(val, (list, dict)):
                 self.__dict__[key] = to_struct(val)
             else:
-                self.__dict__[key] = parse_value(val)
+                self.__dict__[key] = val  # parse_value(val)
         return self
 
 
@@ -128,16 +132,16 @@ def jfislice(*args):
     if len(args) > 0:
         stop = args[0]
     if not isinstance(stop, int):
-        stop = 1
+        stop = None
     if len(args) > 1:
         start = stop
         stop = args[1]
     if not isinstance(stop, int):
-        stop = 1
+        stop = None
     if len(args) > 2:
         step = args[2]
     if not isinstance(step, int):
-        step = 1
+        step = None
     return islice(arr, start, stop, step)
 
 
@@ -254,13 +258,17 @@ def run_query(query, data, imports=None):
     """Run a query against given data"""
     import importlib
     query = query_convert(query)
-    # To anyone reading: I'm sorry. I'm a terrible person...
+    # print("List of known functions")
+    # functypes = lambda x: x[0][0] != '_' and isinstance(x[1], (type(map), type(json), type(print), type(run_query)))
+    # funcs = map(lambda x: (x[0], repr(type(x[1]))), filter(functypes, globals().items()))
+    # print(json.dumps(list(funcs), indent=2))
     globalscope = {
         "data": data,
         "gp": GenProcessor,
         "islice": jfislice,
         "first": first,
         "last": last,
+        "I": lambda arr: map(lambda x: x, arr),
         "age": age,
         "hide": hide,
         "ipy": ipy,
@@ -278,6 +286,10 @@ def run_query(query, data, imports=None):
             yield val
     except TypeError as ex:
         yield res
+    except AttributeError as ex:
+        logger.warning("Got an exception while yielding results")
+        logger.warning("Exception: %s", repr(ex))
+        logger.warning("You might have typoed an attribute")
     except KeyError as ex:
         logger.warning("Got an exception while yielding results")
         logger.warning("Exception: %s", repr(ex))

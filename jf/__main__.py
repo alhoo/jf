@@ -37,7 +37,7 @@ def set_loggers(debug=False):
 def main(args=None):
     """Main PYQ execution function"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("query", default='', nargs='?',
+    parser.add_argument("query", nargs='?', default='I',
                         help="query string for extracting wanted information")
     parser.add_argument("-d", "--debug", action="store_true",
                         help="print debug messages")

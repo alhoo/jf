@@ -1,11 +1,14 @@
 test:
 	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-id tests/
 
+devinstall: README.rst
+	pip install -e .
+
 readme:
 	pandoc README.md | sed 's/<code/<code style="color:cyan;"/g'| elinks -dump -dump-color-mode 1 | sed -r 's/^/ /g;s/ *$$//' | (echo && cat && echo)
 
-README.rst:
-	pandoc -f markdown -t rst README.md >README.rst
+README.rst: README.md
+	pandoc -f markdown -t rst $< >$@
 
 pylint:
 	pylint --output-format=parseable jf tests
