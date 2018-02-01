@@ -12,3 +12,14 @@ pylint:
 
 pep8:
 	pep8 jf tests
+
+package:
+	pip wheel .
+
+release:
+	@echo update version to setup.py
+	@echo git tag version
+	@echo python setup.py sdist upload -r pypi
+
+clean:
+	rm *.whl

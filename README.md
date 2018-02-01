@@ -139,4 +139,4 @@ Known bugs
 ==
 
 * Datetime-recognition is crude and will probably make mistakes
-
+* IPython doesn't launch perfectly with piped data
