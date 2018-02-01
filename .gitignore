@@ -1,2 +1,10 @@
 */__pycache__/
 *.sh
+test.*
+*.pyc
+*.swp
+*.egg-info/
+README.rst
+dist/
+coverage/
+.*
