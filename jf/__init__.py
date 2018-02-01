@@ -133,6 +133,10 @@ def jfislice(*args):
     return islice(arr, start, stop, step)
 
 
+def result_cleaner(val):
+    return json.loads(json.dumps(val, cls=StructEncoder))
+
+
 def ipy(banner, data):
     from IPython import embed
     if not isinstance(banner, str):
@@ -140,9 +144,9 @@ def ipy(banner, data):
     banner += '\nJf instance is now dropping into IPython\n'
     banner += 'Your filtered dataset is loaded in a iterable variable '
     banner += 'named "data"\n\n'
-    cleaner = lambda val: json.loads(json.dumps(val, cls=StructEncoder))
-    data = map(cleaner, data)
+    data = map(result_cleaner, data)
     embed(banner1=banner)
+
 
 def reduce_list(_, arr):
     """Reduce array to a single list"""

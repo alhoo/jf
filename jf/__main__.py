@@ -52,7 +52,7 @@ def yield_json_and_json_lines(inp):
         for char in line:
             pos = pos + 1
             alldata += char
-            #print(char, state, char == '\\')
+            # print(char, state, char == '\\')
             if char == '\\':
                 state[1] = 1
                 continue
@@ -213,7 +213,10 @@ def main(args=None):
                     ret = highlight(ret, lexer, formatter).rstrip()
             else:
                 # ret = eval(ret)
-                if isinstance(ret, dict):
+                if isinstance(ret, str):
+                    # Strip quotes
+                    ret = ret[1:-1]
+                elif isinstance(ret, dict):
                     ret = outfmt(ret, **out_kw_args)
             print(ret)
         if args.list:
