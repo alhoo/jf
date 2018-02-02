@@ -6,6 +6,7 @@ import logging
 from datetime import datetime, timezone
 from itertools import islice, chain
 from functools import reduce
+from jf.parser import parse_query
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ def peek(data, count=100):
 
 def parse_value(val):
     """Parse value to complex types"""
+    logger.debug("Parsing date from '%s'", val)
     from dateutil import parser as dateutil
     try:
         if len(val) > 10:
@@ -146,6 +148,7 @@ def jfislice(*args):
 
 
 def result_cleaner(val):
+    """Cleanup the result"""
     return json.loads(json.dumps(val, cls=StructEncoder))
 
 
@@ -185,6 +188,7 @@ def hide(elements, arr):
 def first(*args):
     """Show first (N) items"""
     arr = args[-1]
+    shown = 1
     if len(args) == 2:
         shown = args[0](arr)
     if not isinstance(shown, int):
@@ -195,6 +199,7 @@ def first(*args):
 def last(*args):
     """Show last (N) items"""
     arr = args[-1]
+    shown = 1
     if len(args) == 2:
         shown = args[0](arr)
     if not isinstance(shown, int):
@@ -223,30 +228,67 @@ class GenProcessor:
         return pipeline
 
 
-def query_convert(query):
+RED = "\033[1;31m"
+BLUE = "\033[1;34m"
+CYAN = "\033[1;36m"
+GREEN = "\033[0;32m"
+RESET = "\033[0;0m"
+BOLD = "\033[;1m"
+REVERSE = "\033[;7m"
+
+
+def colorize(ex):
+    """Colorize syntax error"""
+    string = [c for c in ex.args[1][3]]
+    start = ex.args[1][2]-ex.args[1][1]
+    stop = ex.args[1][2]
+    string[start] = RED+string[start]
+    string[stop] = RESET+string[stop]
+    return ''.join(string)
+
+
+def simple_query_convert(query):
     """Convert query for evaluation"""
     import regex as re
-    res = {
-        "fnre": r'([a-zA-Z][^()]+)',
-        "argsre": r'(\([^()=]*(\(([^()]*(?3)?[^()]*)*\))?)',
-        "kwargsre": r'(, [^()]+)?',
-        "classfn": r'(\.[^ ]*)?',
-    }
-    lambdare_str = r'%s%s%s\)%s' % (res["fnre"], res["argsre"],
-                                    res["kwargsre"], res["classfn"])
-    lambdasub = r'lambda arr: \1(lambda x, *rest: \2), arr\5)\6'
     namere = re.compile(r'([{,] *)([^{} "\',]+):')
     makexre = re.compile(r'([ (])(\.[a-zA-Z])')
-    lambdare = re.compile(lambdare_str)
     nowre = re.compile(r"NOW\(\)")
     logger.debug("Before conversion: %s", query)
     query = namere.sub(r'\1"\2":', query)
     logger.debug("After namere: %s", query)
     query = makexre.sub(r'\1x\2', query)
     logger.debug("After makex: %s", query)
-#    query = lambdare.sub(r'lambda arr: \1(lambda x, *rest: \2, arr)\4', query)
-    query = lambdare.sub(lambdasub, query)
-    logger.debug("After Lambdare: %s", query)
+    from jf.parser import simpleparser
+    query = simpleparser(query, 'arr')
+    logger.debug("After query parse: %s", query)
+    query = nowre.sub(r'datetime.now(timezone.utc)', query)
+    logger.debug("After nowre: %s", query)
+    query = "gp(data, [" + query + "]).process()"
+    logger.debug("Final query '%s'", query)
+    return query
+
+
+def query_convert(query):
+    """Convert query for evaluation"""
+    import regex as re
+    namere = re.compile(r'([{,] *)([^{} "\',]+):')
+    makexre = re.compile(r'([ (])(\.[a-zA-Z])')
+    nowre = re.compile(r"NOW\(\)")
+    logger.debug("Before conversion: %s", query)
+    query = namere.sub(r'\1"\2":', query)
+    logger.debug("After namere: %s", query)
+    query = makexre.sub(r'\1x\2', query)
+    logger.debug("After makex: %s", query)
+    # from jf.parser import reparser
+    # q2 = query
+    # reparser(q2)
+    try:
+        query = parse_query(query).rstrip(",")
+    except SyntaxError as ex:
+        logger.warning("Syntax error in query: %s", repr(ex.args[0]))
+        sys.stderr.write("Error in query:\n\t%s\n\n" % colorize(ex))
+        raise
+    logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)
     query = "gp(data, [" + query + "]).process()"
@@ -257,10 +299,17 @@ def query_convert(query):
 def run_query(query, data, imports=None):
     """Run a query against given data"""
     import importlib
-    query = query_convert(query)
+    try:
+        # query = simple_query_convert(query)
+        query = query_convert(query)
+    except SyntaxError:
+        return []
     # print("List of known functions")
-    # functypes = lambda x: x[0][0] != '_' and isinstance(x[1], (type(map), type(json), type(print), type(run_query)))
-    # funcs = map(lambda x: (x[0], repr(type(x[1]))), filter(functypes, globals().items()))
+    # functiontypes = (type(map), type(json), type(print), type(run_query))
+    # isfunctypes = isinstance(x[1], functiontypes)
+    # isfunction = lambda x: x[0][0] != '_' and isfunctype
+    # global_functions = filter(functypes, globals().items())
+    # funcs = map(lambda x: (x[0], repr(type(x[1]))), global_functions)
     # print(json.dumps(list(funcs), indent=2))
     globalscope = {
         "data": data,
@@ -270,11 +319,12 @@ def run_query(query, data, imports=None):
         "last": last,
         "I": lambda arr: map(lambda x: x, arr),
         "age": age,
+        "date": parse_value,
         "hide": hide,
         "ipy": ipy,
         "reduce": reduce,
         "reduce_list": reduce_list,
-        "sorted": lambda x, arr, **kwargs: sorted(arr, key=x, **kwargs),
+        "sorted": lambda x, arr=None, **kwargs: sorted(arr, key=x, **kwargs),
         "datetime": datetime,
         "timezone": timezone}
     if imports:

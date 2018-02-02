@@ -5,7 +5,6 @@ import json
 import argparse
 import logging
 import html
-import fileinput
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import TerminalFormatter

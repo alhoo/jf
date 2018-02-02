@@ -1,5 +1,11 @@
+"""JF io library"""
 import json
 import fileinput
+import logging
+
+logger = logging.getLogger(__name__)
+
+UEE = 'Got an unexpected exception'
 
 
 def read_jsonl_json_or_yaml(inp, args):
@@ -13,8 +19,6 @@ def read_jsonl_json_or_yaml(inp, args):
             try:
                 yield json.loads(val)
             except json.JSONDecodeError as ex:
-                logger.warning("%s while yielding '%s'", UEE,
-                               alldata[item:pos + 1])
                 logger.warning("Exception %s", repr(ex))
     if len(data) > 0:
         try:

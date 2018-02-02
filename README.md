@@ -24,6 +24,7 @@ Filter selected values
     "87086895"
     "87114792"
 
+
 Filter items by age (and output yaml)
 
     $ cat samples.jsonl | jf 'map({id: x.id, datetime: x["content-datetime"]}), filter(age(x.datetime) > age("456 days")),
@@ -51,6 +52,25 @@ Sort items by age and print their id, length and age
     - 450 days, 6:30:54.419461
     - '87182405'
     - 'length: 251'
+
+Filter items after a given datetime (test.json is a git commit history):
+
+    $ jf 'map(.update({age: age(.commit.author.date)})),filter(date(.commit.author.date) > date("2018-01-30T17:00:00Z")),sorted(x.age, reverse=True), map(.sha, .age, .commit.author.date)' test.json 
+    [
+      "68fe662966c57443ae7bf6939017f8ffa4b182c2",
+      "2 days, 9:40:12.137919",
+      "2018-01-30T18:35:27Z"
+    ]
+    [
+      "d3211e1141d8b2bf480cbbebd376b57bae9d8bdf",
+      "2 days, 9:18:07.134418",
+      "2018-01-30T18:57:32Z"
+    ]
+    [
+      "f8ba0ba559e39611bc0b63f236a3e67085fe8b40",
+      "2 days, 8:50:09.129790",
+      "2018-01-30T19:25:30Z"
+    ]
 
 Import your own modules and hide fields:
 
