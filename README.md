@@ -1,8 +1,7 @@
 jf
 ==
 
-jf, aka json filter pipeline, is a jq-clone written in python. It supports evaluation of python oneliners, making it
-especially appealing for data scientists who are used to python.
+jf, aka "jndex fingers" or more commonly "json filter pipeline", is a jq-clone written in python. It supports evaluation of python oneliners, making it especially appealing for data scientists who are used to python.
 
 Basic usage
 ==
@@ -154,9 +153,9 @@ Features
 * first(N), last(N), islice(start, stop, step)
 * import your own modules for more complex filtering
   * Support stateful classes for complex interactions between items
+* Drop your filtered data to IPython for manual data exploration
 
 Known bugs
 ==
 
-* Datetime-recognition is crude and will probably make mistakes
 * IPython doesn't launch perfectly with piped data
