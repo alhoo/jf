@@ -37,14 +37,19 @@ def parse_value(val):
     logger.debug("Parsing date from '%s'", val)
     from dateutil import parser as dateutil
     try:
-        if len(val) > 10:
+        if len(val) > 1:
             time = dateutil.parse(val)
         else:
             return val
+        logger.debug("Got time '%s'", time)
         return time
-    except ValueError:
+    except ValueError as ex:
+        logger.debug("Not a date k7j5 value: %s", val)
+        logger.info(ex)
         return val
     except TypeError:
+        logger.debug("Not a date qa3t value: %s", val)
+        logger.info(ex)
         return val
 
 
