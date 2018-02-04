@@ -120,13 +120,6 @@ class StructEncoder(json.JSONEncoder):
                 return obj.__str__()
 
 
-def pipelogger(arr):
-    """Log pipe items"""
-    for val in arr:
-        logger.debug("'%s' goes through the pipeline", val)
-        yield val
-
-
 def jfislice(*args):
     """jf wrapper for itertools.islice"""
     arr = args[-1]
@@ -227,7 +220,6 @@ class GenProcessor:
     def process(self):
         """Process items"""
         pipeline = self.igen
-#        pipeline = pipelogger(pipeline)
         for fun in self._filters:
             pipeline = fun(to_struct_gen(pipeline))
         return pipeline
@@ -248,7 +240,10 @@ def colorize(ex):
     start = ex.args[1][2]-ex.args[1][1]
     stop = ex.args[1][2]
     string[start] = RED+string[start]
-    string[stop] = RESET+string[stop]
+    if stop >= len(string):
+      string.append(RESET)
+    else:
+      string[stop] = RESET+string[stop]
     return ''.join(string)
 
 
@@ -283,11 +278,11 @@ def query_convert(query):
 def run_query(query, data, imports=None):
     """Run a query against given data"""
     import importlib
-    try:
+#    try:
         # query = simple_query_convert(query)
-        query = query_convert(query)
-    except SyntaxError:
-        return []
+    query = query_convert(query)
+#    except SyntaxError:
+#        return []
     # print("List of known functions")
     # functiontypes = (type(map), type(json), type(print), type(run_query))
     # isfunctypes = isinstance(x[1], functiontypes)

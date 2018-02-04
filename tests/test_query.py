@@ -123,6 +123,15 @@ class TestJf(unittest.TestCase):
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
+    def test_query_syntax_error(self):
+        """Test complex query"""
+
+        data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
+        cmd = 'map({id: x.a, data: x.b.d'
+        expected = '[{"data": [1, 2, 3, 4], "id": 1}]'
+        with  self.assertRaises(SyntaxError):
+          result = tolist(list(jf.run_query(cmd, data)))
+
     def test_non_json_query(self):
         """Test complex query"""
 
