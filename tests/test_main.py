@@ -16,17 +16,22 @@ class TestJfMain(unittest.TestCase):
 
     def test_main_jsonl(self):
         """Test log setting"""
-        main(['I', 'test.jsonl'])
+        main(['--list', 'I', 'test.jsonl'])
         #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_main_json(self):
         """Test log setting"""
-        main(['I', 'test.json'])
+        main(['--yaml', 'I', 'test.json'])
         #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_main_yaml(self):
         """Test log setting"""
         main(['I', 'test.yaml'])
+        #main(['', StringIO('{"a": 1}, {"a": 2}')])
+
+    def test_main_yaml(self):
+        """Test log setting"""
+        main(['--yamli', 'I', 'test.yaml'])
         #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_logger_setting(self):
