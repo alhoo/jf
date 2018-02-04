@@ -21,6 +21,28 @@ class TestJfIO(unittest.TestCase):
         result = parse_part(test_item)
         self.assertEqual(result, expected)
 
+    def test_filter(self):
+        """Test simple filter"""
+        test_str = 'filter(x.id == "123")'
+        expected = 'lambda arr: filter(lambda x, *rest: (x.id == "123"), arr),'
+        result = parse_query(test_str)
+        self.assertEqual(result, expected)
+
+
+    def test_filter(self):
+        """Test simple filter"""
+        test_str = 'filter(x.commit.committer.name == "Lasse Hyyrynen")'
+        expected = 'lambda arr: filter(lambda x, *rest: (x.commit.committer.name == "Lasse Hyyrynen"), arr),'
+        result = parse_query(test_str)
+        self.assertEqual(result, expected)
+
+    def test_map_filter(self):
+        """Test simple filter"""
+        test_str = 'map({id: x.id}), filter(x.id == "123")'
+        expected = 'lambda arr: map(lambda x, *rest: ({ id:x.id }), arr),lambda arr: filter(lambda x, *rest: (x.id == "123"), arr),'
+        result = parse_query(test_str)
+        self.assertEqual(result, expected)
+
     def test_simple(self):
         """Test simple query"""
         test_str = 'map(x.id)'

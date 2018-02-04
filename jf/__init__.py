@@ -337,14 +337,14 @@ def run_query(query, data, imports=None):
     except TypeError as ex:
         yield res
     except AttributeError as ex:
-        logger.warning("Got an exception while yielding results")
+        logger.warning("Got an exception a34g while yielding results")
         logger.warning("Exception: %s", repr(ex))
         logger.warning("You might have typoed an attribute")
     except KeyError as ex:
-        logger.warning("Got an exception while yielding results")
+        logger.warning("Got an exception h54a while yielding results")
         logger.warning("Exception: %s", repr(ex))
         logger.warning("You might have typoed an attribute")
     except Exception as ex:
-        logger.warning("Got an unexpected exception while yielding results")
+        logger.warning("Got an unexpected gaw3 exception while yielding results")
         logger.warning("Exception: %s", repr(ex))
         raise

@@ -99,10 +99,9 @@ def main(args=None):
         args.bw = True
     try:
         retlist = []
+        data = run_query(args.query, inq, imports=args.imports)
         if args.ipy:
             banner = ''
-            data = run_query(args.query, inq,
-                             imports=args.imports)
             from IPython import embed
             if not sys.stdin.isatty():
                 banner = '\nNotice: You are inputting data from stdin!\n' + \
@@ -117,7 +116,7 @@ def main(args=None):
                 sys.stdin = open('/dev/tty')
             ipy(banner, data)
             return
-        for out in run_query(args.query, inq, imports=args.imports):
+        for out in data:
             out = json.loads(json.dumps(out, cls=StructEncoder))
             if args.list:
                 retlist.append(out)
@@ -131,7 +130,6 @@ def main(args=None):
                 if not args.bw:
                     ret = highlight(ret, lexer, formatter).rstrip()
             else:
-                # ret = eval(ret)
                 if isinstance(ret, str):
                     # Strip quotes
                     ret = ret[1:-1]

@@ -19,7 +19,7 @@ pep8:
 package:
 	pip wheel .
 
-release:
+release: README.rst
 	@echo update version to setup.py
 	@echo git tag version
 	@echo python setup.py sdist upload -r pypi

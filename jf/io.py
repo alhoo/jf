@@ -7,6 +7,24 @@ logger = logging.getLogger(__name__)
 
 UEE = 'Got an unexpected exception'
 
+RED = "\033[1;31m"
+BLUE = "\033[1;34m"
+CYAN = "\033[1;36m"
+GREEN = "\033[0;32m"
+RESET = "\033[0;0m"
+BOLD = "\033[;1m"
+REVERSE = "\033[;7m"
+
+
+def colorize_json_error(text, ex):
+    """Colorize syntax error"""
+    string = [c for c in ex.doc]
+    start = ex.pos
+    stop = ex.pos + 1
+    string[start] = RED+string[start]
+    string[stop] = RESET+string[stop]
+    return ''.join(string[max(0,start - 500):min(len(string),stop + 500)])
+
 
 def read_jsonl_json_or_yaml(inp, args):
     """Read json, jsonl and yaml data from file defined in args"""
@@ -19,7 +37,10 @@ def read_jsonl_json_or_yaml(inp, args):
             try:
                 yield json.loads(val)
             except json.JSONDecodeError as ex:
+                # logger.warning('Error while parsing json: "%s"', ex.msg);
                 logger.warning("Exception %s", repr(ex))
+                jerr = colorize_json_error(data, ex)
+                logger.warning("Error at code marker q4eh\ndata:\n%s", jerr);
     if len(data) > 0:
         try:
             ind = inp(data)

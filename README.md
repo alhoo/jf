@@ -1,7 +1,25 @@
-jf
+JF
 ==
 
-jf, aka "jndex fingers" or more commonly "json filter pipeline", is a jq-clone written in python. It supports evaluation of python oneliners, making it especially appealing for data scientists who are used to python.
+JF, aka "jndex fingers" or more commonly "json filter pipeline", is a jq-clone written in python.
+It supports evaluation of python oneliners, making it especially appealing for data scientists
+who are used to working with python.
+
+
+How does it work
+==
+
+JF works by converting streaming json or yaml data structure through a map/filter-pipeline.
+The pipeline is compiled from a string representing a comma-separated list filters and mappers.
+The query parser assumes that each function of the pipeline reads items from a generator.
+The generator is given as the last non-keyword parameter to the function, 
+so "map(conversion)" is interpreted as "map(conversion, inputgenerator)".
+The result from a previous function is given as the input generator for the next function in the pipeline.
+
+Some built-in functions headers have been remodeled to be more intuitive with the framework.
+Most noticeable is the sorted-function, which normally has the key defined as a keyword argument.
+This was done since it seems more logical to sort items by id by writing "sorted(x.id)" than "sorted(key=lambda x: x.id)".
+
 
 Basic usage
 ==
