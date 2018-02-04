@@ -130,13 +130,6 @@ def parse_part(function):
     return ret
 
 
-def guess_query_type(m):
-    for val in flatten(m):
-        if val in ('==', '>', '<', '!=', '>=', '<='):
-            return 'filter'
-    return 'map'
-
-
 def parse_query(string):
     """Parse query string and convert it to a evaluatable pipeline argument"""
     logger.debug("Parsing: %s", string)
