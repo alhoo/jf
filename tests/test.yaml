@@ -1,0 +1,494 @@
+- age: '12:07:31.950608'
+  author:
+    avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
+    events_url: https://api.github.com/users/hyyry/events{/privacy}
+    followers_url: https://api.github.com/users/hyyry/followers
+    following_url: https://api.github.com/users/hyyry/following{/other_user}
+    gists_url: https://api.github.com/users/hyyry/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/hyyry
+    id: 8501204
+    login: hyyry
+    organizations_url: https://api.github.com/users/hyyry/orgs
+    received_events_url: https://api.github.com/users/hyyry/received_events
+    repos_url: https://api.github.com/users/hyyry/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/hyyry/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/hyyry/subscriptions
+    type: User
+    url: https://api.github.com/users/hyyry
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/f8ba0ba559e39611bc0b63f236a3e67085fe8b40/comments
+  commit:
+    author:
+      date: '2018-01-30 19:25:30+00:00'
+      email: hyyrynen@lingsoft.fi
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 19:25:30+00:00'
+      email: hyyrynen@lingsoft.fi
+      name: Lasse Hyyrynen
+    message: Add support for hiding fields
+    tree:
+      sha: ec0b737b1d43a8645fd40bcc9a42a2dd0baf48ee
+      url: https://api.github.com/repos/alhoo/jf/git/trees/ec0b737b1d43a8645fd40bcc9a42a2dd0baf48ee
+    url: https://api.github.com/repos/alhoo/jf/git/commits/f8ba0ba559e39611bc0b63f236a3e67085fe8b40
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer:
+    avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
+    events_url: https://api.github.com/users/hyyry/events{/privacy}
+    followers_url: https://api.github.com/users/hyyry/followers
+    following_url: https://api.github.com/users/hyyry/following{/other_user}
+    gists_url: https://api.github.com/users/hyyry/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/hyyry
+    id: 8501204
+    login: hyyry
+    organizations_url: https://api.github.com/users/hyyry/orgs
+    received_events_url: https://api.github.com/users/hyyry/received_events
+    repos_url: https://api.github.com/users/hyyry/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/hyyry/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/hyyry/subscriptions
+    type: User
+    url: https://api.github.com/users/hyyry
+  html_url: https://github.com/alhoo/jf/commit/f8ba0ba559e39611bc0b63f236a3e67085fe8b40
+  id: f8ba0ba559e39611bc0b63f236a3e67085fe8b40
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+    sha: d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+    url: https://api.github.com/repos/alhoo/jf/commits/d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+  sha: f8ba0ba559e39611bc0b63f236a3e67085fe8b40
+  url: https://api.github.com/repos/alhoo/jf/commits/f8ba0ba559e39611bc0b63f236a3e67085fe8b40
+
+- age: '12:35:29.970381'
+  author:
+    avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
+    events_url: https://api.github.com/users/hyyry/events{/privacy}
+    followers_url: https://api.github.com/users/hyyry/followers
+    following_url: https://api.github.com/users/hyyry/following{/other_user}
+    gists_url: https://api.github.com/users/hyyry/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/hyyry
+    id: 8501204
+    login: hyyry
+    organizations_url: https://api.github.com/users/hyyry/orgs
+    received_events_url: https://api.github.com/users/hyyry/received_events
+    repos_url: https://api.github.com/users/hyyry/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/hyyry/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/hyyry/subscriptions
+    type: User
+    url: https://api.github.com/users/hyyry
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/d3211e1141d8b2bf480cbbebd376b57bae9d8bdf/comments
+  commit:
+    author:
+      date: '2018-01-30 18:57:32+00:00'
+      email: hyyrynen@lingsoft.fi
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 18:57:32+00:00'
+      email: hyyrynen@lingsoft.fi
+      name: Lasse Hyyrynen
+    message: Enhance error handling
+    tree:
+      sha: 542c5d610c36b1c307cb902640e8ab4c081d5f63
+      url: https://api.github.com/repos/alhoo/jf/git/trees/542c5d610c36b1c307cb902640e8ab4c081d5f63
+    url: https://api.github.com/repos/alhoo/jf/git/commits/d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer:
+    avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
+    events_url: https://api.github.com/users/hyyry/events{/privacy}
+    followers_url: https://api.github.com/users/hyyry/followers
+    following_url: https://api.github.com/users/hyyry/following{/other_user}
+    gists_url: https://api.github.com/users/hyyry/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/hyyry
+    id: 8501204
+    login: hyyry
+    organizations_url: https://api.github.com/users/hyyry/orgs
+    received_events_url: https://api.github.com/users/hyyry/received_events
+    repos_url: https://api.github.com/users/hyyry/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/hyyry/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/hyyry/subscriptions
+    type: User
+    url: https://api.github.com/users/hyyry
+  html_url: https://github.com/alhoo/jf/commit/d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+  id: d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/68fe662966c57443ae7bf6939017f8ffa4b182c2
+    sha: 68fe662966c57443ae7bf6939017f8ffa4b182c2
+    url: https://api.github.com/repos/alhoo/jf/commits/68fe662966c57443ae7bf6939017f8ffa4b182c2
+  sha: d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+  url: https://api.github.com/repos/alhoo/jf/commits/d3211e1141d8b2bf480cbbebd376b57bae9d8bdf
+
+- age: '12:57:34.979537'
+  author:
+    avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
+    events_url: https://api.github.com/users/hyyry/events{/privacy}
+    followers_url: https://api.github.com/users/hyyry/followers
+    following_url: https://api.github.com/users/hyyry/following{/other_user}
+    gists_url: https://api.github.com/users/hyyry/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/hyyry
+    id: 8501204
+    login: hyyry
+    organizations_url: https://api.github.com/users/hyyry/orgs
+    received_events_url: https://api.github.com/users/hyyry/received_events
+    repos_url: https://api.github.com/users/hyyry/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/hyyry/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/hyyry/subscriptions
+    type: User
+    url: https://api.github.com/users/hyyry
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/68fe662966c57443ae7bf6939017f8ffa4b182c2/comments
+  commit:
+    author:
+      date: '2018-01-30 18:35:27+00:00'
+      email: hyyrynen@lingsoft.fi
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 18:35:27+00:00'
+      email: hyyrynen@lingsoft.fi
+      name: Lasse Hyyrynen
+    message: Fix file input
+    tree:
+      sha: 53430b85e7e40544e876f6a48559cbead48dc766
+      url: https://api.github.com/repos/alhoo/jf/git/trees/53430b85e7e40544e876f6a48559cbead48dc766
+    url: https://api.github.com/repos/alhoo/jf/git/commits/68fe662966c57443ae7bf6939017f8ffa4b182c2
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer:
+    avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
+    events_url: https://api.github.com/users/hyyry/events{/privacy}
+    followers_url: https://api.github.com/users/hyyry/followers
+    following_url: https://api.github.com/users/hyyry/following{/other_user}
+    gists_url: https://api.github.com/users/hyyry/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/hyyry
+    id: 8501204
+    login: hyyry
+    organizations_url: https://api.github.com/users/hyyry/orgs
+    received_events_url: https://api.github.com/users/hyyry/received_events
+    repos_url: https://api.github.com/users/hyyry/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/hyyry/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/hyyry/subscriptions
+    type: User
+    url: https://api.github.com/users/hyyry
+  html_url: https://github.com/alhoo/jf/commit/68fe662966c57443ae7bf6939017f8ffa4b182c2
+  id: 68fe662966c57443ae7bf6939017f8ffa4b182c2
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/35e6bfdeb5872322b897e5dc7addab6e410898d7
+    sha: 35e6bfdeb5872322b897e5dc7addab6e410898d7
+    url: https://api.github.com/repos/alhoo/jf/commits/35e6bfdeb5872322b897e5dc7addab6e410898d7
+  sha: 68fe662966c57443ae7bf6939017f8ffa4b182c2
+  url: https://api.github.com/repos/alhoo/jf/commits/68fe662966c57443ae7bf6939017f8ffa4b182c2
+
+- age: '14:46:49.987445'
+  author: null
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/35e6bfdeb5872322b897e5dc7addab6e410898d7/comments
+  commit:
+    author:
+      date: '2018-01-30 16:46:12+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 16:46:12+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    message: Print json lines when indent is not positive
+    tree:
+      sha: 914cfcc876cc529fd7f2d823f3067a50c2311c67
+      url: https://api.github.com/repos/alhoo/jf/git/trees/914cfcc876cc529fd7f2d823f3067a50c2311c67
+    url: https://api.github.com/repos/alhoo/jf/git/commits/35e6bfdeb5872322b897e5dc7addab6e410898d7
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer: null
+  html_url: https://github.com/alhoo/jf/commit/35e6bfdeb5872322b897e5dc7addab6e410898d7
+  id: 35e6bfdeb5872322b897e5dc7addab6e410898d7
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/f5f879dd7303c35fa3712586af1e7df884a5b98b
+    sha: f5f879dd7303c35fa3712586af1e7df884a5b98b
+    url: https://api.github.com/repos/alhoo/jf/commits/f5f879dd7303c35fa3712586af1e7df884a5b98b
+  sha: 35e6bfdeb5872322b897e5dc7addab6e410898d7
+  url: https://api.github.com/repos/alhoo/jf/commits/35e6bfdeb5872322b897e5dc7addab6e410898d7
+
+- age: '15:14:31.993282'
+  author: null
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/f5f879dd7303c35fa3712586af1e7df884a5b98b/comments
+  commit:
+    author:
+      date: '2018-01-30 16:18:30+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 16:18:30+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    message: Reduce verbosity when debugging
+    tree:
+      sha: 79a45d104646a980715c08ac82f9c61f2c11ed71
+      url: https://api.github.com/repos/alhoo/jf/git/trees/79a45d104646a980715c08ac82f9c61f2c11ed71
+    url: https://api.github.com/repos/alhoo/jf/git/commits/f5f879dd7303c35fa3712586af1e7df884a5b98b
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer: null
+  html_url: https://github.com/alhoo/jf/commit/f5f879dd7303c35fa3712586af1e7df884a5b98b
+  id: f5f879dd7303c35fa3712586af1e7df884a5b98b
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/b393d09215efc4fc0382dd82ec3f38ae59a287e5
+    sha: b393d09215efc4fc0382dd82ec3f38ae59a287e5
+    url: https://api.github.com/repos/alhoo/jf/commits/b393d09215efc4fc0382dd82ec3f38ae59a287e5
+  sha: f5f879dd7303c35fa3712586af1e7df884a5b98b
+  url: https://api.github.com/repos/alhoo/jf/commits/f5f879dd7303c35fa3712586af1e7df884a5b98b
+
+- age: '15:23:47.999326'
+  author: null
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/b393d09215efc4fc0382dd82ec3f38ae59a287e5/comments
+  commit:
+    author:
+      date: '2018-01-30 16:09:14+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 16:09:14+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    message: Print help if no input is given
+    tree:
+      sha: 33beb087ecc14daebe3f9ec6700d59fe1e68281a
+      url: https://api.github.com/repos/alhoo/jf/git/trees/33beb087ecc14daebe3f9ec6700d59fe1e68281a
+    url: https://api.github.com/repos/alhoo/jf/git/commits/b393d09215efc4fc0382dd82ec3f38ae59a287e5
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer: null
+  html_url: https://github.com/alhoo/jf/commit/b393d09215efc4fc0382dd82ec3f38ae59a287e5
+  id: b393d09215efc4fc0382dd82ec3f38ae59a287e5
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/58404495ba9128e83e233eaa4f30b1127a56a061
+    sha: 58404495ba9128e83e233eaa4f30b1127a56a061
+    url: https://api.github.com/repos/alhoo/jf/commits/58404495ba9128e83e233eaa4f30b1127a56a061
+  sha: b393d09215efc4fc0382dd82ec3f38ae59a287e5
+  url: https://api.github.com/repos/alhoo/jf/commits/b393d09215efc4fc0382dd82ec3f38ae59a287e5
+
+- age: '16:59:33.006996'
+  author:
+    avatar_url: https://avatars0.githubusercontent.com/u/18532562?v=4
+    events_url: https://api.github.com/users/alhoo/events{/privacy}
+    followers_url: https://api.github.com/users/alhoo/followers
+    following_url: https://api.github.com/users/alhoo/following{/other_user}
+    gists_url: https://api.github.com/users/alhoo/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/alhoo
+    id: 18532562
+    login: alhoo
+    organizations_url: https://api.github.com/users/alhoo/orgs
+    received_events_url: https://api.github.com/users/alhoo/received_events
+    repos_url: https://api.github.com/users/alhoo/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/alhoo/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/alhoo/subscriptions
+    type: User
+    url: https://api.github.com/users/alhoo
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/58404495ba9128e83e233eaa4f30b1127a56a061/comments
+  commit:
+    author:
+      date: '2018-01-30 14:33:29+00:00'
+      email: hyyrynen.lasse@gmail.com
+      name: alhoo
+    comment_count: 0
+    committer:
+      date: '2018-01-30 14:33:29+00:00'
+      email: noreply@github.com
+      name: GitHub
+    message: Update README.md
+    tree:
+      sha: 189e617a5338d4d7823f398cb4bb020d9686f504
+      url: https://api.github.com/repos/alhoo/jf/git/trees/189e617a5338d4d7823f398cb4bb020d9686f504
+    url: https://api.github.com/repos/alhoo/jf/git/commits/58404495ba9128e83e233eaa4f30b1127a56a061
+    verification:
+      payload: 'tree 189e617a5338d4d7823f398cb4bb020d9686f504
+
+        parent 087f6f71e0000d8de4307d25514bc28ea038f072
+
+        author alhoo <hyyrynen.lasse@gmail.com> 1517322809 +0200
+
+        committer GitHub <noreply@github.com> 1517322809 +0200
+
+
+        Update README.md'
+      reason: valid
+      signature: '-----BEGIN PGP SIGNATURE-----
+
+
+        wsBcBAABCAAQBQJacII5CRBK7hj4Ov3rIwAAdHIIAJBT1QJBUzCvk839uxptWeXD
+
+        02NyZOBZvjVUyflJ8dlDJQlz6OcVm9sSDgZt5XVETg3e68l+twQ4Z5DdBfxo/hGg
+
+        1gR0UplqmNopo4bQVQVczCRzkEaVssY4ewC4Q+YsLPNKrU4E1gP93SlXhaagCTze
+
+        h4xAXOXk6U8HSEPgGGpyhI/70LuD/RTb1cQIqp/Gnmb1DCC8DdEyEO6WMPz8a/j7
+
+        eUKx25Wcnm6WNKfeYkW1jUAtVfDRFPkIsttLKGSG+PjTM/NKwt2tHdu/3Em6ZIs7
+
+        I2s2Ecmv3oXd8pnw7xsZKe6ZD0CDk1QMj5oUaj4YgJrprdLdFN6gg9uJi8G0WVk=
+
+        =7U7A
+
+        -----END PGP SIGNATURE-----
+
+        '
+      verified: true
+  committer:
+    avatar_url: https://avatars3.githubusercontent.com/u/19864447?v=4
+    events_url: https://api.github.com/users/web-flow/events{/privacy}
+    followers_url: https://api.github.com/users/web-flow/followers
+    following_url: https://api.github.com/users/web-flow/following{/other_user}
+    gists_url: https://api.github.com/users/web-flow/gists{/gist_id}
+    gravatar_id: ''
+    html_url: https://github.com/web-flow
+    id: 19864447
+    login: web-flow
+    organizations_url: https://api.github.com/users/web-flow/orgs
+    received_events_url: https://api.github.com/users/web-flow/received_events
+    repos_url: https://api.github.com/users/web-flow/repos
+    site_admin: false
+    starred_url: https://api.github.com/users/web-flow/starred{/owner}{/repo}
+    subscriptions_url: https://api.github.com/users/web-flow/subscriptions
+    type: User
+    url: https://api.github.com/users/web-flow
+  html_url: https://github.com/alhoo/jf/commit/58404495ba9128e83e233eaa4f30b1127a56a061
+  id: 58404495ba9128e83e233eaa4f30b1127a56a061
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/087f6f71e0000d8de4307d25514bc28ea038f072
+    sha: 087f6f71e0000d8de4307d25514bc28ea038f072
+    url: https://api.github.com/repos/alhoo/jf/commits/087f6f71e0000d8de4307d25514bc28ea038f072
+  sha: 58404495ba9128e83e233eaa4f30b1127a56a061
+  url: https://api.github.com/repos/alhoo/jf/commits/58404495ba9128e83e233eaa4f30b1127a56a061
+
+- age: '17:27:11.015466'
+  author: null
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/087f6f71e0000d8de4307d25514bc28ea038f072/comments
+  commit:
+    author:
+      date: '2018-01-30 14:05:51+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 14:05:51+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    message: Make jf faster
+    tree:
+      sha: 3e08da62f03c0d2c29ed85b1148a3773668cfde2
+      url: https://api.github.com/repos/alhoo/jf/git/trees/3e08da62f03c0d2c29ed85b1148a3773668cfde2
+    url: https://api.github.com/repos/alhoo/jf/git/commits/087f6f71e0000d8de4307d25514bc28ea038f072
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer: null
+  html_url: https://github.com/alhoo/jf/commit/087f6f71e0000d8de4307d25514bc28ea038f072
+  id: 087f6f71e0000d8de4307d25514bc28ea038f072
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/6893e579c860511715656898580010e98adc3a94
+    sha: 6893e579c860511715656898580010e98adc3a94
+    url: https://api.github.com/repos/alhoo/jf/commits/6893e579c860511715656898580010e98adc3a94
+  sha: 087f6f71e0000d8de4307d25514bc28ea038f072
+  url: https://api.github.com/repos/alhoo/jf/commits/087f6f71e0000d8de4307d25514bc28ea038f072
+
+- age: '19:00:31.021493'
+  author: null
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/6893e579c860511715656898580010e98adc3a94/comments
+  commit:
+    author:
+      date: '2018-01-30 12:32:31+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 12:32:31+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    message: Lazyload dateparser since it is too slow to load without being used
+    tree:
+      sha: f22d6d877fa85ff85a46f787f6f039ec46207b71
+      url: https://api.github.com/repos/alhoo/jf/git/trees/f22d6d877fa85ff85a46f787f6f039ec46207b71
+    url: https://api.github.com/repos/alhoo/jf/git/commits/6893e579c860511715656898580010e98adc3a94
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer: null
+  html_url: https://github.com/alhoo/jf/commit/6893e579c860511715656898580010e98adc3a94
+  id: 6893e579c860511715656898580010e98adc3a94
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/a0a255375e12b140a9d63ccbf5f1b569b06a9906
+    sha: a0a255375e12b140a9d63ccbf5f1b569b06a9906
+    url: https://api.github.com/repos/alhoo/jf/commits/a0a255375e12b140a9d63ccbf5f1b569b06a9906
+  sha: 6893e579c860511715656898580010e98adc3a94
+  url: https://api.github.com/repos/alhoo/jf/commits/6893e579c860511715656898580010e98adc3a94
+
+- age: '23:22:51.027449'
+  author: null
+  comments_url: https://api.github.com/repos/alhoo/jf/commits/a0a255375e12b140a9d63ccbf5f1b569b06a9906/comments
+  commit:
+    author:
+      date: '2018-01-30 08:10:11+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    comment_count: 0
+    committer:
+      date: '2018-01-30 08:10:11+00:00'
+      email: lasse.hyyrynen@utopiaanalytics.com
+      name: Lasse Hyyrynen
+    message: Add support for islice
+    tree:
+      sha: 306b2f943ec5db1a6acd66f90b1da2c3f0865150
+      url: https://api.github.com/repos/alhoo/jf/git/trees/306b2f943ec5db1a6acd66f90b1da2c3f0865150
+    url: https://api.github.com/repos/alhoo/jf/git/commits/a0a255375e12b140a9d63ccbf5f1b569b06a9906
+    verification:
+      payload: null
+      reason: unsigned
+      signature: null
+      verified: false
+  committer: null
+  html_url: https://github.com/alhoo/jf/commit/a0a255375e12b140a9d63ccbf5f1b569b06a9906
+  id: a0a255375e12b140a9d63ccbf5f1b569b06a9906
+  parents:
+  - html_url: https://github.com/alhoo/jf/commit/b3c8c77078b192fb928eec9b17c45666883c109c
+    sha: b3c8c77078b192fb928eec9b17c45666883c109c
+    url: https://api.github.com/repos/alhoo/jf/commits/b3c8c77078b192fb928eec9b17c45666883c109c
+  sha: a0a255375e12b140a9d63ccbf5f1b569b06a9906
+  url: https://api.github.com/repos/alhoo/jf/commits/a0a255375e12b140a9d63ccbf5f1b569b06a9906
+
