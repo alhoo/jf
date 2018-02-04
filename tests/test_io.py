@@ -25,6 +25,15 @@ class TestJfIO(unittest.TestCase):
         result = list(yield_json_and_json_lines([test_str]))
         self.assertEqual(result, ['{"a": 2353}', '{"a": 646}'])
 
+    def test_broken_jsonl_file(self):
+        """Test simple query"""
+        args = Struct(**{'files': 'input.json', "yamli": 0})
+        def openhook(a=None, b=None):
+          test_str = '{"a": 1, b: 5}\n{"a": 2, "b": 5}'
+          return StringIO(test_str)
+        result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
+        self.assertEqual(result, [{"a": 2, "b": 5}])
+
     def test_jsonl_file(self):
         """Test simple query"""
         args = Struct(**{'files': 'input.json', "yamli": 0})
