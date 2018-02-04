@@ -130,51 +130,6 @@ def parse_part(function):
     return ret
 
 
-def ast_parser(query):
-    """TODO: make a full feature ast parser"""
-    import ast
-    nodes = ast.parse(query).node.body[0].value.elts
-    filters = [ast.dump(elt) for elt in nodes]
-    # moduleargs = lambda function: function.func.value.args
-    # functionargs = lambda function: function.args
-    # code[f3.func.value.args[0].col_offset:]
-    return filters
-
-
-def simpleparser(query, igen='igen'):
-    """Simple regex parser"""
-    import regex
-    functionre = r'([a-zA-Z][^() ,]+)'
-    argsre = r'\(([^,()]*)([^()]*(\((?2)?[^()]*\)[^()]*)*)\)'
-    classfunction = r'(\.[^ ]*)?'
-    lambdare_str = r'%s%s%s' % (functionre, argsre, classfunction)
-    logger.debug(lambdare_str)
-    lambdasub = r'lambda arr: \1(lambda x: (\2)\3, %s=arr)\5' % igen
-    lambdare = regex.compile(lambdare_str)
-    query = lambdare.sub(lambdasub, query)
-    logger.debug("After Lambdare: %s", query)
-    return query
-
-
-def reparser(query):
-    """Complex regex parser"""
-    import regex
-    res = {
-        "functionre": r'([a-zA-Z][^()]+)',
-        "argsre": r'(\([^()=]*(\(([^()]*(?3)?[^()]*)*\))?)',
-        "kwargsre": r'(, [^()]+)?',
-        "classfunction": r'(\.[^ ]*)?',
-    }
-    lambdare_str = r'%s%s%s\)%s' % (res["functionre"], res["argsre"],
-                                    res["kwargsre"], res["classfunction"])
-    lambdasub = r'lambda arr: \1(lambda x, *rest: \2), arr\5)\6'
-    lambdare = regex.compile(lambdare_str)
-#    query = lambdare.sub(r'lambda arr: \1(lambda x, *rest: \2, arr)\4', query)
-    query = lambdare.sub(lambdasub, query)
-    logger.debug("After Lambdare: %s", query)
-    return query
-
-
 def guess_query_type(m):
     for val in flatten(m):
         if val in ('==', '>', '<', '!=', '>=', '<='):

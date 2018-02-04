@@ -3,12 +3,74 @@
 import unittest
 import json
 
+from datetime import datetime, date
+
 import jf
 
 
 def tolist(igen):
     """Convert gen to list"""
     return json.dumps([x for x in igen], cls=jf.StructEncoder, sort_keys=True)
+
+
+class TestJfFunctions(unittest.TestCase):
+    """Basic jf functions"""
+
+    def test_peek(self):
+        """Test peeking"""
+        data = [1,2,3]
+        head, data = jf.peek(data, 1)
+        self.assertEqual(head, [1])
+        self.assertEqual(list(data), [1, 2,3])
+
+    def test_peek_2(self):
+        """Test peeking"""
+        data = [1,2,3]
+        head, data = jf.peek(data, 2)
+        self.assertEqual(head, [1, 2])
+        self.assertEqual(list(data), [1, 2,3])
+
+    def test_dateparser(self):
+        """Test date parsing"""
+        result = jf.parse_value("2018-01-01")
+        expected = datetime(2018, 1, 1, 0, 0)
+        self.assertEqual(result, expected)
+
+    def test_dateparser_nondate(self):
+        """Test date parsing"""
+        result = jf.parse_value({"not": "a date"})
+        expected = {"not": "a date"}
+        self.assertEqual(result, expected)
+
+    def test_dateparser_nondate(self):
+        """Test date parsing"""
+        result = jf.parse_value("n")
+        expected = "n"
+        self.assertEqual(result, expected)
+
+    def test_dateparser_nondate(self):
+        """Test date parsing"""
+        result = jf.parse_value("not a date")
+        expected = "not a date"
+        self.assertEqual(result, expected)
+
+    def test_reduce_list(self):
+        result = jf.reduce_list(None, [1,2])
+        expected = [[1,2]]
+        self.assertEqual(result, expected)
+
+    def test_colorize(self):
+        result = None
+        try:
+          query = "{x.id]"
+          query = jf.parse_query(query).rstrip(",")
+        except SyntaxError as ex:
+          print(ex)
+          result = jf.colorize(ex)
+          pass
+        expected = '{x.id'+jf.RED+']'+jf.RESET+','
+        self.assertEqual(result, expected)
+
 
 
 class TestJf(unittest.TestCase):
@@ -136,6 +198,18 @@ class TestJf(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_last(self):
+        """Test fetching last items"""
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id), last()'
+        expected = '[2]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_last_2(self):
         """Test fetching last items"""
         data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
                 {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},

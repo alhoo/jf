@@ -252,27 +252,6 @@ def colorize(ex):
     return ''.join(string)
 
 
-def simple_query_convert(query):
-    """Convert query for evaluation"""
-    import regex as re
-    namere = re.compile(r'([{,] *)([^{} "\',]+):')
-    makexre = re.compile(r'([ (])(\.[a-zA-Z])')
-    nowre = re.compile(r"NOW\(\)")
-    logger.debug("Before conversion: %s", query)
-    query = namere.sub(r'\1"\2":', query)
-    logger.debug("After namere: %s", query)
-    query = makexre.sub(r'\1x\2', query)
-    logger.debug("After makex: %s", query)
-    from jf.parser import simpleparser
-    query = simpleparser(query, 'arr')
-    logger.debug("After query parse: %s", query)
-    query = nowre.sub(r'datetime.now(timezone.utc)', query)
-    logger.debug("After nowre: %s", query)
-    query = "gp(data, [" + query + "]).process()"
-    logger.debug("Final query '%s'", query)
-    return query
-
-
 def query_convert(query):
     """Convert query for evaluation"""
     import regex as re
