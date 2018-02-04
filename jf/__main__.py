@@ -97,61 +97,56 @@ def main(args=None):
     formatter = TerminalFormatter()
     if not sys.stdout.isatty():
         args.bw = True
-    try:
-        retlist = []
-        data = run_query(args.query, inq, imports=args.imports)
-        if args.ipy:
-            banner = ''
-            from IPython import embed
-            if not sys.stdin.isatty():
-                banner = '\nNotice: You are inputting data from stdin!\n' + \
-                         'This might cause some trouble since jf will try ' + \
-                         'to get some input from you also.\n' + \
-                         'To get the full benefit of jf and IPython, ' + \
-                         'consider giving the input as a file instead.\n\n' + \
-                         'To prevent any unexpected behaviour, jk will ' + \
-                         'load the full dataset in memory.\n' + \
-                         'This might take a while...\n'
-                data = list(data)
-                sys.stdin = open('/dev/tty')
-            ipy(banner, data)
-            return
-        for out in data:
-            out = json.loads(json.dumps(out, cls=StructEncoder))
-            if args.list:
-                retlist.append(out)
-                continue
-            if lexertype == 'yaml':
-                out = [out]
-            ret = outfmt(out, **out_kw_args)
-            if not args.raw or args.yaml:
-                if args.html_unescape:
-                    ret = html.unescape(ret)
-                if not args.bw:
-                    ret = highlight(ret, lexer, formatter).rstrip()
-            else:
-                if isinstance(ret, str):
-                    # Strip quotes
-                    ret = ret[1:-1]
-                elif isinstance(ret, dict):
-                    ret = outfmt(ret, **out_kw_args)
-            print(ret)
+    retlist = []
+    data = run_query(args.query, inq, imports=args.imports)
+    if args.ipy:
+        banner = ''
+        from IPython import embed
+        if not sys.stdin.isatty():
+            banner = '\nNotice: You are inputting data from stdin!\n' + \
+                     'This might cause some trouble since jf will try ' + \
+                     'to get some input from you also.\n' + \
+                     'To get the full benefit of jf and IPython, ' + \
+                     'consider giving the input as a file instead.\n\n' + \
+                     'To prevent any unexpected behaviour, jk will ' + \
+                     'load the full dataset in memory.\n' + \
+                     'This might take a while...\n'
+            data = list(data)
+            sys.stdin = open('/dev/tty')
+        ipy(banner, data)
+        return
+    for out in data:
+        out = json.loads(json.dumps(out, cls=StructEncoder))
         if args.list:
-            ret = outfmt(retlist, **out_kw_args)
-            if not args.raw or args.yaml:
-                if args.html_unescape:
-                    ret = html.unescape(ret)
-                if not args.bw:
-                    ret = highlight(ret, lexer, formatter).rstrip()
-            else:
-                # ret = eval(ret)
-                if isinstance(ret, dict):
-                    ret = outfmt(ret, **out_kw_args)
-            print(ret)
-    except Exception as ex:
-        logger.warning("%s while trying to produce results", UEE)
-        logger.warning("Exception %s", repr(ex))
-        raise
+            retlist.append(out)
+            continue
+        if lexertype == 'yaml':
+            out = [out]
+        ret = outfmt(out, **out_kw_args)
+        if not args.raw or args.yaml:
+            if args.html_unescape:
+                ret = html.unescape(ret)
+            if not args.bw:
+                ret = highlight(ret, lexer, formatter).rstrip()
+        else:
+            if isinstance(ret, str):
+                # Strip quotes
+                ret = ret[1:-1]
+            elif isinstance(ret, dict):
+                ret = outfmt(ret, **out_kw_args)
+        print(ret)
+    if args.list:
+        ret = outfmt(retlist, **out_kw_args)
+        if not args.raw or args.yaml:
+            if args.html_unescape:
+                ret = html.unescape(ret)
+            if not args.bw:
+                ret = highlight(ret, lexer, formatter).rstrip()
+        else:
+            # ret = eval(ret)
+            if isinstance(ret, dict):
+                ret = outfmt(ret, **out_kw_args)
+        print(ret)
 
 
 if __name__ == "__main__":
