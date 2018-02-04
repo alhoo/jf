@@ -1,3 +1,5 @@
+![Travis build](https://travis-ci.org/alhoo/jf.svg)
+
 JF
 ==
 
