@@ -34,6 +34,8 @@ For datetime processing, two useful helper functions are imported by default:
 
 These are useful for sorting or filtering items in based on timestamps.
 
+For shortened syntax, '{...}' is interpreted as 'map({...})' and (...) is interpreted as filter(...).
+
 
 Basic usage
 ==
@@ -47,6 +49,11 @@ Filter selected fields
 Filter selected items
 
     $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject}), filter(x.id == "87114792")'
+    {"id": "87114792", "subject": "New Finnish storybooks"}
+
+Filter selected items with shortened syntax
+
+    $ cat samples.jsonl | jf '{id: x.id, subject: x.fields.subject}, (x.id == "87114792")'
     {"id": "87114792", "subject": "New Finnish storybooks"}
 
 Filter selected values

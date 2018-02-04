@@ -175,14 +175,31 @@ def reparser(query):
     return query
 
 
+def guess_query_type(m):
+    for val in flatten(m):
+        if val in ('==', '>', '<', '!=', '>=', '<='):
+            return 'filter'
+    return 'map'
+
+
 def parse_query(string):
     """Parse query string and convert it to a evaluatable pipeline argument"""
     logger.debug("Parsing: %s", string)
     query_tree = filter_tree(parser.expr("%s," % string).tolist())[0]
     ret = ''
     for func in query_tree:
-        logger.debug(len(func))
-        logger.debug(func)
+        logger.debug("Function definition length: %d", len(func))
+        if maxdepth(func) < 3:
+            logger.debug("Shallow: %s", func)
+            ret += func[0]
+            continue
+        if func[0][0] == '{':
+            logger.debug("Detected short syntax. Guessing.")
+            func = [['map'], [['(']] + [func] + [[')']]]
+        if func[0][0] == '(':
+            logger.debug("Detected short syntax. Guessing.")
+            func = [['filter'], func]
+        logger.debug("Parsing parts: %s", func)
         if len(func) == 2:
             part = parse_part(func)
             ret += part
@@ -196,4 +213,5 @@ def parse_query(string):
             ret += part
         else:
             ret += func[0]
+        logger.debug("ret: %s", ret)
     return ret
