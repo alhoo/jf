@@ -19,6 +19,20 @@ The result from a previous function is given as the input generator for the next
 Some built-in functions headers have been remodeled to be more intuitive with the framework.
 Most noticeable is the sorted-function, which normally has the key defined as a keyword argument.
 This was done since it seems more logical to sort items by id by writing "sorted(x.id)" than "sorted(key=lambda x: x.id)".
+Similar changes are done for some other useful functions:
+
+* islice(stop) => islice(arr, start=0, stop, step=1)
+* islice(start, stop, step=1) => islice(arr, start, stop, step)
+* first(N=1) => islice(N)
+* last(N=1) => list(arr)[-N:]
+* I = arr (== identity operation)
+
+For datetime processing, two useful helper functions are imported by default:
+
+* date(string) for parsing string into a python datetime-object
+* age(string) for calculating timedelta between now() and date(string)
+
+These are useful for sorting or filtering items in based on timestamps.
 
 
 Basic usage

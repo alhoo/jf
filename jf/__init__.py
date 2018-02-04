@@ -318,7 +318,7 @@ def run_query(query, data, imports=None):
         "first": first,
         "null": None,
         "last": last,
-        "I": lambda arr: map(lambda x: x, arr),
+        "I": lambda arr: arr,
         "age": age,
         "date": parse_value,
         "hide": hide,
