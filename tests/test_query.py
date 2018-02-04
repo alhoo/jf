@@ -42,6 +42,12 @@ class TestJfFunctions(unittest.TestCase):
         expected = {"not": "a date"}
         self.assertEqual(result, expected)
 
+    def test_dateparser_empty(self):
+        """Test date parsing"""
+        result = jf.parse_value("")
+        expected = ""
+        self.assertEqual(result, expected)
+
     def test_dateparser_nondate(self):
         """Test date parsing"""
         result = jf.parse_value("n")

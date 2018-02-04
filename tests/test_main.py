@@ -17,32 +17,31 @@ class TestJfMain(unittest.TestCase):
     def test_main_jsonl(self):
         """Test log setting"""
         main(['--list', 'I', 'test.jsonl'])
-        #main(['', StringIO('{"a": 1}, {"a": 2}')])
+
+    def test_main_help(self):
+        """Test log setting"""
+        with self.assertRaises(SystemExit):
+            main(['--help'])
 
     def test_main_json(self):
         """Test log setting"""
         main(['--list', '--raw', '--yaml', 'I', 'test.json'])
-        #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_main_json(self):
         """Test log setting"""
         main(['--raw', '--yaml', 'I', 'test.json'])
-        #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_main_json(self):
         """Test log setting"""
         main(['--list', '--yaml', 'I', 'test.json'])
-        #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_main_yaml(self):
         """Test log setting"""
         main(['I', 'test.yaml'])
-        #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_main_yaml(self):
         """Test log setting"""
         main(['--yamli', 'I', 'test.yaml'])
-        #main(['', StringIO('{"a": 1}, {"a": 2}')])
 
     def test_logger_setting(self):
         """Test log setting"""
