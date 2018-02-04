@@ -51,12 +51,14 @@ Filter selected fields
 
 Filter selected items
 
-    $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject}), filter(x.id == "87114792")'
+    $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject}),
+            filter(x.id == "87114792")'
     {"id": "87114792", "subject": "New Finnish storybooks"}
 
 Filter selected items with shortened syntax
 
-    $ cat samples.jsonl | jf '{id: x.id, subject: x.fields.subject}, (x.id == "87114792")'
+    $ cat samples.jsonl | jf '{id: x.id, subject: x.fields.subject},
+            (x.id == "87114792")'
     {"id": "87114792", "subject": "New Finnish storybooks"}
 
 Filter selected values
@@ -68,7 +70,8 @@ Filter selected values
 
 Filter items by age (and output yaml)
 
-    $ cat samples.jsonl | jf 'map({id: x.id, datetime: x["content-datetime"]}), filter(age(x.datetime) > age("456 days")),
+    $ cat samples.jsonl | jf 'map({id: x.id, datetime: x["content-datetime"]}),
+            filter(age(x.datetime) > age("456 days")),
             map(.update({age: age(x.datetime)}))' --indent=5 --yaml
     age: 457 days, 4:07:54.932587
     datetime: '2016-10-29 10:55:42+03:00'
@@ -91,12 +94,12 @@ Sort items by age and print their id, length and age
     - '14558799'
     - 'length: 1228'
     - 450 days, 6:30:54.419461
-    - '87182405'
-    - 'length: 251'
 
 Filter items after a given datetime (test.json is a git commit history):
 
-    $ jf 'map(.update({age: age(.commit.author.date)})),filter(date(.commit.author.date) > date("2018-01-30T17:00:00Z")),sorted(x.age, reverse=True), map(.sha, .age, .commit.author.date)' test.json 
+    $ jf 'map(.update({age: age(.commit.author.date)})),
+            filter(date(.commit.author.date) > date("2018-01-30T17:00:00Z")),
+            sorted(x.age, reverse=True), map(.sha, .age, .commit.author.date)' test.json 
     [
       "68fe662966c57443ae7bf6939017f8ffa4b182c2",
       "2 days, 9:40:12.137919",
@@ -117,8 +120,8 @@ Import your own modules and hide fields:
 
     $ cat test.json|jf --import demomodule --yaml 'map(x.update({id: x.sha})),
             demomodule.timestamppipe(),
-            hide("sha", "committer", "parents", "html_url", "author", "commit", "comments_url"),
-            islice(3,5)'
+            hide("sha", "committer", "parents", "html_url", "author", "commit",
+                 "comments_url"), islice(3,5)'
     - Pipemod: was here at 2018-01-31 09:26:12.366465
       id: f5f879dd7303c35fa3712586af1e7df884a5b98b
       url: https://api.github.com/repos/alhoo/jf/commits/f5f879dd7303c35fa3712586af1e7df884a5b98b
@@ -130,6 +133,13 @@ Read yaml:
 
     $ cat test.yaml | jf --yamli 'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
             filter(x.age < age("1 days"))' --indent=2 --yaml
+    - age: 4 days, 22:45:56.388477
+      author:
+        avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
+        events_url: https://api.github.com/users/hyyry/events{/privacy}
+        followers_url: https://api.github.com/users/hyyry/followers
+        ...
+
 
 Group duplicates (age is within the same hour):
 
@@ -137,8 +147,9 @@ Group duplicates (age is within the same hour):
             sorted(.commit.author.date, reverse=True),
             demomodule.DuplicateRemover(int(age(.commit.author.date).total_seconds()/3600),
             group=1).process(lambda x: {"duplicate": x.id}),
-            map(list(map(lambda y: {age: age(y.commit.author.date),
-            id: y.id, date: y.commit.author.date, duplicate_of: y["duplicate"], comment: y.commit.message}, x))),
+            map(list(map(lambda y: {age: age(y.commit.author.date), id: y.id, 
+                         date: y.commit.author.date, duplicate_of: y["duplicate"],
+                         comment: y.commit.message}, x))),
             first(2)'
     [
       {
