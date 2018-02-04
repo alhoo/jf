@@ -26,10 +26,10 @@ def colorize_json_error(text, ex):
     return ''.join(string[max(0,start - 500):min(len(string),stop + 500)])
 
 
-def read_jsonl_json_or_yaml(inp, args):
+def read_jsonl_json_or_yaml(inp, args, openhook=None):
     """Read json, jsonl and yaml data from file defined in args"""
     data = ''
-    inf = fileinput.input(files=args.files)
+    inf = fileinput.input(files=args.files, openhook=openhook)
     if args.yamli:
         data = "\n".join([l for l in inf])
     else:
