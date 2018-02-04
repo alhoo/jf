@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/alhoo/jf.svg?branch=master)](https://travis-ci.org/alhoo/jf)
+[![Coverage](https://codecov.io/github/alhoo/jf/coverage.svg?branch=master)](https://codecov.io/github/alhoo/jf)
 [![PyPI](https://img.shields.io/pypi/v/jf.svg)](https://pypi.python.org/pypi/jf)
 
 JF
