@@ -310,21 +310,6 @@ def run_query(query, data, imports=None):
     if imports:
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
-    try:
-        res = eval(query, globalscope)
-        for val in res:
-            yield val
-    except TypeError as ex:
-        yield res
-    except AttributeError as ex:
-        logger.warning("Got an exception a34g while yielding results")
-        logger.warning("Exception: %s", repr(ex))
-        logger.warning("You might have typoed an attribute")
-    except KeyError as ex:
-        logger.warning("Got an exception h54a while yielding results")
-        logger.warning("Exception: %s", repr(ex))
-        logger.warning("You might have typoed an attribute")
-    except Exception as ex:
-        logger.warning("Got an unexpected gaw3 exception while yielding results")
-        logger.warning("Exception: %s", repr(ex))
-        raise
+    res = eval(query, globalscope)
+    for val in res:
+        yield val
