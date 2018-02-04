@@ -10,6 +10,18 @@ readme:
 README.rst: README.md
 	pandoc -f markdown -t rst $< >$@
 
+build33:
+	virtualenv local --python=python3.3
+	local/bin/pip install -r requirements.txt
+
+build34:
+	virtualenv local --python=python3.4
+	local/bin/pip install -r requirements.txt
+
+build35:
+	virtualenv local --python=python3.5
+	local/bin/pip install -r requirements.txt
+
 pylint:
 	pylint --output-format=parseable jf tests
 
