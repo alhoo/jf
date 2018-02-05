@@ -55,8 +55,9 @@ def main(args=None):
                         help="raw output")
     parser.add_argument("-a", "--ensure_ascii", action="store_true",
                         default=False, help="ensure ascii only characters")
+    parser.add_argument('--ipyfake', action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("-p", "--ipy", action="store_true",
-                        default=False, help="start IPython shell with data")
+                        help="start IPython shell with data")
     parser.add_argument("--html_unescape", action="store_true", default=False,
                         help="unescape html entities")
     parser.add_argument('files', metavar='FILE', nargs='*', default="-",
@@ -78,7 +79,7 @@ def main(args=None):
 
     inq = read_jsonl_json_or_yaml(inp, args)
     data = run_query(args.query, inq, imports=args.imports)
-    if args.ipy:
+    if args.ipy or args.ipyfake:
         banner = ''
         from IPython import embed
         if not sys.stdin.isatty():
@@ -92,7 +93,7 @@ def main(args=None):
                      'This might take a while...\n'
             data = list(data)
             sys.stdin = open('/dev/tty')
-        ipy(banner, data)
+        ipy(banner, data, args.ipyfake)
         return
     print_results(data, args)
 

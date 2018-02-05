@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+import sys
 from io import StringIO
 import logging
 
@@ -27,11 +28,11 @@ class TestJfMain(unittest.TestCase):
         """Test log setting"""
         main(['--list', '--raw', '--yaml', 'I', 'test.json'])
 
-    def test_main_json(self):
+    def test_main_json_raw(self):
         """Test log setting"""
         main(['--raw', '--yaml', 'I', 'test.json'])
 
-    def test_main_json(self):
+    def test_main_json_list(self):
         """Test log setting"""
         main(['--list', '--yaml', 'I', 'test.json'])
 
@@ -39,7 +40,12 @@ class TestJfMain(unittest.TestCase):
         """Test log setting"""
         main(['I', 'test.yaml'])
 
-    def test_main_yaml(self):
+    def test_main_yaml_ipy(self):
+        """Test log setting"""
+        sys.stdin = StringIO("quit\n")
+        main(['--ipyfake', 'I', 'test.yaml'])
+
+    def test_main_yaml_input(self):
         """Test log setting"""
         main(['--yamli', 'I', 'test.yaml'])
 

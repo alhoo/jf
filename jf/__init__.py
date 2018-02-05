@@ -150,7 +150,7 @@ def result_cleaner(val):
     return json.loads(json.dumps(val, cls=StructEncoder))
 
 
-def ipy(banner, data):
+def ipy(banner, data, fakerun=False):
     from IPython import embed
     if not isinstance(banner, str):
         banner = ''
@@ -158,8 +158,11 @@ def ipy(banner, data):
     banner += 'Your filtered dataset is loaded in a iterable variable '
     banner += 'named "data"\n\ndata sample:\n'
     head, data = peek(map(result_cleaner, data), 1)
-    banner += json.dumps(head[0], indent=2, sort_keys=True) + "\n\n"
-    embed(banner1=banner)
+    if len(head) > 0:
+        banner += json.dumps(head[0], indent=2, sort_keys=True)
+    banner += "\n\n"
+    if not fakerun:
+        embed(banner1=banner)
 
 
 def reduce_list(_, arr):
