@@ -277,7 +277,6 @@ def query_convert(query):
 
 def run_query(query, data, imports=None):
     """Run a query against given data"""
-    import importlib
 #    try:
         # query = simple_query_convert(query)
     query = query_convert(query)
@@ -308,6 +307,9 @@ def run_query(query, data, imports=None):
         "datetime": datetime,
         "timezone": timezone}
     if imports:
+        import importlib
+        import os
+        sys.path.append(os.path.dirname('.'))
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
     res = eval(query, globalscope)
