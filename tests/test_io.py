@@ -21,32 +21,32 @@ class TestJfIO(unittest.TestCase):
 
     def test_print_result_list(self):
         """Test simple query"""
-        args = Struct(**{"list": 1, "raw": 0, "html_unescape":1, "bw": 0})
+        args = Struct(**{"list": 1, "raw": 0, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results([1,2], args)
 
     def test_print_result_list_2(self):
         """Test simple query"""
-        args = Struct(**{"list": 1, "raw": 1, "html_unescape":1, "bw": 0})
+        args = Struct(**{"list": 1, "raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results(["a"], args)
 
     def test_print_result_list_2(self):
         """Test simple query"""
-        args = Struct(**{"list": 1, "raw": 1, "html_unescape":1, "bw": 0})
+        args = Struct(**{"list": 1, "raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results([{"a": 1}], args)
 
     def test_print_results(self):
         """Test simple query"""
-        args = Struct(**{"raw": 0, "html_unescape":1, "bw": 0})
+        args = Struct(**{"raw": 0, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results([1,2], args)
 
     def test_print_results_2(self):
         """Test simple query"""
-        args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0})
+        args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results(["a"], args)
 
     def test_print_results_2(self):
         """Test simple query"""
-        args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0})
+        args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results([{"a": 1}], args)
 
     def test_json(self):

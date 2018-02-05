@@ -51,7 +51,7 @@ def print_results(data, args):
         lexertype = 'yaml'
     lexer = get_lexer_by_name(lexertype, stripall=True)
     formatter = TerminalFormatter()
-    if not sys.stdout.isatty():
+    if not sys.stdout.isatty() and not args.forcecolor:
         args.bw = True
     retlist = []
     for out in data:

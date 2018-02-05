@@ -54,7 +54,10 @@ def main(args=None):
                         help="raw output")
     parser.add_argument("-a", "--ensure_ascii", action="store_true",
                         default=False, help="ensure ascii only characters")
-    parser.add_argument('--ipyfake', action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument('--ipyfake', action="store_true",
+                        help=argparse.SUPPRESS)
+    parser.add_argument('--forcecolor', action="store_true",
+                        help=argparse.SUPPRESS)
     parser.add_argument("-p", "--ipy", action="store_true",
                         help="start IPython shell with data")
     parser.add_argument("--html_unescape", action="store_true", default=False,
