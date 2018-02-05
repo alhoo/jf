@@ -47,10 +47,6 @@ def parse_value(val):
         logger.debug("Not a date k7j5 value: %s", val)
         logger.info(ex)
         return val
-    except TypeError:
-        logger.debug("Not a date qa3t value: %s", val)
-        logger.info(ex)
-        return val
 
 
 class Struct:
@@ -111,13 +107,7 @@ class StructEncoder(json.JSONEncoder):
     """Try to convert everything to json"""
 
     def default(self, obj):
-        try:
-            return obj.dict()
-        except AttributeError:
-            try:
-                return obj.__dict__
-            except AttributeError:
-                return obj.__str__()
+        return obj.dict()
 
 
 def jfislice(*args):
