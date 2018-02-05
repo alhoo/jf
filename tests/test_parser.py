@@ -63,6 +63,12 @@ class TestJfIO(unittest.TestCase):
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
+    def test_imported_class(self):
+        test_str = 'demomod.Dup(int(age(x.c.author).total()/3), group=1).process(lambda x: {"dup": x.id})'
+        expected = 'lambda arr: demomod.Dup(lambda x, *rest: (int(age(x.c.author).total()/ 3)), arr, group = 1).process(lambda x : {"dup":x.id}),'
+        result = parse_query(test_str)
+        self.assertEqual(result, expected)
+
     def _test_two(self):
         """Test simple query"""
         test_str = 'map(x.id), sorted(x.id)'
