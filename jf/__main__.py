@@ -5,12 +5,9 @@ import json
 import argparse
 import logging
 import html
-from pygments import highlight
-from pygments.lexers import get_lexer_by_name
-from pygments.formatters import TerminalFormatter
 
-from jf import run_query, StructEncoder, ipy
-from jf.io import read_jsonl_json_or_yaml
+from jf import run_query, ipy
+from jf.io import read_jsonl_json_or_yaml, print_results
 
 logger = logging.getLogger(__name__)
 
@@ -80,24 +77,6 @@ def main(args=None):
         inp = yaml.load
 
     inq = read_jsonl_json_or_yaml(inp, args)
-    lexertype = 'json'
-    out_kw_args = {"sort_keys": args.sort_keys,
-                   "indent": args.indent,
-                   "cls": StructEncoder,
-                   "ensure_ascii": args.ensure_ascii}
-    outfmt = json.dumps
-    if args.yaml and not args.json:
-        import yaml
-        outfmt = yaml.dump
-        out_kw_args = {"allow_unicode": not args.ensure_ascii,
-                       "indent": args.indent,
-                       "default_flow_style": False}
-        lexertype = 'yaml'
-    lexer = get_lexer_by_name(lexertype, stripall=True)
-    formatter = TerminalFormatter()
-    if not sys.stdout.isatty():
-        args.bw = True
-    retlist = []
     data = run_query(args.query, inq, imports=args.imports)
     if args.ipy:
         banner = ''
@@ -115,38 +94,7 @@ def main(args=None):
             sys.stdin = open('/dev/tty')
         ipy(banner, data)
         return
-    for out in data:
-        out = json.loads(json.dumps(out, cls=StructEncoder))
-        if args.list:
-            retlist.append(out)
-            continue
-        if lexertype == 'yaml':
-            out = [out]
-        ret = outfmt(out, **out_kw_args)
-        if not args.raw or args.yaml:
-            if args.html_unescape:
-                ret = html.unescape(ret)
-            if not args.bw:
-                ret = highlight(ret, lexer, formatter).rstrip()
-        else:
-            if isinstance(ret, str):
-                # Strip quotes
-                ret = ret[1:-1]
-            elif isinstance(ret, dict):
-                ret = outfmt(ret, **out_kw_args)
-        print(ret)
-    if args.list:
-        ret = outfmt(retlist, **out_kw_args)
-        if not args.raw or args.yaml:
-            if args.html_unescape:
-                ret = html.unescape(ret)
-            if not args.bw:
-                ret = highlight(ret, lexer, formatter).rstrip()
-        else:
-            # ret = eval(ret)
-            if isinstance(ret, dict):
-                ret = outfmt(ret, **out_kw_args)
-        print(ret)
+    print_results(data, args)
 
 
 if __name__ == "__main__":

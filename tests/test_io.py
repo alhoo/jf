@@ -15,6 +15,12 @@ class TestJfIO(unittest.TestCase):
 
     def test_json(self):
         """Test simple query"""
+        test_str = '"a"'
+        result = list(yield_json_and_json_lines([test_str]))
+        self.assertEqual(result, "a")
+
+    def test_json(self):
+        """Test simple query"""
         test_str = '[{"a": 2353}, {"a": 646}]'
         result = list(yield_json_and_json_lines([test_str]))
         self.assertEqual(result, ['{"a": 2353}', '{"a": 646}'])
