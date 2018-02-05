@@ -4,7 +4,6 @@ import sys
 import json
 import argparse
 import logging
-import html
 
 from jf import run_query, ipy
 from jf.io import read_jsonl_json_or_yaml, print_results

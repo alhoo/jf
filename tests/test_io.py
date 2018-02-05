@@ -6,7 +6,7 @@ import yaml
 
 from io import StringIO
 
-from jf.io import read_jsonl_json_or_yaml, yield_json_and_json_lines
+from jf.io import read_jsonl_json_or_yaml, yield_json_and_json_lines, print_results
 from jf import Struct
 
 
@@ -18,6 +18,21 @@ class TestJfIO(unittest.TestCase):
         test_str = '"a"'
         result = list(yield_json_and_json_lines([test_str]))
         self.assertEqual(result, "a")
+
+    def test_print_results(self):
+        """Test simple query"""
+        args = Struct(**{"raw": 0, "html_unescape":1, "bw": 0})
+        print_results([1,2], args)
+
+    def test_print_results_2(self):
+        """Test simple query"""
+        args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0})
+        print_results(["a"], args)
+
+    def test_print_results_2(self):
+        """Test simple query"""
+        args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0})
+        print_results([{"a": 1}], args)
 
     def test_json(self):
         """Test simple query"""

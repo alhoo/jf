@@ -35,6 +35,7 @@ def colorize_json_error(text, ex):
 
 
 def print_results(data, args):
+    import html
     lexertype = 'json'
     out_kw_args = {"sort_keys": args.sort_keys,
                    "indent": args.indent,
