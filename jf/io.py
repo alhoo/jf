@@ -72,8 +72,6 @@ def print_results(data, args):
             if isinstance(ret, str):
                 # Strip quotes
                 ret = ret[1:-1]
-            elif isinstance(ret, dict):
-                ret = outfmt(ret, **out_kw_args)
         print(ret)
     if args.list:
         ret = outfmt(retlist, **out_kw_args)
