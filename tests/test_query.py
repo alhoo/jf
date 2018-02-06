@@ -210,6 +210,30 @@ class TestJf(unittest.TestCase):
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
+    def test_islice_1(self):
+        """Test islicing data"""
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id), islice(1)'
+        expected = '[3]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_islice_2(self):
+        """Test islicing data"""
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id), islice(1, 2)'
+        expected = '[5]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
     def test_islice(self):
         """Test islicing data"""
         data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
