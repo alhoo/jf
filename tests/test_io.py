@@ -163,6 +163,13 @@ class TestJfIO(unittest.TestCase):
         expected = ['"a"', '{"a": 2353, "b": "sdaf\\"}f32"}', '{"a": 646}']
         self.assertEqual(result, expected)
 
+    def test_char_as_json(self):
+        """Test simple query"""
+        test_str = "a"
+        result = list(yield_json_and_json_lines([test_str]))
+        expected = ["a"]
+        self.assertEqual(result, expected)
+
     def test_escaped_jsonl_2(self):
         """Test simple query"""
         test_obj = ["a", {"a": 2353, "b": "sdaf\"}f32"}, {"a": 646}]
