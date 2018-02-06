@@ -16,6 +16,12 @@ def tolist(igen):
 class TestJfFunctions(unittest.TestCase):
     """Basic jf functions"""
 
+    def test_result_cleaner(self):
+        """Test peeking"""
+        st = jf.Struct(**{"a": 3})
+        res = jf.result_cleaner([st])
+        self.assertEqual(res, [{"a": 3}])
+
     def test_peek(self):
         """Test peeking"""
         data = [1,2,3]
@@ -78,9 +84,13 @@ class TestJfFunctions(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-
 class TestJf(unittest.TestCase):
     """Basic jf testcases"""
+
+    def test_ipython(self):
+        """Test simple query"""
+
+        jf.ipy(None, [1,2,3], fakerun=True)
 
     def test_get_item(self):
         """Test simple query"""
