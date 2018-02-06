@@ -17,6 +17,10 @@ class TestJfMain(unittest.TestCase):
 
     def test_main_jsonl(self):
         """Test log setting"""
+        main(['--indent=-1', 'I', 'test.json'])
+
+    def test_main_jsonl(self):
+        """Test log setting"""
         main(['--list', 'I', 'test.jsonl'])
 
     def test_main_help(self):

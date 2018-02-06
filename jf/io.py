@@ -1,5 +1,6 @@
 """JF io library"""
 import json
+import yaml
 import fileinput
 import logging
 
@@ -107,9 +108,10 @@ def read_jsonl_json_or_yaml(inp, args, openhook=None):
                     yield val
             else:
                 yield ind
-        except ValueError as ex:
+        except yaml.parser.ParserError as ex:
             logger.warning("%s while producing input data", UEE)
             logger.warning("Exception %s", repr(ex))
+            raise
 
 
 def yield_json_and_json_lines(inp):
