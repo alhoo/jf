@@ -121,17 +121,11 @@ def jfislice(*args):
         args = [args]
     if len(args) > 0:
         stop = args[0]
-    if not isinstance(stop, int):
-        stop = None
     if len(args) > 1:
         start = stop
         stop = args[1]
-    if not isinstance(stop, int):
-        stop = None
     if len(args) > 2:
         step = args[2]
-    if not isinstance(step, int):
-        step = None
     return islice(arr, start, stop, step)
 
 
