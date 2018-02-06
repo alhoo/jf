@@ -107,6 +107,17 @@ class TestJfIO(unittest.TestCase):
         #print(openhook().read())
         self.assertEqual(result, ['list'])
 
+    def test_yaml_string(self):
+        """Test simple query"""
+        args = Struct(**{'files': 'input.yaml', "yamli": 1})
+        def openhook(a=None, b=None):
+          test_str = 'a'
+          return StringIO(test_str)
+        result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
+        #result = None
+        #print(openhook().read())
+        self.assertEqual(result, ['a'])
+
     def test_yaml_file(self):
         """Test simple query"""
         args = Struct(**{'files': 'input.yaml', "yamli": 1})
