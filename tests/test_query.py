@@ -13,6 +13,15 @@ def tolist(igen):
     return json.dumps([x for x in igen], cls=jf.StructEncoder, sort_keys=True)
 
 
+class TestJfGenProcessor(unittest.TestCase):
+    """Basic jf io testcases"""
+
+    def test_param_list(self):
+        gp = jf.GenProcessor((1,2,3), [lambda arr: map(lambda x: 2*x, arr)])
+        gp.add_filter(lambda arr: map(lambda x: 2*x, arr))
+        self.assertEqual(list(gp.process()), [4,8,12])
+
+
 class TestJfFunctions(unittest.TestCase):
     """Basic jf functions"""
 
