@@ -134,7 +134,7 @@ Read yaml:
 
     $ cat test.yaml | jf --yamli 'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
             filter(x.age < age("1 days"))' --indent=2 --yaml
-    - age: 4 days, 22:45:56.388477
+    - age: 0 days, 22:45:56.388477
       author:
         avatar_url: https://avatars1.githubusercontent.com/u/8501204?v=4
         events_url: https://api.github.com/users/hyyry/events{/privacy}

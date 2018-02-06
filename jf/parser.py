@@ -149,11 +149,11 @@ def parse_query(string):
         if len(func) == 2:
             part = parse_part(func)
             ret += part
-#        elif len(func) == 3:
-#            func = [[func[0][0] + "".join([x[0] for x in func[1]])], func[2]]
-#            logger.debug(repr(func))
-#            part = parse_part(func)
-#            ret += part
+        elif len(func) == 3:
+            func = [[func[0][0] + "".join([x[0] for x in func[1]])], func[2]]
+            logger.debug(repr(func))
+            part = parse_part(func)
+            ret += part
         elif len(func) > 3:
             part = parse_part(func)
             ret += part
