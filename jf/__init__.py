@@ -107,7 +107,13 @@ class StructEncoder(json.JSONEncoder):
     """Try to convert everything to json"""
 
     def default(self, obj):
-        return obj.dict()
+        try:
+            return obj.dict()
+        except AttributeError:
+            try:
+                return obj.__dict__
+            except AttributeError:
+                return obj.__str__()
 
 
 def jfislice(*args):
@@ -237,10 +243,13 @@ def colorize(ex):
 def query_convert(query):
     """Convert query for evaluation"""
     import regex as re
+    indentre = re.compile(r'\n *')
     namere = re.compile(r'([{,] *)([^{} "\',]+):')
     makexre = re.compile(r'([ (])(\.[a-zA-Z])')
     nowre = re.compile(r"NOW\(\)")
     logger.debug("Before conversion: %s", query)
+    query = indentre.sub(r' ', query)
+    logger.debug("After indent removal: %s", query)
     query = namere.sub(r'\1"\2":', query)
     logger.debug("After namere: %s", query)
     query = makexre.sub(r'\1x\2', query)

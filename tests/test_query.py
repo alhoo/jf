@@ -31,6 +31,12 @@ class TestJfFunctions(unittest.TestCase):
         res = jf.result_cleaner([st])
         self.assertEqual(res, [{"a": 3}])
 
+    def test_result_cleaner(self):
+        """Test peeking"""
+        st = jf.Struct(**{"a": datetime(2018, 1, 1)})
+        res = jf.result_cleaner([st])
+        self.assertEqual(res, [{"a": '2018-01-01 00:00:00'}])
+
     def test_peek(self):
         """Test peeking"""
         data = [1,2,3]
@@ -204,6 +210,37 @@ class TestJf(unittest.TestCase):
               'sorted(age(.date), reverse=True),' + \
               'map(.id)'
         expected = '[3, 1, 5, 2]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_age_output(self):
+        """
+        $ cat test.yaml | jf --yamli
+            'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
+             filter(x.age < age("1 days"))' --indent=2 --yaml
+        """
+
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), first()'
+        expected = '[{"date": "2018-01-30 15:12:35+00:00", "id": 1}]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_age_output_2(self):
+        """
+        $ cat test.yaml | jf --yamli
+            'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
+             filter(x.age < age("1 days"))' --indent=2 --yaml
+        """
+
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True),' + \
+              'map(.date)'
+        expected = '["2018-01-30 15:12:35+00:00", "2018-01-30 16:28:40+00:00"]'
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
