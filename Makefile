@@ -1,3 +1,21 @@
+CC = g++
+CFLAGS = -g -pthread -fwrapv -Wall -Wno-unused-result -Wstrict-prototypes -fPIC -std=c++11
+LDFLAGS = -pthread -shared
+
+#PYTHON_DIR = $(HOME)/python-src/Python-3.5.0
+#INCLUDE = -I$(PYTHON_DIR)/Include -I$(PYTHON_DIR)
+INCLUDE = -I/usr/include/python3.5m/
+
+
+all: jf/jsonlgen.so
+
+jf/jsonlgen.o: jf/io.c
+	$(CC) $(CFLAGS) $(INCLUDE) -c $^ -o $@
+
+jf/jsonlgen.so: jf/jsonlgen.o
+	$(CC) $(LDFLAGS) $^ -o $@
+
+
 test:
 	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-id tests/
 
@@ -37,4 +55,4 @@ release: README.rst
 	@echo python setup.py sdist upload -r pypi
 
 clean:
-	rm *.whl
+	rm -Rf *.whl jf/*.o jf/*.so build dist
