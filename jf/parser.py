@@ -56,9 +56,7 @@ def merge_lambdas(arr):
             ret += ', '
         ret += val
         first = False
-    if first:
-        ret += 'arr'
-    elif not rest:
+    if not rest:
         ret += '), arr'
     return ret
 
