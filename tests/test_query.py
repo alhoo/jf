@@ -32,7 +32,7 @@ class TestJfFunctions(unittest.TestCase):
         res = jf.result_cleaner([st])
         self.assertEqual(res, [{"a": 3}])
 
-    def test_result_cleaner(self):
+    def test_result_cleaner2(self):
         """Test peeking"""
         st = jf.Struct(**{"a": datetime(2018, 1, 1)})
         res = jf.result_cleaner([st])
@@ -64,22 +64,27 @@ class TestJfFunctions(unittest.TestCase):
         expected = {"not": "a date"}
         self.assertEqual(result, expected)
 
+    def test_dateparser_nondate2(self):
+        """Test date parsing"""
+        result = jf.parse_value("n")
+        expected = "n"
+        self.assertEqual(result, expected)
+
+    def test_dateparser_nondate3(self):
+        """Test date parsing"""
+        result = jf.parse_value("not a date")
+        expected = "not a date"
+        self.assertEqual(result, expected)
+
     def test_dateparser_empty(self):
         """Test date parsing"""
         result = jf.parse_value("")
         expected = ""
         self.assertEqual(result, expected)
 
-    def test_dateparser_nondate(self):
-        """Test date parsing"""
-        result = jf.parse_value("n")
-        expected = "n"
-        self.assertEqual(result, expected)
-
-    def test_dateparser_nondate(self):
-        """Test date parsing"""
-        result = jf.parse_value("not a date")
-        expected = "not a date"
+    def test_yield_all(self):
+        result = list(jf.yield_all(lambda x: x, [[1,2], [3,4]]))
+        expected = [1,2,3,4]
         self.assertEqual(result, expected)
 
     def test_reduce_list(self):

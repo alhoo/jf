@@ -17,7 +17,7 @@ class TestJfIO(unittest.TestCase):
         """Test simple query"""
         test_str = '"a"'
         result = list(yield_json_and_json_lines([test_str]))
-        self.assertEqual(result, "a")
+        self.assertEqual(result, ['"a"'])
 
     def test_print_result_list(self):
         """Test simple query"""
@@ -29,7 +29,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{"list": 1, "raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results(["a"], args)
 
-    def test_print_result_list_2(self):
+    def test_print_result_list_3(self):
         """Test simple query"""
         args = Struct(**{"list": 1, "raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results([{"a": 1}], args)
@@ -44,12 +44,12 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results(["a"], args)
 
-    def test_print_results_2(self):
+    def test_print_results_3(self):
         """Test simple query"""
         args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results([{"a": 1}], args)
 
-    def test_json(self):
+    def test_json_2(self):
         """Test simple query"""
         test_str = '[{"a": 2353}, {"a": 646}]'
         result = list(yield_json_and_json_lines([test_str]))
