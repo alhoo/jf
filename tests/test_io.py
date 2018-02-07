@@ -59,7 +59,7 @@ class TestJfIO(unittest.TestCase):
         """Test simple query"""
         test_str = '[["a","b"],["c","d"]]'
         result = list(yield_json_and_json_lines([test_str]))
-        self.assertEqual(result, [["a", "b"],["c","d"]])
+        self.assertEqual(result, ['["a","b"]', '["c","d"]'])
 
     def test_jsonl(self):
         """Test simple query"""

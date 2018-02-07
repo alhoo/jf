@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 import json
+import re
 
 from datetime import datetime, date
 
@@ -99,6 +100,60 @@ class TestJfFunctions(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
+class TestJfquery(unittest.TestCase):
+    """Basic jf testcases"""
+
+    unescapere = re.compile(r'__JFESCAPED_')
+
+    def test_query_converter(self):
+        """Test simple query"""
+
+        query = 'map(x.id)'
+        expr = jf.query_convert(query)
+        expr = self.unescapere.sub(r'', expr)
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.id), arr)]).process()')
+
+    def test_py_while(self):
+        """Test simple query"""
+
+        query = 'map(x.while)'
+        expr = jf.query_convert(query)
+        expr = self.unescapere.sub(r'', expr)
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.while), arr)]).process()')
+
+    def test_py_if(self):
+        """Test simple query"""
+
+        query = 'map(x.if>0)'
+        expr = jf.query_convert(query)
+        expr = self.unescapere.sub(r'', expr)
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.if > 0), arr)]).process()')
+
+    def test_py_else1(self):
+        """Test simple query"""
+
+        query = 'map(x.else != "expression")'
+        expr = jf.query_convert(query)
+        expr = self.unescapere.sub(r'', expr)
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.else != "expression"), arr)]).process()')
+
+    def test_py_else(self):
+        """Test simple query"""
+
+        query = 'map(x.else != "expression")'
+        expr = jf.query_convert(query)
+        expr = self.unescapere.sub(r'', expr)
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.else != "expression"), arr)]).process()')
+
+    def test_py_from(self):
+        """Test simple query"""
+
+        query = 'map(x.from, x.id)'
+        expr = jf.query_convert(query)
+        expr = self.unescapere.sub(r'', expr)
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.from, x.id), arr)]).process()')
+
+
 class TestJf(unittest.TestCase):
     """Basic jf testcases"""
 
@@ -160,8 +215,7 @@ class TestJf(unittest.TestCase):
         data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({id: x.a, data: x.b.d'
         expected = '[{"data": [1, 2, 3, 4], "id": 1}]'
-        with  self.assertRaises(SyntaxError):
-          result = tolist(list(jf.run_query(cmd, data)))
+        result = tolist(list(jf.run_query(cmd, data)))
 
     def test_non_json_query(self):
         """Test complex query"""

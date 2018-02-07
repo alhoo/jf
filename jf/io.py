@@ -69,7 +69,7 @@ def print_results(data, args):
             if not args.bw:
                 ret = highlight(ret, lexer, formatter).rstrip()
         else:
-            if isinstance(ret, str):
+            if isinstance(out, str):
                 # Strip quotes
                 ret = ret[1:-1]
         print(ret)
@@ -92,7 +92,8 @@ def read_jsonl_json_or_yaml(inp, args, openhook=None):
     else:
         for val in yield_json_and_json_lines(inf):
             try:
-                yield json.loads(val)
+                obj = json.loads(val)
+                yield obj
             except json.JSONDecodeError as ex:
                 # logger.warning('Error while parsing json: "%s"', ex.msg);
                 logger.warning("Exception %s", repr(ex))
@@ -121,7 +122,7 @@ def yield_json_and_json_lines(inp):
         for char in line:
             pos = pos + 1
             alldata += char
-            # print(char, state, char == '\\')
+#            print(char, state, char == '\\')
             if char == '\\':
                 state[1] = 1
                 continue
@@ -154,7 +155,7 @@ def yield_json_and_json_lines(inp):
             elif char == ']':
                 state[3] -= 1
                 if state[3] == 1 and (not (item < 0) and alldata[item] == '['):
-                    yield json.loads(alldata[item:pos + 1])
+                    yield alldata[item:pos + 1]
                     item = -pos
     if item == -1 and item < pos:
         yield alldata[0:pos + 1]

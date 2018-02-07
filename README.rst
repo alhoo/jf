@@ -32,6 +32,8 @@ useful functions:
 -  first(N=1) => islice(N)
 -  last(N=1) => list(arr)[-N:]
 -  I = arr (== identity operation)
+-  yield\_from(x) => yield items from x
+-  chain() => combine items into a list
 
 For datetime processing, two useful helper functions are imported by
 default:
@@ -205,6 +207,30 @@ Group duplicates (age is within the same hour):
         "date": "2018-01-30 16:09:14+00:00"
       }
     ]
+
+Use pythonic conditional operation, string.split() and complex string
+and date formatting with built-in python syntax. Also you can combine
+the power of regular expressions by including the re-library.
+
+::
+
+    $ jf --import re --import demomodule --input skype.json 'yield_from(x.messages),
+            map(x.update({from: x.from.split(":")[-1], mid: x.skypeeditedid if x.skypeeditedid else x.clientmessageid})),
+            sorted(age(x.composetime), reverse=True),
+            demomodule.DuplicateRemover(x.mid, group=1).process(),
+            map(last(x)),
+            yield_from(x),
+            sorted(age(.composetime), reverse=True),
+            map("%s %s: %s" % (date(x.composetime).strftime("%d.%m.%Y %H:%M"), x.from, re.sub(r"(<[^>]+>)+", " ", x.content)))' --raw
+    27.01.2018 11:02 2296ead9324b68aef4bc105c8e90200c@thread.skype:  1518001760666 8:live:matti_3426 8:live:matti_6656 8:hyyrynen.london 8:live:suvi_56 8:jukka.mattinen 
+    27.01.2018 11:12 matti_7626: Required competence: PHP programmer (Mika D, Markus H, Heidi), some JavaScript (e.g. for GUI)
+    27.01.2018 11:12 matti_7626: Matti: parameters part
+    27.01.2018 11:15 matti_7626: 1.) Clarify customer requirements - AP: Suvi/Joseph
+    27.01.2018 11:22 matti_7626: This week - initial installation and setup
+    27.01.2018 11:22 matti_7626: Next week (pending customer requirements) - system configuration
+    27.01.2018 11:25 matti_7626: configuration = parameters, configuration files (audio files, from customer, ask Suvi to request today?), add audio files to system (via GUI)
+    27.01.2018 11:26 matti_7626: Testing = specify how we do testing, for example written test cases by the customer.
+    27.01.2018 11:28 matti_7626: Need test group (testgroup 1 prob easiest to recognise says Lasse)
 
 Installing
 ==========

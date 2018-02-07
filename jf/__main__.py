@@ -62,9 +62,14 @@ def main(args=None):
                         help="start IPython shell with data")
     parser.add_argument("--html_unescape", action="store_true", default=False,
                         help="unescape html entities")
+    parser.add_argument('--input', metavar='FILE',
+                        help='files to read. Overrides files argument list')
     parser.add_argument('files', metavar='FILE', nargs='*', default="-",
                         help='files to read, if empty, stdin is used')
     args = parser.parse_args(args)
+
+    if args.input != None:
+        args.files = [args.input]
 
     if len(args.files) == 1 and args.files[0] == '-' and sys.stdin.isatty():
         return parser.print_help()

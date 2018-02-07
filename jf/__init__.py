@@ -58,12 +58,13 @@ class Struct:
 
     def __getattr__(self, item):
         """Return item attribute if exists"""
-        return self.__getitem__(item)
+        return self.__getitem__(item.replace("__JFESCAPED_", ''))
+        #return self.__getitem__(item.replace("JF_", ''))
 
     def __getitem__(self, item):
         """Return item attribute if exists"""
         if item in self.__dict__:
-            return self.__dict__[item]
+            return self.__dict__[item.replace("__JFESCAPED_", '')]
         return None
 
     def dict(self):
@@ -163,6 +164,13 @@ def reduce_list(_, arr):
     return [ret]
 
 
+def yield_all(fn, arr):
+    """Yield all subitems of all item"""
+    for it in arr:
+        for val in fn(it):
+            yield val
+
+
 def hide(elements, arr):
     """Hide elements from items"""
     logger.info("Using hide-pipeline")
@@ -244,8 +252,9 @@ def query_convert(query):
     """Convert query for evaluation"""
     import regex as re
     indentre = re.compile(r'\n *')
-    namere = re.compile(r'([{,] *)([^{} "\',]+):')
+    namere = re.compile(r'([{,] *)([^{} "\[\]\',]+):')
     makexre = re.compile(r'([ (])(\.[a-zA-Z])')
+    keywordunpackingre = re.compile(r'\( *\*\*x *\)')
     nowre = re.compile(r"NOW\(\)")
     logger.debug("Before conversion: %s", query)
     query = indentre.sub(r' ', query)
@@ -254,15 +263,23 @@ def query_convert(query):
     logger.debug("After namere: %s", query)
     query = makexre.sub(r'\1x\2', query)
     logger.debug("After makex: %s", query)
+    query = keywordunpackingre.sub('(**x.dict())', query)
+    logger.debug("After kw-unpacking: %s", query)
     # from jf.parser import reparser
     # q2 = query
     # reparser(q2)
     try:
+        jfkwre = re.compile(r'\.([a-z]+[.)><\!=, ])')
+        query = jfkwre.sub(r'.__JFESCAPED_\1', query)
+        logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
     except SyntaxError as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
-        sys.stderr.write("Error in query:\n\t%s\n\n" % colorize(ex))
-        raise
+        query = colorize(ex)
+        ijfkwre = re.compile(r'\.__JFESCAPED_([a-z]+[.)><\!=, ])')
+        query = ijfkwre.sub(r'.\1', query)
+        sys.stderr.write("Error in query:\n\t%s\n\n" % query)
+        raise StopIteration
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)
@@ -273,6 +290,7 @@ def query_convert(query):
 
 def run_query(query, data, imports=None):
     """Run a query against given data"""
+    import regex as re
 #    try:
         # query = simple_query_convert(query)
     query = query_convert(query)
@@ -294,11 +312,16 @@ def run_query(query, data, imports=None):
         "last": last,
         "I": lambda arr: arr,
         "age": age,
+        "re": re,
         "date": parse_value,
         "hide": hide,
         "ipy": ipy,
         "reduce": reduce,
         "reduce_list": reduce_list,
+        "yield_all": yield_all,
+        "yield_from": yield_all,
+        "group": reduce_list,
+        "chain": reduce_list,
         "sorted": lambda x, arr=None, **kwargs: sorted(arr, key=x, **kwargs),
         "datetime": datetime,
         "timezone": timezone}
@@ -308,6 +331,7 @@ def run_query(query, data, imports=None):
         sys.path.append(os.path.dirname('.'))
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
+
     res = eval(query, globalscope)
     for val in res:
         yield val
