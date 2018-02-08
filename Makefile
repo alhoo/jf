@@ -2,8 +2,7 @@ CC = g++
 CFLAGS = -g -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
 LDFLAGS = -pthread -shared
 
-PYTHON_DIR = $(HOME)/virtualenv/python3.5.5/
-INCLUDE = -I$(PYTHON_DIR)/include
+INCLUDE = $(shell pkg-config --cflags python3)
 #INCLUDE = -I/usr/include/python3.5m/
 
 
