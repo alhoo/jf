@@ -54,4 +54,4 @@ release: jf/jsonlgen.so README.rst
 	@echo python setup.py sdist upload -r pypi
 
 clean:
-	rm -Rf *.whl jf/*.o jf/*.so build dist
+	rm -Rf *.whl jf/*.o jf/*.so tests/*.pyc jf/*.pyc build dist
