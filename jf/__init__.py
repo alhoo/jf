@@ -47,10 +47,6 @@ def parse_value(val):
         logger.debug("Not a date k7j5 value: %s", val)
         logger.info(ex)
         return val
-    except TypeError:
-        logger.debug("Not a date qa3t value: %s", val)
-        logger.info(ex)
-        return val
 
 
 class Struct:
@@ -62,12 +58,13 @@ class Struct:
 
     def __getattr__(self, item):
         """Return item attribute if exists"""
-        return self.__getitem__(item)
+        return self.__getitem__(item.replace("__JFESCAPED_", ''))
+        #return self.__getitem__(item.replace("JF_", ''))
 
     def __getitem__(self, item):
         """Return item attribute if exists"""
         if item in self.__dict__:
-            return self.__dict__[item]
+            return self.__dict__[item.replace("__JFESCAPED_", '')]
         return None
 
     def dict(self):
@@ -120,13 +117,6 @@ class StructEncoder(json.JSONEncoder):
                 return obj.__str__()
 
 
-def pipelogger(arr):
-    """Log pipe items"""
-    for val in arr:
-        logger.debug("'%s' goes through the pipeline", val)
-        yield val
-
-
 def jfislice(*args):
     """jf wrapper for itertools.islice"""
     arr = args[-1]
@@ -138,17 +128,11 @@ def jfislice(*args):
         args = [args]
     if len(args) > 0:
         stop = args[0]
-    if not isinstance(stop, int):
-        stop = None
     if len(args) > 1:
         start = stop
         stop = args[1]
-    if not isinstance(stop, int):
-        stop = None
     if len(args) > 2:
         step = args[2]
-    if not isinstance(step, int):
-        step = None
     return islice(arr, start, stop, step)
 
 
@@ -157,7 +141,7 @@ def result_cleaner(val):
     return json.loads(json.dumps(val, cls=StructEncoder))
 
 
-def ipy(banner, data):
+def ipy(banner, data, fakerun=False):
     from IPython import embed
     if not isinstance(banner, str):
         banner = ''
@@ -165,8 +149,11 @@ def ipy(banner, data):
     banner += 'Your filtered dataset is loaded in a iterable variable '
     banner += 'named "data"\n\ndata sample:\n'
     head, data = peek(map(result_cleaner, data), 1)
-    banner += json.dumps(head[0], indent=2, sort_keys=True) + "\n\n"
-    embed(banner1=banner)
+    if len(head) > 0:
+        banner += json.dumps(head[0], indent=2, sort_keys=True)
+    banner += "\n\n"
+    if not fakerun:
+        embed(banner1=banner)
 
 
 def reduce_list(_, arr):
@@ -175,6 +162,13 @@ def reduce_list(_, arr):
     for val in arr:
         ret.append(val)
     return [ret]
+
+
+def yield_all(fn, arr):
+    """Yield all subitems of all item"""
+    for it in arr:
+        for val in fn(it):
+            yield val
 
 
 def hide(elements, arr):
@@ -227,7 +221,6 @@ class GenProcessor:
     def process(self):
         """Process items"""
         pipeline = self.igen
-#        pipeline = pipelogger(pipeline)
         for fun in self._filters:
             pipeline = fun(to_struct_gen(pipeline))
         return pipeline
@@ -248,51 +241,45 @@ def colorize(ex):
     start = ex.args[1][2]-ex.args[1][1]
     stop = ex.args[1][2]
     string[start] = RED+string[start]
-    string[stop] = RESET+string[stop]
+    if stop >= len(string):
+      string.append(RESET)
+    else:
+      string[stop] = RESET+string[stop]
     return ''.join(string)
-
-
-def simple_query_convert(query):
-    """Convert query for evaluation"""
-    import regex as re
-    namere = re.compile(r'([{,] *)([^{} "\',]+):')
-    makexre = re.compile(r'([ (])(\.[a-zA-Z])')
-    nowre = re.compile(r"NOW\(\)")
-    logger.debug("Before conversion: %s", query)
-    query = namere.sub(r'\1"\2":', query)
-    logger.debug("After namere: %s", query)
-    query = makexre.sub(r'\1x\2', query)
-    logger.debug("After makex: %s", query)
-    from jf.parser import simpleparser
-    query = simpleparser(query, 'arr')
-    logger.debug("After query parse: %s", query)
-    query = nowre.sub(r'datetime.now(timezone.utc)', query)
-    logger.debug("After nowre: %s", query)
-    query = "gp(data, [" + query + "]).process()"
-    logger.debug("Final query '%s'", query)
-    return query
 
 
 def query_convert(query):
     """Convert query for evaluation"""
     import regex as re
-    namere = re.compile(r'([{,] *)([^{} "\',]+):')
+    indentre = re.compile(r'\n *')
+    namere = re.compile(r'([{,] *)([^{} "\[\]\',]+):')
     makexre = re.compile(r'([ (])(\.[a-zA-Z])')
+    keywordunpackingre = re.compile(r'\( *\*\*x *\)')
     nowre = re.compile(r"NOW\(\)")
     logger.debug("Before conversion: %s", query)
+    query = indentre.sub(r' ', query)
+    logger.debug("After indent removal: %s", query)
     query = namere.sub(r'\1"\2":', query)
     logger.debug("After namere: %s", query)
     query = makexre.sub(r'\1x\2', query)
     logger.debug("After makex: %s", query)
+    query = keywordunpackingre.sub('(**x.dict())', query)
+    logger.debug("After kw-unpacking: %s", query)
     # from jf.parser import reparser
     # q2 = query
     # reparser(q2)
     try:
+        jfkwre = re.compile(r'\.([a-z]+[.)><\!=, ])')
+        query = jfkwre.sub(r'.__JFESCAPED_\1', query)
+        logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
     except SyntaxError as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
-        sys.stderr.write("Error in query:\n\t%s\n\n" % colorize(ex))
-        raise
+        query = colorize(ex)
+        ijfkwre = re.compile(r'\.__JFESCAPED_([a-z]+[.)><\!=, ])')
+        query = ijfkwre.sub(r'.\1', query)
+        sys.stderr.write("Error in query:\n\t%s\n\n" % query)
+        raise StopIteration
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)
@@ -303,12 +290,12 @@ def query_convert(query):
 
 def run_query(query, data, imports=None):
     """Run a query against given data"""
-    import importlib
-    try:
+    import regex as re
+#    try:
         # query = simple_query_convert(query)
-        query = query_convert(query)
-    except SyntaxError:
-        return []
+    query = query_convert(query)
+#    except SyntaxError:
+#        return []
     # print("List of known functions")
     # functiontypes = (type(map), type(json), type(print), type(run_query))
     # isfunctypes = isinstance(x[1], functiontypes)
@@ -325,32 +312,26 @@ def run_query(query, data, imports=None):
         "last": last,
         "I": lambda arr: arr,
         "age": age,
+        "re": re,
         "date": parse_value,
         "hide": hide,
         "ipy": ipy,
         "reduce": reduce,
         "reduce_list": reduce_list,
+        "yield_all": yield_all,
+        "yield_from": yield_all,
+        "group": reduce_list,
+        "chain": reduce_list,
         "sorted": lambda x, arr=None, **kwargs: sorted(arr, key=x, **kwargs),
         "datetime": datetime,
         "timezone": timezone}
     if imports:
+        import importlib
+        import os
+        sys.path.append(os.path.dirname('.'))
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
-    try:
-        res = eval(query, globalscope)
-        for val in res:
-            yield val
-    except TypeError as ex:
-        yield res
-    except AttributeError as ex:
-        logger.warning("Got an exception a34g while yielding results")
-        logger.warning("Exception: %s", repr(ex))
-        logger.warning("You might have typoed an attribute")
-    except KeyError as ex:
-        logger.warning("Got an exception h54a while yielding results")
-        logger.warning("Exception: %s", repr(ex))
-        logger.warning("You might have typoed an attribute")
-    except Exception as ex:
-        logger.warning("Got an unexpected gaw3 exception while yielding results")
-        logger.warning("Exception: %s", repr(ex))
-        raise
+
+    res = eval(query, globalscope)
+    for val in res:
+        yield val

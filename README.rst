@@ -1,52 +1,57 @@
-[![Build Status](https://travis-ci.org/alhoo/jf.svg?branch=master)](https://travis-ci.org/alhoo/jf)
-[![Coverage](https://codecov.io/github/alhoo/jf/coverage.svg?branch=master)](https://codecov.io/github/alhoo/jf)
-[![PyPI](https://img.shields.io/pypi/v/jf.svg)](https://pypi.python.org/pypi/jf)
+|Build Status| |Coverage| |PyPI|
 
 JF
 ==
 
-JF, aka "jndex fingers" or more commonly "json filter pipeline", is a jq-clone written in python.
-It supports evaluation of python oneliners, making it especially appealing for data scientists
-who are used to working with python.
-
+JF, aka "jndex fingers" or more commonly "json filter pipeline", is a
+jq-clone written in python. It supports evaluation of python oneliners,
+making it especially appealing for data scientists who are used to
+working with python.
 
 How does it work
-==
+================
 
-JF works by converting streaming json or yaml data structure through a map/filter-pipeline.
-The pipeline is compiled from a string representing a comma-separated list filters and mappers.
-The query parser assumes that each function of the pipeline reads items from a generator.
-The generator is given as the last non-keyword parameter to the function, 
-so "map(conversion)" is interpreted as "map(conversion, inputgenerator)".
-The result from a previous function is given as the input generator for the next function in the pipeline.
+JF works by converting streaming json or yaml data structure through a
+map/filter-pipeline. The pipeline is compiled from a string representing
+a comma-separated list filters and mappers. The query parser assumes
+that each function of the pipeline reads items from a generator. The
+generator is given as the last non-keyword parameter to the function, so
+"map(conversion)" is interpreted as "map(conversion, inputgenerator)".
+The result from a previous function is given as the input generator for
+the next function in the pipeline.
 
-Some built-in functions headers have been remodeled to be more intuitive with the framework.
-Most noticeable is the sorted-function, which normally has the key defined as a keyword argument.
-This was done since it seems more logical to sort items by id by writing "sorted(x.id)" than "sorted(key=lambda x: x.id)".
-Similar changes are done for some other useful functions:
+Some built-in functions headers have been remodeled to be more intuitive
+with the framework. Most noticeable is the sorted-function, which
+normally has the key defined as a keyword argument. This was done since
+it seems more logical to sort items by id by writing "sorted(x.id)" than
+"sorted(key=lambda x: x.id)". Similar changes are done for some other
+useful functions:
 
-* islice(stop) => islice(arr, start=0, stop, step=1)
-* islice(start, stop, step=1) => islice(arr, start, stop, step)
-* first(N=1) => islice(N)
-* last(N=1) => list(arr)[-N:]
-* I = arr (== identity operation)
-* yield\_from(x) => yield items from x
-* chain() => combine items into a list
+-  islice(stop) => islice(arr, start=0, stop, step=1)
+-  islice(start, stop, step=1) => islice(arr, start, stop, step)
+-  first(N=1) => islice(N)
+-  last(N=1) => list(arr)[-N:]
+-  I = arr (== identity operation)
+-  yield\_from(x) => yield items from x
+-  chain() => combine items into a list
 
-For datetime processing, two useful helper functions are imported by default:
+For datetime processing, two useful helper functions are imported by
+default:
 
-* date(string) for parsing string into a python datetime-object
-* age(string) for calculating timedelta between now() and date(string)
+-  date(string) for parsing string into a python datetime-object
+-  age(string) for calculating timedelta between now() and date(string)
 
 These are useful for sorting or filtering items in based on timestamps.
 
-For shortened syntax, '{...}' is interpreted as 'map({...})' and (...) is interpreted as filter(...).
-
+For shortened syntax, '{...}' is interpreted as 'map({...})' and (...)
+is interpreted as filter(...).
 
 Basic usage
-==
+===========
 
 Filter selected fields
+
+::
 
     $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject})'
     {"id": "87086895", "subject": "Swedish children stories"}
@@ -54,11 +59,15 @@ Filter selected fields
 
 Filter selected items
 
+::
+
     $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject}),
             filter(x.id == "87114792")'
     {"id": "87114792", "subject": "New Finnish storybooks"}
 
 Filter selected items with shortened syntax
+
+::
 
     $ cat samples.jsonl | jf '{id: x.id, subject: x.fields.subject},
             (x.id == "87114792")'
@@ -66,12 +75,15 @@ Filter selected items with shortened syntax
 
 Filter selected values
 
+::
+
     $ cat samples.jsonl | jf 'map(x.id)'
     "87086895"
     "87114792"
 
-
 Filter items by age (and output yaml)
+
+::
 
     $ cat samples.jsonl | jf 'map({id: x.id, datetime: x["content-datetime"]}),
             filter(age(x.datetime) > age("456 days")),
@@ -81,6 +93,8 @@ Filter items by age (and output yaml)
     id: '87086895'
 
 Sort items by age and print their id, length and age
+
+::
 
     $ cat samples.jsonl|jf 'map(x.update({age: age(x["content-datetime"])})),
             sorted(x.age),
@@ -99,6 +113,8 @@ Sort items by age and print their id, length and age
     - 450 days, 6:30:54.419461
 
 Filter items after a given datetime (test.json is a git commit history):
+
+::
 
     $ jf 'map(.update({age: age(.commit.author.date)})),
             filter(date(.commit.author.date) > date("2018-01-30T17:00:00Z")),
@@ -121,6 +137,8 @@ Filter items after a given datetime (test.json is a git commit history):
 
 Import your own modules and hide fields:
 
+::
+
     $ cat test.json|jf --import demomodule --yaml 'map(x.update({id: x.sha})),
             demomodule.timestamppipe(),
             hide("sha", "committer", "parents", "html_url", "author", "commit",
@@ -134,6 +152,8 @@ Import your own modules and hide fields:
 
 Read yaml:
 
+::
+
     $ cat test.yaml | jf --yamli 'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
             filter(x.age < age("1 days"))' --indent=2 --yaml
     - age: 0 days, 22:45:56.388477
@@ -143,8 +163,9 @@ Read yaml:
         followers_url: https://api.github.com/users/hyyry/followers
         ...
 
-
 Group duplicates (age is within the same hour):
+
+::
 
     $ cat test.json|jf --import demomodule 'map(x.update({id: x.sha})),
             sorted(.commit.author.date, reverse=True),
@@ -187,7 +208,11 @@ Group duplicates (age is within the same hour):
       }
     ]
 
-Use pythonic conditional operation, string.split() and complex string and date formatting with built-in python syntax. Also you can combine the power of regular expressions by including the re-library.
+Use pythonic conditional operation, string.split() and complex string
+and date formatting with built-in python syntax. Also you can combine
+the power of regular expressions by including the re-library.
+
+::
 
     $ jf --import re --import demomodule --input skype.json 'yield_from(x.messages),
             map(x.update({from: x.from.split(":")[-1], mid: x.skypeeditedid if x.skypeeditedid else x.clientmessageid})),
@@ -207,31 +232,34 @@ Use pythonic conditional operation, string.split() and complex string and date f
     27.01.2018 11:26 matti_7626: Testing = specify how we do testing, for example written test cases by the customer.
     27.01.2018 11:28 matti_7626: Need test group (testgroup 1 prob easiest to recognise says Lasse)
 
-
-
-
-
-
 Installing
-==
+==========
+
+::
 
     pip install jf
 
-
 Features
-==
+========
 
-* json, jsonl and yaml files for input and output
-* construct generator pipeline with map, hide, filter
-* access json dict as classes with dot-notation for attributes
-* datetime and timedelta comparison
-  * age() for timedelta between datetime and current time
-* first(N), last(N), islice(start, stop, step)
-* import your own modules for more complex filtering
-  * Support stateful classes for complex interactions between items
-* Drop your filtered data to IPython for manual data exploration
+-  json, jsonl and yaml files for input and output
+-  construct generator pipeline with map, hide, filter
+-  access json dict as classes with dot-notation for attributes
+-  datetime and timedelta comparison
+-  age() for timedelta between datetime and current time
+-  first(N), last(N), islice(start, stop, step)
+-  import your own modules for more complex filtering
+-  Support stateful classes for complex interactions between items
+-  Drop your filtered data to IPython for manual data exploration
 
 Known bugs
-==
+==========
 
-* IPython doesn't launch perfectly with piped data
+-  IPython doesn't launch perfectly with piped data
+
+.. |Build Status| image:: https://travis-ci.org/alhoo/jf.svg?branch=master
+   :target: https://travis-ci.org/alhoo/jf
+.. |Coverage| image:: https://codecov.io/github/alhoo/jf/coverage.svg?branch=master
+   :target: https://codecov.io/github/alhoo/jf
+.. |PyPI| image:: https://img.shields.io/pypi/v/jf.svg
+   :target: https://pypi.python.org/pypi/jf

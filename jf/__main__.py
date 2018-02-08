@@ -4,13 +4,9 @@ import sys
 import json
 import argparse
 import logging
-import html
-from pygments import highlight
-from pygments.lexers import get_lexer_by_name
-from pygments.formatters import TerminalFormatter
 
-from jf import run_query, StructEncoder, ipy
-from jf.io import read_jsonl_json_or_yaml
+from jf import run_query, ipy
+from jf.io import read_jsonl_json_or_yaml, print_results
 
 logger = logging.getLogger(__name__)
 
@@ -58,13 +54,22 @@ def main(args=None):
                         help="raw output")
     parser.add_argument("-a", "--ensure_ascii", action="store_true",
                         default=False, help="ensure ascii only characters")
+    parser.add_argument('--ipyfake', action="store_true",
+                        help=argparse.SUPPRESS)
+    parser.add_argument('--forcecolor', action="store_true",
+                        help=argparse.SUPPRESS)
     parser.add_argument("-p", "--ipy", action="store_true",
-                        default=False, help="start IPython shell with data")
+                        help="start IPython shell with data")
     parser.add_argument("--html_unescape", action="store_true", default=False,
                         help="unescape html entities")
+    parser.add_argument('--input', metavar='FILE',
+                        help='files to read. Overrides files argument list')
     parser.add_argument('files', metavar='FILE', nargs='*', default="-",
                         help='files to read, if empty, stdin is used')
     args = parser.parse_args(args)
+
+    if args.input != None:
+        args.files = [args.input]
 
     if len(args.files) == 1 and args.files[0] == '-' and sys.stdin.isatty():
         return parser.print_help()
@@ -80,78 +85,24 @@ def main(args=None):
         inp = yaml.load
 
     inq = read_jsonl_json_or_yaml(inp, args)
-    lexertype = 'json'
-    out_kw_args = {"sort_keys": args.sort_keys,
-                   "indent": args.indent,
-                   "cls": StructEncoder,
-                   "ensure_ascii": args.ensure_ascii}
-    outfmt = json.dumps
-    if args.yaml and not args.json:
-        import yaml
-        outfmt = yaml.dump
-        out_kw_args = {"allow_unicode": not args.ensure_ascii,
-                       "indent": args.indent,
-                       "default_flow_style": False}
-        lexertype = 'yaml'
-    lexer = get_lexer_by_name(lexertype, stripall=True)
-    formatter = TerminalFormatter()
-    if not sys.stdout.isatty():
-        args.bw = True
-    try:
-        retlist = []
-        data = run_query(args.query, inq, imports=args.imports)
-        if args.ipy:
-            banner = ''
-            from IPython import embed
-            if not sys.stdin.isatty():
-                banner = '\nNotice: You are inputting data from stdin!\n' + \
-                         'This might cause some trouble since jf will try ' + \
-                         'to get some input from you also.\n' + \
-                         'To get the full benefit of jf and IPython, ' + \
-                         'consider giving the input as a file instead.\n\n' + \
-                         'To prevent any unexpected behaviour, jk will ' + \
-                         'load the full dataset in memory.\n' + \
-                         'This might take a while...\n'
-                data = list(data)
-                sys.stdin = open('/dev/tty')
-            ipy(banner, data)
-            return
-        for out in data:
-            out = json.loads(json.dumps(out, cls=StructEncoder))
-            if args.list:
-                retlist.append(out)
-                continue
-            if lexertype == 'yaml':
-                out = [out]
-            ret = outfmt(out, **out_kw_args)
-            if not args.raw or args.yaml:
-                if args.html_unescape:
-                    ret = html.unescape(ret)
-                if not args.bw:
-                    ret = highlight(ret, lexer, formatter).rstrip()
-            else:
-                if isinstance(ret, str):
-                    # Strip quotes
-                    ret = ret[1:-1]
-                elif isinstance(ret, dict):
-                    ret = outfmt(ret, **out_kw_args)
-            print(ret)
-        if args.list:
-            ret = outfmt(retlist, **out_kw_args)
-            if not args.raw or args.yaml:
-                if args.html_unescape:
-                    ret = html.unescape(ret)
-                if not args.bw:
-                    ret = highlight(ret, lexer, formatter).rstrip()
-            else:
-                # ret = eval(ret)
-                if isinstance(ret, dict):
-                    ret = outfmt(ret, **out_kw_args)
-            print(ret)
-    except Exception as ex:
-        logger.warning("%s while trying to produce results", UEE)
-        logger.warning("Exception %s", repr(ex))
-        raise
+    data = run_query(args.query, inq, imports=args.imports)
+    if args.ipy or args.ipyfake:
+        banner = ''
+        from IPython import embed
+        if not sys.stdin.isatty():
+            banner = '\nNotice: You are inputting data from stdin!\n' + \
+                     'This might cause some trouble since jf will try ' + \
+                     'to get some input from you also.\n' + \
+                     'To get the full benefit of jf and IPython, ' + \
+                     'consider giving the input as a file instead.\n\n' + \
+                     'To prevent any unexpected behaviour, jk will ' + \
+                     'load the full dataset in memory.\n' + \
+                     'This might take a while...\n'
+            data = list(data)
+            sys.stdin = open('/dev/tty')
+        ipy(banner, data, args.ipyfake)
+        return
+    print_results(data, args)
 
 
 if __name__ == "__main__":
