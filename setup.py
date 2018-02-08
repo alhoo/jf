@@ -2,7 +2,7 @@
 
 from os import path
 from codecs import open
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, Extension
 
 here = path.abspath(path.dirname(__file__))
 
@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
   name = 'jf',
-  version = '0.3.8',
+  version = '0.3.9',
   description = 'Python jsonl query engine',
   long_description=long_description,
   author = 'Lasse Hyyrynen',
@@ -20,7 +20,7 @@ setup(
   maintainer_email = 'leh@protonmail.com',
   license = 'MIT',
   keywords = ['json', 'yaml', 'jq'],
-  download_url = 'https://github.com/alhoo/jf/archive/0.3.8.tar.gz',
+  download_url = 'https://github.com/alhoo/jf/archive/0.3.9.tar.gz',
   url = 'https://github.com/alhoo/jf',
   classifiers=[
     'Development Status :: 2 - Pre-Alpha',
@@ -33,6 +33,11 @@ setup(
   packages = ['jf'],
   setup_requires = [
     'setuptools>=20.2.2'
+  ],
+  ext_modules = [Extension("jf.jsonlgen",
+    sources=["jf/jsonlgen.cc"],
+    extra_compile_args=['-std=c++11'],
+    ),
   ],
   install_requires = [
     'pygments>=2.0.0',
