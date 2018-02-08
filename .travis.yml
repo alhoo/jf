@@ -2,8 +2,17 @@ sudo: false
 language: python
 python:
   - 3.5
+addons:
+  apt:
+    packages:
+    - libpython-dev
+    - python-dev
+    - python3-dev
 install:
   - pip install -r requirements.txt
   - pip install codecov
 script: make test
 after_success: codecov
+before_install:
+  # Workaround for weird Python binary in the latest Travis CI update
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libpython-dev; fi

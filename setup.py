@@ -22,7 +22,7 @@ setup(
   keywords = ['json', 'yaml', 'jq'],
   download_url = 'https://github.com/alhoo/jf/archive/0.3.8.tar.gz',
   url = 'https://github.com/alhoo/jf',
-  classifier=[
+  classifiers=[
     'Development Status :: 2 - Pre-Alpha',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',

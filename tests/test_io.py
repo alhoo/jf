@@ -165,9 +165,9 @@ class TestJfIO(unittest.TestCase):
 
     def test_char_as_json(self):
         """Test simple query"""
-        test_str = "a"
+        test_str = '"a"'
         result = list(yield_json_and_json_lines([test_str]))
-        expected = ["a"]
+        expected = ['"a"']
         self.assertEqual(result, expected)
 
     def test_escaped_jsonl_2(self):

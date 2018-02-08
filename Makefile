@@ -1,4 +1,21 @@
-test:
+CC = g++
+CFLAGS = -g -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
+LDFLAGS = -pthread -shared
+
+INCLUDE = $(shell pkg-config --cflags python3)
+#INCLUDE = -I/usr/include/python3.5m/
+
+
+all: jf/jsonlgen.so
+
+jf/jsonlgen.o: jf/jsonlgen.cc
+	$(CC) $(CFLAGS) $(INCLUDE) -c $^ -o $@
+
+jf/jsonlgen.so: jf/jsonlgen.o
+	$(CC) $(LDFLAGS) $^ -o $@
+
+
+test: jf/jsonlgen.so
 	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-id tests/
 
 devinstall: README.rst
@@ -31,10 +48,10 @@ pep8:
 package:
 	pip wheel .
 
-release: README.rst
+release: jf/jsonlgen.so README.rst
 	@echo update version to setup.py
 	@echo git tag version
 	@echo python setup.py sdist upload -r pypi
 
 clean:
-	rm *.whl
+	rm -Rf *.whl jf/*.o jf/*.so build dist
