@@ -3,6 +3,8 @@ import json
 import fileinput
 import logging
 
+from jf import jsonlgen
+
 logger = logging.getLogger(__name__)
 
 UEE = 'Got an unexpected exception'
@@ -56,6 +58,14 @@ def read_jsonl_json_or_yaml(inp, args):
 
 def yield_json_and_json_lines(inp):
     """Yield  json and json lines"""
+#    for i in yield_json_and_json_lines_orig(inp):
+#        yield i
+#    return
+    for i in jsonlgen.gen(iter(inp)):
+        yield i
+    return
+
+def yield_json_and_json_lines_orig(inp):
     alldata = ''
     item = -1
     state = [0, 0, 0, 0]
@@ -65,11 +75,11 @@ def yield_json_and_json_lines(inp):
             pos = pos + 1
             alldata += char
             # print(char, state, char == '\\')
-            if char == '\\':
-                state[1] = 1
-                continue
             if state[1] > 0:
                 state[1] = 0
+                continue
+            if char == '\\':
+                state[1] = 1
                 continue
             if char == '"':
                 if state[3] < 2:
@@ -101,3 +111,8 @@ def yield_json_and_json_lines(inp):
                     item = -pos
     if item == -1 and item < pos:
         yield alldata[0:pos + 1]
+
+
+
+
+

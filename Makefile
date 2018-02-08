@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -pthread -fwrapv -Wall -Wno-unused-result -Wstrict-prototypes -fPIC -std=c++11
+CFLAGS = -g -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
 LDFLAGS = -pthread -shared
 
 #PYTHON_DIR = $(HOME)/python-src/Python-3.5.0
@@ -9,7 +9,7 @@ INCLUDE = -I/usr/include/python3.5m/
 
 all: jf/jsonlgen.so
 
-jf/jsonlgen.o: jf/io.c
+jf/jsonlgen.o: jf/jsonlgen.cc
 	$(CC) $(CFLAGS) $(INCLUDE) -c $^ -o $@
 
 jf/jsonlgen.so: jf/jsonlgen.o
