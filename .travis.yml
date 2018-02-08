@@ -2,8 +2,11 @@ sudo: false
 language: python
 python:
   - 3.5
+addons:
+  apt:
+    packages:
+    - apt-get install libpython-dev
 install:
-  - apt-get install libpython-dev
   - pip install -r requirements.txt
   - pip install codecov
 script: make test
