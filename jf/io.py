@@ -61,9 +61,10 @@ def yield_json_and_json_lines(inp):
 #    for i in yield_json_and_json_lines_orig(inp):
 #        yield i
 #    return
-    for i in jsonlgen.gen(iter(inp)):
-        yield i
-    return
+#    for i in jsonlgen.gen(iter(inp)):
+#        yield i
+#    return
+    return jsonlgen.gen(iter(inp))
 
 def yield_json_and_json_lines_orig(inp):
     alldata = ''
