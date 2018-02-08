@@ -16,7 +16,7 @@ jf/jsonlgen.so: jf/jsonlgen.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 
-test:
+test: jf/jsonlgen.so
 	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-id tests/
 
 devinstall: README.rst
@@ -49,7 +49,7 @@ pep8:
 package:
 	pip wheel .
 
-release: README.rst
+release: jf/jsonlgen.so README.rst
 	@echo update version to setup.py
 	@echo git tag version
 	@echo python setup.py sdist upload -r pypi
