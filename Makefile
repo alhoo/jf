@@ -2,9 +2,9 @@ CC = g++
 CFLAGS = -g -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
 LDFLAGS = -pthread -shared
 
-#PYTHON_DIR = $(HOME)/python-src/Python-3.5.0
-#INCLUDE = -I$(PYTHON_DIR)/Include -I$(PYTHON_DIR)
-INCLUDE = -I/usr/include/python3.5m/
+PYTHON_DIR = $(HOME)/virtualenv/python3.5.5/
+INCLUDE = -I$(PYTHON_DIR)/include
+#INCLUDE = -I/usr/include/python3.5m/
 
 
 all: jf/jsonlgen.so
