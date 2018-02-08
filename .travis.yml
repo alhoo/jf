@@ -3,6 +3,7 @@ language: python
 python:
   - 3.5
 install:
+  - apt-get install libpython-dev
   - pip install -r requirements.txt
   - pip install codecov
 script: make test
