@@ -121,7 +121,7 @@ Filter items after a given datetime (test.json is a git commit history):
 
 Import your own modules and hide fields:
 
-    $ cat test.json|jf --import demomodule --yaml 'map(x.update({id: x.sha})),
+    $ cat test.json|jf --import_from modules/ --import demomodule --yaml 'map(x.update({id: x.sha})),
             demomodule.timestamppipe(),
             hide("sha", "committer", "parents", "html_url", "author", "commit",
                  "comments_url"), islice(3,5)'
@@ -146,7 +146,7 @@ Read yaml:
 
 Group duplicates (age is within the same hour):
 
-    $ cat test.json|jf --import demomodule 'map(x.update({id: x.sha})),
+    $ cat test.json|jf --import_from modules/ --import demomodule 'map(x.update({id: x.sha})),
             sorted(.commit.author.date, reverse=True),
             demomodule.DuplicateRemover(int(age(.commit.author.date).total_seconds()/3600),
             group=1).process(lambda x: {"duplicate": x.id}),
@@ -189,7 +189,7 @@ Group duplicates (age is within the same hour):
 
 Use pythonic conditional operation, string.split() and complex string and date formatting with built-in python syntax. Also you can combine the power of regular expressions by including the re-library.
 
-    $ jf --import re --import demomodule --input skype.json 'yield_from(x.messages),
+    $ jf --import_from modules/ --import re --import demomodule --input skype.json 'yield_from(x.messages),
             map(x.update({from: x.from.split(":")[-1], mid: x.skypeeditedid if x.skypeeditedid else x.clientmessageid})),
             sorted(age(x.composetime), reverse=True),
             demomodule.DuplicateRemover(x.mid, group=1).process(),
