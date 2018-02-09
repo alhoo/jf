@@ -28,7 +28,7 @@ Similar changes are done for some other useful functions:
 * islice(stop) => islice(arr, start=0, stop, step=1)
 * islice(start, stop, step=1) => islice(arr, start, stop, step)
 * first(N=1) => islice(N)
-* last(N=1) => list(arr)[-N:]
+* last(N=1) => iter(deque(arr, maxlen=N))
 * I = arr (== identity operation)
 * yield\_from(x) => yield items from x
 * chain() => combine items into a list
