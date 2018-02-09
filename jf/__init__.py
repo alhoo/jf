@@ -5,6 +5,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from itertools import islice, chain
+from collections import deque
 from functools import reduce
 from jf.parser import parse_query
 
@@ -203,7 +204,8 @@ def last(*args):
         shown = args[0](arr)
     if not isinstance(shown, int):
         shown = 1
-    return list(arr)[-shown:]
+    return iter(deque(arr, maxlen=shown))
+    #list(arr)[-shown:]
 
 
 class GenProcessor:
