@@ -36,7 +36,7 @@ def main(args=None):
                         help="query string for extracting wanted information")
     parser.add_argument("-d", "--debug", action="store_true",
                         help="print debug messages")
-    parser.add_argument("-i", "--indent", type=int, default=2,
+    parser.add_argument("--indent", type=int, default=2,
                         help="pretty-printed with given indent level")
     parser.add_argument("--import_from", help="add path to search imports from")
     parser.add_argument("--import", help="import custom processing module")
@@ -63,7 +63,7 @@ def main(args=None):
                         help="start IPython shell with data")
     parser.add_argument("--html_unescape", action="store_true", default=False,
                         help="unescape html entities")
-    parser.add_argument('--input', metavar='FILE',
+    parser.add_argument('-i', '--input', metavar='FILE',
                         help='files to read. Overrides files argument list')
     parser.add_argument('files', metavar='FILE', nargs='*', default="-",
                         help='files to read, if empty, stdin is used')

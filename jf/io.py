@@ -86,10 +86,11 @@ def print_results(data, args):
         return
 
 
-def read_jsonl_json_or_yaml(inp, args, openhook=None):
+def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
     """Read json, jsonl and yaml data from file defined in args"""
     data = ''
-    inf = fileinput.input(files=args.files, openhook=openhook)
+    # inf = fileinput.input(files=args.files, openhook=openhook)
+    inf = (x.decode('UTF-8') for x in fileinput.input(files=args.files, openhook=openhook, mode='rb'))
     if args.yamli:
         data = "\n".join([l for l in inf])
     else:
