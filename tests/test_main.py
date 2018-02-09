@@ -17,11 +17,11 @@ class TestJfMain(unittest.TestCase):
 
     def test_main_jsonl(self):
         """Test log setting"""
-        main(['--indent=-1', 'I', 'test.json'])
+        main(['--indent=-1', 'I', 'tests/test.json'])
 
     def test_main_jsonl2(self):
         """Test log setting"""
-        main(['--list', 'I', 'test.jsonl'])
+        main(['--list', 'I', 'tests/test.jsonl'])
 
     def test_main_help(self):
         """Test log setting"""
@@ -30,28 +30,28 @@ class TestJfMain(unittest.TestCase):
 
     def test_main_json(self):
         """Test log setting"""
-        main(['--list', '--raw', '--yaml', 'I', 'test.json'])
+        main(['--list', '--raw', '--yaml', 'I', 'tests/test.json'])
 
     def test_main_json_raw(self):
         """Test log setting"""
-        main(['--raw', '--yaml', 'I', 'test.json'])
+        main(['--raw', '--yaml', 'I', 'tests/test.json'])
 
     def test_main_json_list(self):
         """Test log setting"""
-        main(['--list', '--yaml', 'I', 'test.json'])
+        main(['--list', '--yaml', 'I', 'tests/test.json'])
 
     def test_main_yaml(self):
         """Test log setting"""
-        main(['I', 'test.yaml'])
+        main(['I', 'tests/test.yaml'])
 
     def test_main_yaml_ipy(self):
         """Test log setting"""
         sys.stdin = StringIO("quit\n")
-        main(['--ipyfake', 'I', 'test.yaml'])
+        main(['--ipyfake', 'I', 'tests/test.yaml'])
 
     def test_main_yaml_input(self):
         """Test log setting"""
-        main(['--yamli', 'I', 'test.yaml'])
+        main(['--yamli', 'I', 'tests/test.yaml'])
 
     def test_logger_setting(self):
         """Test log setting"""

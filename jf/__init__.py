@@ -288,7 +288,7 @@ def query_convert(query):
     return query
 
 
-def run_query(query, data, imports=None):
+def run_query(query, data, imports=None, import_from=None):
     """Run a query against given data"""
     import regex as re
 #    try:
@@ -329,6 +329,8 @@ def run_query(query, data, imports=None):
         import importlib
         import os
         sys.path.append(os.path.dirname('.'))
+        if import_from:
+            sys.path.append(os.path.dirname(import_from))
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
 

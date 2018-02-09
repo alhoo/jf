@@ -38,7 +38,8 @@ def main(args=None):
                         help="print debug messages")
     parser.add_argument("-i", "--indent", type=int, default=2,
                         help="pretty-printed with given indent level")
-    parser.add_argument("--imports", help="import custom processing module")
+    parser.add_argument("--import_from", help="add path to search imports from")
+    parser.add_argument("--import", help="import custom processing module")
     parser.add_argument("-l", "--list", action="store_true",
                         help="wrap output to a list")
     parser.add_argument("-y", "--yaml", action='store_true',
@@ -85,7 +86,10 @@ def main(args=None):
         inp = yaml.load
 
     inq = read_jsonl_json_or_yaml(inp, args)
-    data = run_query(args.query, inq, imports=args.imports)
+    imports = None
+    if 'import' in args.__dict__:
+        imports = args.__dict__["import"]
+    data = run_query(args.query, inq, imports=imports, import_from=args.import_from)
     if args.ipy or args.ipyfake:
         banner = ''
         from IPython import embed
