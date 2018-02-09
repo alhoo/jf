@@ -59,12 +59,11 @@ class Struct:
     def __getattr__(self, item):
         """Return item attribute if exists"""
         return self.__getitem__(item.replace("__JFESCAPED_", ''))
-        #return self.__getitem__(item.replace("JF_", ''))
 
     def __getitem__(self, item):
         """Return item attribute if exists"""
         if item in self.__dict__:
-            return self.__dict__[item.replace("__JFESCAPED_", '')]
+            return self.__dict__[item]
         return None
 
     def dict(self):
