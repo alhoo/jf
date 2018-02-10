@@ -55,38 +55,42 @@ def print_results(data, args):
     if not sys.stdout.isatty() and not args.forcecolor:
         args.bw = True
     retlist = []
-    for out in data:
-        out = json.loads(json.dumps(out, cls=StructEncoder))
+    try:
+        for out in data:
+            out = json.loads(json.dumps(out, cls=StructEncoder))
+            if args.list:
+                retlist.append(out)
+                continue
+            if lexertype == 'yaml':
+                out = [out]
+            ret = outfmt(out, **out_kw_args)
+            if not args.raw or args.yaml:
+                if args.html_unescape:
+                    ret = html.unescape(ret)
+                if not args.bw:
+                    ret = highlight(ret, lexer, formatter).rstrip()
+            else:
+                if isinstance(out, str):
+                    # Strip quotes
+                    ret = ret[1:-1]
+            print(ret)
         if args.list:
-            retlist.append(out)
-            continue
-        if lexertype == 'yaml':
-            out = [out]
-        ret = outfmt(out, **out_kw_args)
-        if not args.raw or args.yaml:
-            if args.html_unescape:
-                ret = html.unescape(ret)
-            if not args.bw:
-                ret = highlight(ret, lexer, formatter).rstrip()
-        else:
-            if isinstance(out, str):
-                # Strip quotes
-                ret = ret[1:-1]
-        print(ret)
-    if args.list:
-        ret = outfmt(retlist, **out_kw_args)
-        if not args.raw or args.yaml:
-            if args.html_unescape:
-                ret = html.unescape(ret)
-            if not args.bw:
-                ret = highlight(ret, lexer, formatter).rstrip()
-        print(ret)
+            ret = outfmt(retlist, **out_kw_args)
+            if not args.raw or args.yaml:
+                if args.html_unescape:
+                    ret = html.unescape(ret)
+                if not args.bw:
+                    ret = highlight(ret, lexer, formatter).rstrip()
+            print(ret)
+    except BrokenPipeError:
+        return
 
 
-def read_jsonl_json_or_yaml(inp, args, openhook=None):
+def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
     """Read json, jsonl and yaml data from file defined in args"""
     data = ''
-    inf = fileinput.input(files=args.files, openhook=openhook)
+    # inf = fileinput.input(files=args.files, openhook=openhook)
+    inf = (x.decode('UTF-8') for x in fileinput.input(files=args.files, openhook=openhook, mode='rb'))
     if args.yamli:
         data = "\n".join([l for l in inf])
     else:

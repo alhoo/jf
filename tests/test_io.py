@@ -1,13 +1,35 @@
 """Tests for the PYQ tool"""
 # -*- coding: utf-8 -*-
+import sys
 import unittest
 import json
 import yaml
 
-from io import StringIO
+from io import BytesIO
 
 from jf.io import read_jsonl_json_or_yaml, yield_json_and_json_lines, print_results
 from jf import Struct
+
+from contextlib import contextmanager
+from io import StringIO
+
+@contextmanager
+def captured_output(write_to=StringIO):
+    new_out, new_err = write_to(), write_to
+    old_out, old_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = new_out, new_err
+        yield sys.stdout, sys.stderr
+    finally:
+        sys.stdout, sys.stderr = old_out, old_err
+
+
+class BrokenPipeOutput:
+    def isatty(self):
+        return True
+
+    def write(self, s):
+        raise BrokenPipeError
 
 
 class TestJfIO(unittest.TestCase):
@@ -44,10 +66,20 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
         print_results(["a"], args)
 
+    def test_handle_broken_pipe(self):
+        """Test simple query"""
+        args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
+        with captured_output(BrokenPipeOutput) as (out, err):
+          print_results([{"a": 1}], args)
+
     def test_print_results_3(self):
         """Test simple query"""
         args = Struct(**{"raw": 1, "html_unescape":1, "bw": 0, "forcecolor": 1})
-        print_results([{"a": 1}], args)
+        with captured_output() as (out, err):
+          print_results([{"a": 1}], args)
+
+        output = out.getvalue().strip()
+        self.assertEqual(output, '{"a": 1}')
 
     def test_json_2(self):
         """Test simple query"""
@@ -72,7 +104,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.json', "yamli": 0})
         def openhook(a=None, b=None):
           test_str = '{"a": 1, b: 5}\n{"a": 2, "b": 5}'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         self.assertEqual(result, [{"a": 2, "b": 5}])
 
@@ -81,7 +113,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.yaml', "yamli": 1})
         def openhook(a=None, b=None):
           test_str = '[a,b,c'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         self.assertEqual(result, [])
 
@@ -90,7 +122,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.json', "yamli": 0})
         def openhook(a=None, b=None):
           test_str = '{"a": 1}\n{"a": 2}'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())
@@ -101,7 +133,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.json', "yamli": 0})
         def openhook(a=None, b=None):
           test_str = '["list"]'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())
@@ -112,7 +144,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.yaml', "yamli": 1})
         def openhook(a=None, b=None):
           test_str = 'a'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())
@@ -123,7 +155,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.yaml', "yamli": 1})
         def openhook(a=None, b=None):
           test_str = '- list'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())

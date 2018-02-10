@@ -202,7 +202,7 @@ class TestJf(unittest.TestCase):
         data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({"id": x.a, "data": x.b.d}), hide("data")'
         expected = '[{"id": 1}]'
-        result = tolist(list(jf.run_query(cmd, data, "itertools")))
+        result = tolist(list(jf.run_query(cmd, data, "itertools", "modules")))
         self.assertEqual(result, expected)
 
     def test_complex_query(self):
@@ -373,6 +373,18 @@ class TestJf(unittest.TestCase):
               'sorted(age(.date), reverse=True), map(.id), last(2)'
         expected = '[1, 2]'
         result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_import_from(self):
+        """Test fetching first items"""
+        data = [{"a": 2, 'b': "2018-01-30 16:28:40+00:00"},
+                {"a": 1, 'b': "2018-01-30 15:12:35+00:00"},
+                {"a": 3, 'b': "2018-01-10 15:12:35+00:00"},
+                {"a": 5, 'b': "2018-01-30 16:06:59+03:00"}]
+        cmd = 'map({id: x.a, date: x.b}),' + \
+              'sorted(age(.date), reverse=True), map(.id), first()'
+        expected = '[3]'
+        result = tolist(list(jf.run_query(cmd, data, "re", "modules")))
         self.assertEqual(result, expected)
 
     def test_first(self):

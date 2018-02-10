@@ -2,6 +2,8 @@
 *.sh
 test.*
 *.pyc
+*.o
+*.so
 *.swp
 *.egg-info/
 README.rst

@@ -60,12 +60,11 @@ class Struct:
     def __getattr__(self, item):
         """Return item attribute if exists"""
         return self.__getitem__(item.replace("__JFESCAPED_", ''))
-        #return self.__getitem__(item.replace("JF_", ''))
 
     def __getitem__(self, item):
         """Return item attribute if exists"""
         if item in self.__dict__:
-            return self.__dict__[item.replace("__JFESCAPED_", '')]
+            return self.__dict__[item]
         return None
 
     def dict(self):
@@ -102,6 +101,7 @@ def to_struct(val):
 
 def to_struct_gen(arr):
     """Convert all items in arr to struct"""
+#    logger.info("Converting to struct: %s", arr)
     return (to_struct(x) for x in arr)
 
 
@@ -309,9 +309,11 @@ def run_query(query, data, imports=None, import_from=None):
         "data": data,
         "gp": GenProcessor,
         "islice": jfislice,
+        "head": first,
+        "tail": last,
         "first": first,
-        "null": None,
         "last": last,
+        "null": None,
         "I": lambda arr: arr,
         "age": age,
         "re": re,
