@@ -101,6 +101,7 @@ def to_struct(val):
 
 def to_struct_gen(arr):
     """Convert all items in arr to struct"""
+#    logger.info("Converting to struct: %s", arr)
     return (to_struct(x) for x in arr)
 
 
