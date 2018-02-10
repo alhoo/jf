@@ -202,7 +202,7 @@ class TestJf(unittest.TestCase):
         data = [{"a": 1, 'b': {'c': 632, 'd': [1, 2, 3, 4]}}]
         cmd = 'map({"id": x.a, "data": x.b.d}), hide("data")'
         expected = '[{"id": 1}]'
-        result = tolist(list(jf.run_query(cmd, data, "itertools")))
+        result = tolist(list(jf.run_query(cmd, data, "itertools", "modules")))
         self.assertEqual(result, expected)
 
     def test_complex_query(self):
