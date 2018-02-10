@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
+CFLAGS = -O3 -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
 LDFLAGS = -pthread -shared
 
 INCLUDE = $(shell pkg-config --cflags python3)

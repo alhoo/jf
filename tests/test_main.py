@@ -42,12 +42,20 @@ class TestJfMain(unittest.TestCase):
 
     def test_main_yaml(self):
         """Test log setting"""
+        main(['-'])
+
+    def test_main_yaml(self):
+        """Test log setting"""
         main(['I', 'tests/test.yaml'])
 
     def test_main_yaml_ipy(self):
         """Test log setting"""
         sys.stdin = StringIO("quit\n")
         main(['--ipyfake', 'I', 'tests/test.yaml'])
+
+    def test_main_input_arg(self):
+        """Test log setting"""
+        main(['--input', 'tests/test.yaml', 'I'])
 
     def test_main_yaml_input(self):
         """Test log setting"""
