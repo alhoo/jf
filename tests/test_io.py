@@ -4,7 +4,7 @@ import unittest
 import json
 import yaml
 
-from io import StringIO
+from io import BytesIO
 
 from jf.io import read_jsonl_json_or_yaml, yield_json_and_json_lines, print_results
 from jf import Struct
@@ -72,7 +72,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.json', "yamli": 0})
         def openhook(a=None, b=None):
           test_str = '{"a": 1, b: 5}\n{"a": 2, "b": 5}'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         self.assertEqual(result, [{"a": 2, "b": 5}])
 
@@ -81,7 +81,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.yaml', "yamli": 1})
         def openhook(a=None, b=None):
           test_str = '[a,b,c'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         self.assertEqual(result, [])
 
@@ -90,7 +90,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.json', "yamli": 0})
         def openhook(a=None, b=None):
           test_str = '{"a": 1}\n{"a": 2}'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())
@@ -101,7 +101,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.json', "yamli": 0})
         def openhook(a=None, b=None):
           test_str = '["list"]'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())
@@ -112,7 +112,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.yaml', "yamli": 1})
         def openhook(a=None, b=None):
           test_str = 'a'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())
@@ -123,7 +123,7 @@ class TestJfIO(unittest.TestCase):
         args = Struct(**{'files': 'input.yaml', "yamli": 1})
         def openhook(a=None, b=None):
           test_str = '- list'
-          return StringIO(test_str)
+          return BytesIO(test_str.encode())
         result = list(read_jsonl_json_or_yaml(yaml.load, args, openhook=openhook))
         #result = None
         #print(openhook().read())
