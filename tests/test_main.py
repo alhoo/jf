@@ -8,9 +8,31 @@ import logging
 
 from jf.__main__ import set_loggers, main
 
+from contextlib import contextmanager
+from io import StringIO
+
 def disable_loggers():
     logger = logging.getLogger('jf')
     logger.setLevel(logging.ERROR)
+
+@contextmanager
+def captured_output(write_to=StringIO):
+    new_out, new_err = write_to(), write_to
+    old_out, old_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = new_out, new_err
+        yield sys.stdout, sys.stderr
+    finally:
+        sys.stdout, sys.stderr = old_out, old_err
+
+
+class BrokenPipeOutput:
+    def isatty(self):
+        return True
+
+    def write(self, s):
+        raise BrokenPipeError
+
 
 class TestJfMain(unittest.TestCase):
     """Basic jf main"""
@@ -42,7 +64,8 @@ class TestJfMain(unittest.TestCase):
 
     def test_main_yaml(self):
         """Test log setting"""
-        main(['-'])
+        with captured_output(BrokenPipeOutput) as (out, err):
+            main(['-'])
 
     def test_main_yaml(self):
         """Test log setting"""

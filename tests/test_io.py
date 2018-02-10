@@ -26,7 +26,7 @@ def captured_output(write_to=StringIO):
 
 class BrokenPipeOutput:
     def isatty(self):
-        return False
+        return True
 
     def write(self, s):
         raise BrokenPipeError
