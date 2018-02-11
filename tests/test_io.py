@@ -156,6 +156,14 @@ class TestJfIO(unittest.TestCase):
                       openhook=openhook))
         self.assertEqual(result, ['list'])
 
+    def test_excel_string(self):
+        """Test simple query"""
+        args = Struct(**{'files': ['tests/test.xlsx']})
+
+        result = list(read_input(args))
+        self.assertEqual(result, [{'a': 1, 'b': 2, 'c': 3},
+                                  {'a': 4, 'b': 5, 'c': 6}])
+
     def test_csv_string(self):
         """Test simple query"""
         args = Struct(**{'files': ['tests/test.csv']})
