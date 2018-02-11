@@ -209,6 +209,14 @@ def last(*args):
     # list(arr)[-shown:]
 
 
+def update(fun, arr):
+    """update all items using function"""
+    for val in arr:
+#        logger.info("(%s).update(fun(%s))")
+        val.__dict__.update(fun(val))
+        yield val
+
+
 class GenProcessor:
     """Make a generator pipeline"""
 
@@ -311,6 +319,7 @@ def run_query(query, data, imports=None, import_from=None):
         "gp": GenProcessor,
         "islice": jfislice,
         "head": first,
+        "update": update,
         "tail": last,
         "first": first,
         "last": last,

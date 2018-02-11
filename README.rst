@@ -30,7 +30,8 @@ useful functions:
 -  islice(stop) => islice(arr, start=0, stop, step=1)
 -  islice(start, stop, step=1) => islice(arr, start, stop, step)
 -  first(N=1) => islice(N)
--  last(N=1) => list(arr)[-N:]
+-  update(val) => map(lambda x: x.\_\_dict\_\_.update(val), arr)
+-  last(N=1) => iter(deque(arr, maxlen=N))
 -  I = arr (== identity operation)
 -  yield\_from(x) => yield items from x
 -  chain() => combine items into a list
@@ -87,7 +88,7 @@ Filter items by age (and output yaml)
 
     $ cat samples.jsonl | jf 'map({id: x.id, datetime: x["content-datetime"]}),
             filter(age(x.datetime) > age("456 days")),
-            map(.update({age: age(x.datetime)}))' --indent=5 --yaml
+            update({age: age(x.datetime)})' --indent=5 --yaml
     age: 457 days, 4:07:54.932587
     datetime: '2016-10-29 10:55:42+03:00'
     id: '87086895'
@@ -96,7 +97,7 @@ Sort items by age and print their id, length and age
 
 ::
 
-    $ cat samples.jsonl|jf 'map(x.update({age: age(x["content-datetime"])})),
+    $ cat samples.jsonl|jf 'update({age: age(x["content-datetime"])}),
             sorted(x.age),
             map(.id, "length: %d" % len(.content), .age)' --indent=3 --yaml
     - '14941692'
@@ -116,7 +117,7 @@ Filter items after a given datetime (test.json is a git commit history):
 
 ::
 
-    $ jf 'map(.update({age: age(.commit.author.date)})),
+    $ jf 'update({age: age(.commit.author.date)}),
             filter(date(.commit.author.date) > date("2018-01-30T17:00:00Z")),
             sorted(x.age, reverse=True), map(.sha, .age, .commit.author.date)' test.json 
     [
@@ -139,7 +140,7 @@ Import your own modules and hide fields:
 
 ::
 
-    $ cat test.json|jf --import demomodule --yaml 'map(x.update({id: x.sha})),
+    $ cat test.json|jf --import_from modules/ --import demomodule --yaml 'update({id: x.sha}),
             demomodule.timestamppipe(),
             hide("sha", "committer", "parents", "html_url", "author", "commit",
                  "comments_url"), islice(3,5)'
@@ -154,7 +155,7 @@ Read yaml:
 
 ::
 
-    $ cat test.yaml | jf --yamli 'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
+    $ cat test.yaml | jf --yamli 'update({id: x.sha, age: age(x.commit.author.date)}),
             filter(x.age < age("1 days"))' --indent=2 --yaml
     - age: 0 days, 22:45:56.388477
       author:
@@ -167,7 +168,7 @@ Group duplicates (age is within the same hour):
 
 ::
 
-    $ cat test.json|jf --import demomodule 'map(x.update({id: x.sha})),
+    $ cat test.json|jf --import_from modules/ --import demomodule 'update({id: x.sha}),
             sorted(.commit.author.date, reverse=True),
             demomodule.DuplicateRemover(int(age(.commit.author.date).total_seconds()/3600),
             group=1).process(lambda x: {"duplicate": x.id}),
@@ -214,8 +215,8 @@ the power of regular expressions by including the re-library.
 
 ::
 
-    $ jf --import re --import demomodule --input skype.json 'yield_from(x.messages),
-            map(x.update({from: x.from.split(":")[-1], mid: x.skypeeditedid if x.skypeeditedid else x.clientmessageid})),
+    $ jf --import_from modules/ --import re --import demomodule --input skype.json 'yield_from(x.messages),
+            update({from: x.from.split(":")[-1], mid: x.skypeeditedid if x.skypeeditedid else x.clientmessageid}),
             sorted(age(x.composetime), reverse=True),
             demomodule.DuplicateRemover(x.mid, group=1).process(),
             map(last(x)),
@@ -243,6 +244,8 @@ Features
 ========
 
 -  json, jsonl and yaml files for input and output
+-  bz2 and gzip compressed input for json, jsonl and yaml
+-  csv and xlsx support if pandas and xlrd is installed
 -  construct generator pipeline with map, hide, filter
 -  access json dict as classes with dot-notation for attributes
 -  datetime and timedelta comparison
