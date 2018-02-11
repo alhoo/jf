@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from datetime import datetime
 
-def timestamppipe(x, arr):
-  for it in arr:
+def timestamppipe(*args):
+  for it in args[-1]:
     it.update({"Pipemod": "was here at %s" % datetime.now()})
     yield it
 

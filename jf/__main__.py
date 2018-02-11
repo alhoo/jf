@@ -6,7 +6,7 @@ import argparse
 import logging
 
 from jf import run_query, ipy
-from jf.io import read_jsonl_json_or_yaml, print_results
+from jf.io import read_input, print_results
 
 logger = logging.getLogger(__name__)
 
@@ -81,13 +81,7 @@ def main(args=None):
 
     set_loggers(args.debug)
 
-#    inq = (json.loads(d) for d in sys.stdin)
-    inp = json.loads
-    if args.yamli:
-        import yaml
-        inp = yaml.load
-
-    inq = read_jsonl_json_or_yaml(inp, args)
+    inq = read_input(args)
     imports = None
     if 'import' in args.__dict__:
         imports = args.__dict__["import"]

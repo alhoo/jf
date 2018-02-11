@@ -45,7 +45,8 @@ def merge_not(arr, char=','):
 
 def merge_lambdas(arr):
     """Merge jf lambdas to mappers and filters"""
-    ret = 'lambda x, *rest: ('
+    logger.debug("merge lambdas: %s", arr)
+    ret = ''
     rest = False
     first = True
     for val, keep in arr:
@@ -56,9 +57,12 @@ def merge_lambdas(arr):
             ret += ', '
         ret += val
         first = False
+    if ret == '':
+        return 'arr'
     if not rest:
         ret += '), arr'
-    return ret
+    logger.debug("ret: %s", ret)
+    return 'lambda x, *rest: (' + ret
 
 
 kwargre = re.compile(r'[^!><=]+=[^><=]+')

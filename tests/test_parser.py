@@ -24,8 +24,7 @@ class TestJfIO(unittest.TestCase):
     def test_module_parse(self):
         """Test simple filter"""
         test_str = 'demomodule.timestamppipe()'
-        expected = 'lambda arr: demomodule.timestamppipe(lambda x, ' + \
-                   '*rest: (), arr),'
+        expected = 'lambda arr: demomodule.timestamppipe(arr),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 

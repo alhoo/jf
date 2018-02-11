@@ -87,15 +87,9 @@ def print_results(data, args):
         return
 
 
-def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
+def read_input(args, openhook=fileinput.hook_compressed):
     """Read json, jsonl and yaml data from file defined in args"""
-    yamli = False
-    inp = json.loads
-    if args.yamli or args.files[0].endswith("yaml"):
-        import yaml
-        inp = yaml.load
-        yamli = True
-    elif args.files[0].endswith("xml") or args.files[0].endswith("html"):
+    if args.files[0].endswith("xml") or args.files[0].endswith("html"):
         logger.warning("XML and html support has not yet been implemented")
         logger.warning("Comment here: https://github.com/alhoo/jf/issues/1")
         return
@@ -109,7 +103,6 @@ def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
             logger.warning("Install pandas and xlrd to read excel")
             logger.warning("pip install pandas")
             logger.warning("pip install xlrd")
-            pass
         return
     elif args.files[0].endswith("csv"):
         try:
@@ -120,13 +113,14 @@ def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
         except ImportError:
             logger.warning("Install pandas to read csv")
             logger.warning("pip install pandas")
-            pass
         return
     data = ''
     # inf = fileinput.input(files=args.files, openhook=openhook)
+    inp = json.loads
     inf = (x.decode('UTF-8') for x in
            fileinput.input(files=args.files, openhook=openhook, mode='rb'))
-    if args.yamli:
+    if args.yamli or args.files[0].endswith("yaml"):
+        inp = yaml.load
         data = "\n".join([l for l in inf])
     else:
         for val in yield_json_and_json_lines(inf):

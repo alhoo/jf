@@ -158,10 +158,10 @@ def ipy(banner, data, fakerun=False):
         embed(banner1=banner)
 
 
-def reduce_list(_, arr):
+def reduce_list(*args):
     """Reduce array to a single list"""
     ret = []
-    for val in arr:
+    for val in args[-1]:
         ret.append(val)
     return [ret]
 
@@ -212,7 +212,6 @@ def last(*args):
 def update(fun, arr):
     """update all items using function"""
     for val in arr:
-#        logger.info("(%s).update(fun(%s))")
         val.__dict__.update(fun(val))
         yield val
 
