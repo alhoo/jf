@@ -89,6 +89,39 @@ def print_results(data, args):
 
 def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
     """Read json, jsonl and yaml data from file defined in args"""
+    yamli = False
+    inp = json.loads
+    if args.yamli or args.files[0].endswith("yaml"):
+        import yaml
+        inp = yaml.load
+        yamli = True
+    elif args.files[0].endswith("xml") or args.files[0].endswith("html"):
+        logger.warning("XML and html support has not yet been implemented")
+        logger.warning("Comment here: https://github.com/alhoo/jf/issues/1")
+        return
+    elif args.files[0].endswith("xlsx"):
+        try:
+            # FIXME only outputs from the first line
+            import pandas
+            for val in pandas.read_excel(args.files[0]).to_dict("records"):
+                yield val
+        except ImportError:
+            logger.warning("Install pandas and xlrd to read excel")
+            logger.warning("pip install pandas")
+            logger.warning("pip install xlrd")
+            pass
+        return
+    elif args.files[0].endswith("csv"):
+        try:
+            # FIXME only outputs from the first line
+            import pandas
+            for val in pandas.read_csv(args.files[0]).to_dict("records"):
+                yield val
+        except ImportError:
+            logger.warning("Install pandas to read csv")
+            logger.warning("pip install pandas")
+            pass
+        return
     data = ''
     # inf = fileinput.input(files=args.files, openhook=openhook)
     inf = (x.decode('UTF-8') for x in
