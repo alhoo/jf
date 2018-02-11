@@ -38,7 +38,8 @@ def main(args=None):
                         help="print debug messages")
     parser.add_argument("--indent", type=int, default=2,
                         help="pretty-printed with given indent level")
-    parser.add_argument("--import_from", help="add path to search imports from")
+    parser.add_argument("--import_from",
+                        help="add path to search imports from")
     parser.add_argument("--import", help="import custom processing module")
     parser.add_argument("-l", "--list", action="store_true",
                         help="wrap output to a list")
@@ -69,11 +70,12 @@ def main(args=None):
                         help='files to read, if empty, stdin is used')
     args = parser.parse_args(args)
 
-    if args.input != None:
+    if args.input is not None:
         args.files = [args.input]
 
     if len(args.files) == 1 and args.files[0] == '-' and sys.stdin.isatty():
-        return parser.print_help()
+        parser.print_help()
+        return
     if args.indent < 0:
         args.indent = None
 
@@ -89,10 +91,10 @@ def main(args=None):
     imports = None
     if 'import' in args.__dict__:
         imports = args.__dict__["import"]
-    data = run_query(args.query, inq, imports=imports, import_from=args.import_from)
+    data = run_query(args.query, inq, imports=imports,
+                     import_from=args.import_from)
     if args.ipy or args.ipyfake:
         banner = ''
-        from IPython import embed
         if not sys.stdin.isatty():
             banner = '\nNotice: You are inputting data from stdin!\n' + \
                      'This might cause some trouble since jf will try ' + \

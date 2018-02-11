@@ -24,21 +24,24 @@ class TestJfIO(unittest.TestCase):
     def test_module_parse(self):
         """Test simple filter"""
         test_str = 'demomodule.timestamppipe()'
-        expected = 'lambda arr: demomodule.timestamppipe(lambda x, *rest: (), arr),'
+        expected = 'lambda arr: demomodule.timestamppipe(lambda x, ' + \
+                   '*rest: (), arr),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
     def test_filter(self):
         """Test simple filter"""
         test_str = 'filter(x.id == "123")'
-        expected = 'lambda arr: filter(lambda x, *rest: (x.id == "123"), arr),'
+        expected = 'lambda arr: filter(lambda x, ' + \
+                   '*rest: (x.id == "123"), arr),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
     def test_filter2(self):
         """Test simple filter"""
         test_str = 'filter(x.commit.committer.name == "Lasse Hyyrynen")'
-        expected = 'lambda arr: filter(lambda x, *rest: (x.commit.committer.name == "Lasse Hyyrynen"), arr),'
+        expected = 'lambda arr: filter(lambda x, *rest: ' + \
+                   '(x.commit.committer.name == "Lasse Hyyrynen"), arr),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
@@ -59,7 +62,10 @@ class TestJfIO(unittest.TestCase):
     def test_map_filter(self):
         """Test simple filter"""
         test_str = 'map({id: x.id}), filter(x.id == "123")'
-        expected = 'lambda arr: map(lambda x, *rest: ({ id:x.id }), arr),lambda arr: filter(lambda x, *rest: (x.id == "123"), arr),'
+        expected = 'lambda arr: map(lambda x, ' + \
+                   '*rest: ({ id:x.id }), arr),' + \
+                   'lambda arr: filter(lambda x, ' + \
+                   '*rest: (x.id == "123"), arr),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
@@ -71,8 +77,11 @@ class TestJfIO(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_imported_class(self):
-        test_str = 'demomod.Dup(int(age(x.c.author).total()/3), group=1).process(lambda x: {"dup": x.id})'
-        expected = 'lambda arr: demomod.Dup(lambda x, *rest: (int(age(x.c.author).total()/ 3)), arr, group = 1).process(lambda x : {"dup":x.id}),'
+        test_str = 'demomod.Dup(int(age(x.c.author).total()/3), group=1)' + \
+                   '.process(lambda x: {"dup": x.id})'
+        expected = 'lambda arr: demomod.Dup(lambda x, *rest: ' + \
+                   '(int(age(x.c.author).total()/ 3)), arr, group = 1)' + \
+                   '.process(lambda x : {"dup":x.id}),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
