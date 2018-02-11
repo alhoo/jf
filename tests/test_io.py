@@ -8,7 +8,7 @@ import yaml
 from io import BytesIO
 
 from jf.io import read_input, yield_json_and_json_lines
-from jf.io import print_results
+from jf.io import print_results, import_error
 from jf import Struct
 
 from contextlib import contextmanager
@@ -17,7 +17,7 @@ from io import StringIO
 
 @contextmanager
 def captured_output(write_to=StringIO):
-    new_out, new_err = write_to(), write_to
+    new_out, new_err = write_to(), write_to()
     old_out, old_err = sys.stdout, sys.stderr
     try:
         sys.stdout, sys.stderr = new_out, new_err
@@ -183,6 +183,14 @@ class TestJfIO(unittest.TestCase):
         result = list(read_input(args,
                       openhook=openhook))
         self.assertEqual(result, ['a'])
+
+    def test_import_error(self):
+        with captured_output() as (out, err):
+            import_error()
+        output = err.getvalue().strip()
+        self.assertEqual(output, '')
+        output = out.getvalue().strip()
+        self.assertEqual(output, '')
 
     def test_yaml_string_2(self):
         """Test simple query"""

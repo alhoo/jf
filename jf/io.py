@@ -87,33 +87,35 @@ def print_results(data, args):
         return
 
 
+def import_error():
+        logger.warning("Install pandas and xlrd to read csv and excel")
+        logger.warning("pip install pandas")
+        logger.warning("pip install xlrd")
+
+
 def read_input(args, openhook=fileinput.hook_compressed):
     """Read json, jsonl and yaml data from file defined in args"""
-    if args.files[0].endswith("xml") or args.files[0].endswith("html"):
-        logger.warning("XML and html support has not yet been implemented")
-        logger.warning("Comment here: https://github.com/alhoo/jf/issues/1")
-        return
-    elif args.files[0].endswith("xlsx"):
-        try:
+    try:
+        if args.files[0].endswith("xml") or args.files[0].endswith("html"):
+            logger.warning("XML and html support has not yet been implemented")
+            logger.warning("Comment here: https://github.com/alhoo/jf/issues/1")
+            return
+        elif args.files[0].endswith("xlsx"):
             # FIXME only outputs from the first line
+            import xlrd
             import pandas
             for val in pandas.read_excel(args.files[0]).to_dict("records"):
                 yield val
-        except ImportError:
-            logger.warning("Install pandas and xlrd to read excel")
-            logger.warning("pip install pandas")
-            logger.warning("pip install xlrd")
-        return
-    elif args.files[0].endswith("csv"):
-        try:
+            return
+        elif args.files[0].endswith("csv"):
             # FIXME only outputs from the first line
             import pandas
             for val in pandas.read_csv(args.files[0]).to_dict("records"):
                 yield val
-        except ImportError:
-            logger.warning("Install pandas to read csv")
-            logger.warning("pip install pandas")
-        return
+            return
+    except ImportError:
+        return import_error()
+
     data = ''
     # inf = fileinput.input(files=args.files, openhook=openhook)
     inp = json.loads
