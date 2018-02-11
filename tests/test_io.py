@@ -172,6 +172,18 @@ class TestJfIO(unittest.TestCase):
         self.assertEqual(result, [{'a': 1, 'b': 2, 'c': 3},
                                   {'a': 4, 'b': 5, 'c': 6}])
 
+    def test_xml_string(self):
+        """Test simple query"""
+        args = Struct(**{'files': ['input.xml'], "yamli": 1})
+
+        def openhook(a=None, b=None):
+            test_str = '<p>a</p>'
+            return BytesIO(test_str.encode())
+
+        result = list(read_input(args,
+                      openhook=openhook))
+        # self.assertEqual(result, ['a'])
+
     def test_yaml_string(self):
         """Test simple query"""
         args = Struct(**{'files': ['input.yaml'], "yamli": 1})
