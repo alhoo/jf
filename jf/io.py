@@ -1,9 +1,10 @@
 """JF io library"""
 import sys
-import json
-import yaml
 import fileinput
 import logging
+
+import json
+import yaml
 
 from pygments import highlight
 from pygments.formatters import TerminalFormatter
@@ -25,17 +26,18 @@ BOLD = "\033[;1m"
 REVERSE = "\033[;7m"
 
 
-def colorize_json_error(text, ex):
+def colorize_json_error(ex):
     """Colorize syntax error"""
     string = [c for c in ex.doc]
     start = ex.pos
     stop = ex.pos + 1
     string[start] = RED+string[start]
     string[stop] = RESET+string[stop]
-    return ''.join(string[max(0,start - 500):min(len(string),stop + 500)])
+    return ''.join(string[max(0, start - 500):min(len(string), stop + 500)])
 
 
 def print_results(data, args):
+    """Print results"""
     import html
     lexertype = 'json'
     out_kw_args = {"sort_keys": args.sort_keys,
@@ -44,7 +46,6 @@ def print_results(data, args):
                    "ensure_ascii": args.ensure_ascii}
     outfmt = json.dumps
     if args.yaml and not args.json:
-        import yaml
         outfmt = yaml.dump
         out_kw_args = {"allow_unicode": not args.ensure_ascii,
                        "indent": args.indent,
@@ -90,7 +91,8 @@ def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
     """Read json, jsonl and yaml data from file defined in args"""
     data = ''
     # inf = fileinput.input(files=args.files, openhook=openhook)
-    inf = (x.decode('UTF-8') for x in fileinput.input(files=args.files, openhook=openhook, mode='rb'))
+    inf = (x.decode('UTF-8') for x in
+           fileinput.input(files=args.files, openhook=openhook, mode='rb'))
     if args.yamli:
         data = "\n".join([l for l in inf])
     else:
@@ -101,9 +103,9 @@ def read_jsonl_json_or_yaml(inp, args, openhook=fileinput.hook_compressed):
             except json.JSONDecodeError as ex:
                 # logger.warning('Error while parsing json: "%s"', ex.msg);
                 logger.warning("Exception %s", repr(ex))
-                jerr = colorize_json_error(data, ex)
-                logger.warning("Error at code marker q4eh\ndata:\n%s", jerr);
-    if len(data) > 0:
+                jerr = colorize_json_error(ex)
+                logger.warning("Error at code marker q4eh\ndata:\n%s", jerr)
+    if data:
         try:
             ind = inp(data)
             if isinstance(ind, list):

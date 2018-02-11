@@ -127,7 +127,7 @@ def jfislice(*args):
     stop = 1
     if isinstance(args, int):
         args = [args]
-    if len(args) > 0:
+    if args:
         stop = args[0]
     if len(args) > 1:
         start = stop
@@ -143,6 +143,7 @@ def result_cleaner(val):
 
 
 def ipy(banner, data, fakerun=False):
+    """Start ipython with data-variable"""
     from IPython import embed
     if not isinstance(banner, str):
         banner = ''
@@ -150,7 +151,7 @@ def ipy(banner, data, fakerun=False):
     banner += 'Your filtered dataset is loaded in a iterable variable '
     banner += 'named "data"\n\ndata sample:\n'
     head, data = peek(map(result_cleaner, data), 1)
-    if len(head) > 0:
+    if head:
         banner += json.dumps(head[0], indent=2, sort_keys=True)
     banner += "\n\n"
     if not fakerun:
@@ -165,10 +166,10 @@ def reduce_list(_, arr):
     return [ret]
 
 
-def yield_all(fn, arr):
+def yield_all(fun, arr):
     """Yield all subitems of all item"""
-    for it in arr:
-        for val in fn(it):
+    for items in arr:
+        for val in fun(items):
             yield val
 
 
@@ -205,7 +206,7 @@ def last(*args):
     if not isinstance(shown, int):
         shown = 1
     return iter(deque(arr, maxlen=shown))
-    #list(arr)[-shown:]
+    # list(arr)[-shown:]
 
 
 class GenProcessor:
@@ -244,9 +245,9 @@ def colorize(ex):
     stop = ex.args[1][2]
     string[start] = RED+string[start]
     if stop >= len(string):
-      string.append(RESET)
+        string.append(RESET)
     else:
-      string[stop] = RESET+string[stop]
+        string[stop] = RESET+string[stop]
     return ''.join(string)
 
 
@@ -294,7 +295,7 @@ def run_query(query, data, imports=None, import_from=None):
     """Run a query against given data"""
     import regex as re
 #    try:
-        # query = simple_query_convert(query)
+#        query = simple_query_convert(query)
     query = query_convert(query)
 #    except SyntaxError:
 #        return []

@@ -11,9 +11,11 @@ from jf.__main__ import set_loggers, main
 from contextlib import contextmanager
 from io import StringIO
 
+
 def disable_loggers():
     logger = logging.getLogger('jf')
     logger.setLevel(logging.ERROR)
+
 
 @contextmanager
 def captured_output(write_to=StringIO):
@@ -89,4 +91,3 @@ class TestJfMain(unittest.TestCase):
         set_loggers(False)
         set_loggers(True)
         disable_loggers()
-

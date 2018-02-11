@@ -18,9 +18,9 @@ class TestJfGenProcessor(unittest.TestCase):
     """Basic jf io testcases"""
 
     def test_param_list(self):
-        gp = jf.GenProcessor((1,2,3), [lambda arr: map(lambda x: 2*x, arr)])
+        gp = jf.GenProcessor((1, 2, 3), [lambda arr: map(lambda x: 2*x, arr)])
         gp.add_filter(lambda arr: map(lambda x: 2*x, arr))
-        self.assertEqual(list(gp.process()), [4,8,12])
+        self.assertEqual(list(gp.process()), [4, 8, 12])
 
 
 class TestJfFunctions(unittest.TestCase):
@@ -40,17 +40,17 @@ class TestJfFunctions(unittest.TestCase):
 
     def test_peek(self):
         """Test peeking"""
-        data = [1,2,3]
+        data = [1, 2, 3]
         head, data = jf.peek(data, 1)
         self.assertEqual(head, [1])
-        self.assertEqual(list(data), [1, 2,3])
+        self.assertEqual(list(data), [1, 2, 3])
 
     def test_peek_2(self):
         """Test peeking"""
-        data = [1,2,3]
+        data = [1, 2, 3]
         head, data = jf.peek(data, 2)
         self.assertEqual(head, [1, 2])
-        self.assertEqual(list(data), [1, 2,3])
+        self.assertEqual(list(data), [1, 2, 3])
 
     def test_dateparser(self):
         """Test date parsing"""
@@ -83,24 +83,24 @@ class TestJfFunctions(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_yield_all(self):
-        result = list(jf.yield_all(lambda x: x, [[1,2], [3,4]]))
-        expected = [1,2,3,4]
+        result = list(jf.yield_all(lambda x: x, [[1, 2], [3, 4]]))
+        expected = [1, 2, 3, 4]
         self.assertEqual(result, expected)
 
     def test_reduce_list(self):
-        result = jf.reduce_list(None, [1,2])
-        expected = [[1,2]]
+        result = jf.reduce_list(None, [1, 2])
+        expected = [[1, 2]]
         self.assertEqual(result, expected)
 
     def test_colorize(self):
         result = None
         try:
-          query = "{x.id]"
-          query = jf.parse_query(query).rstrip(",")
+            query = "{x.id]"
+            query = jf.parse_query(query).rstrip(",")
         except SyntaxError as ex:
-          print(ex)
-          result = jf.colorize(ex)
-          pass
+            print(ex)
+            result = jf.colorize(ex)
+            pass
         expected = '{x.id'+jf.RED+']'+jf.RESET+','
         self.assertEqual(result, expected)
 
@@ -116,7 +116,8 @@ class TestJfquery(unittest.TestCase):
         query = 'map(x.id)'
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r'', expr)
-        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.id), arr)]).process()')
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, ' +
+                               '*rest: (x.id), arr)]).process()')
 
     def test_py_while(self):
         """Test simple query"""
@@ -124,7 +125,8 @@ class TestJfquery(unittest.TestCase):
         query = 'map(x.while)'
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r'', expr)
-        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.while), arr)]).process()')
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, ' +
+                               '*rest: (x.while), arr)]).process()')
 
     def test_py_if(self):
         """Test simple query"""
@@ -132,7 +134,8 @@ class TestJfquery(unittest.TestCase):
         query = 'map(x.if>0)'
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r'', expr)
-        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.if > 0), arr)]).process()')
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, ' +
+                               '*rest: (x.if > 0), arr)]).process()')
 
     def test_py_else1(self):
         """Test simple query"""
@@ -140,7 +143,9 @@ class TestJfquery(unittest.TestCase):
         query = 'map(x.else != "expression")'
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r'', expr)
-        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.else != "expression"), arr)]).process()')
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, ' +
+                               '*rest: (x.else != "expression"), arr)' +
+                               ']).process()')
 
     def test_py_else(self):
         """Test simple query"""
@@ -148,7 +153,9 @@ class TestJfquery(unittest.TestCase):
         query = 'map(x.else != "expression")'
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r'', expr)
-        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.else != "expression"), arr)]).process()')
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, ' +
+                               '*rest: (x.else != "expression"), arr)' +
+                               ']).process()')
 
     def test_py_from(self):
         """Test simple query"""
@@ -156,7 +163,8 @@ class TestJfquery(unittest.TestCase):
         query = 'map(x.from, x.id)'
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r'', expr)
-        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, *rest: (x.from, x.id), arr)]).process()')
+        self.assertEqual(expr, 'gp(data, [lambda arr: map(lambda x, ' +
+                               '*rest: (x.from, x.id), arr)]).process()')
 
 
 class TestJf(unittest.TestCase):
@@ -165,7 +173,7 @@ class TestJf(unittest.TestCase):
     def test_ipython(self):
         """Test simple query"""
 
-        jf.ipy(None, [1,2,3], fakerun=True)
+        jf.ipy(None, [1, 2, 3], fakerun=True)
 
     def test_get_item(self):
         """Test simple query"""

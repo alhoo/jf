@@ -48,7 +48,8 @@ setup(
     'ipython>=6.2.0'
   ],
   tests_require = [
-    'nose>=1.3.0'
+    'nose>=1.3.0',
+    'pylint>=1.8.2'
   ],
   test_suite = 'tests',
   zip_safe = True,
