@@ -222,6 +222,8 @@ Features
 ==
 
 * json, jsonl and yaml files for input and output
+* bz2 and gzip compressed input for json, jsonl and yaml
+* csv and xlsx support if pandas and xlrd is installed
 * construct generator pipeline with map, hide, filter
 * access json dict as classes with dot-notation for attributes
 * datetime and timedelta comparison
