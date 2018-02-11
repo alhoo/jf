@@ -87,6 +87,12 @@ class TestJfFunctions(unittest.TestCase):
         expected = [1, 2, 3, 4]
         self.assertEqual(result, expected)
 
+    def test_update(self):
+        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(jf.update(lambda x: {"b": x["a"] + 1}, igen))
+        expected = '[{"a": 1, "b": 2}, {"a": 2, "b": 3}]'
+        self.assertEqual(result, expected)
+
     def test_reduce_list(self):
         result = jf.reduce_list(None, [1, 2])
         expected = [[1, 2]]
@@ -265,7 +271,7 @@ class TestJf(unittest.TestCase):
     def test_age(self):
         """
         $ cat test.yaml | jf --yamli
-            'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
+            'update({id: x.sha, age: age(x.commit.author.date)}),
              filter(x.age < age("1 days"))' --indent=2 --yaml
         """
 
@@ -283,7 +289,7 @@ class TestJf(unittest.TestCase):
     def test_age_output(self):
         """
         $ cat test.yaml | jf --yamli
-            'map(x.update({id: x.sha, age: age(x.commit.author.date)})),
+            'update({id: x.sha, age: age(x.commit.author.date)}),
              filter(x.age < age("1 days"))' --indent=2 --yaml
         """
 
