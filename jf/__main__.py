@@ -73,9 +73,6 @@ def main(args=None):
     if args.input is not None:
         args.files = [args.input]
 
-    if len(args.files) == 1 and args.files[0] == '-' and sys.stdin.isatty():
-        parser.print_help()
-        return
     if args.indent < 0:
         args.indent = None
 
