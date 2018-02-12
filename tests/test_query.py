@@ -87,6 +87,32 @@ class TestJfFunctions(unittest.TestCase):
         expected = [1, 2, 3, 4]
         self.assertEqual(result, expected)
 
+    def test_last(self):
+        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(jf.last(lambda x: 1, igen))
+        expected = '[{"a": 2}]'
+        self.assertEqual(result, expected)
+
+    def test_last_str(self):
+        """last() doesn't know how to handle strings"""
+        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(jf.last(lambda x: "2", igen))
+        expected = '[{"a": 2}]'
+        self.assertEqual(result, expected)
+
+    def test_first(self):
+        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(jf.first(lambda x: 1, igen))
+        expected = '[{"a": 1}]'
+        self.assertEqual(result, expected)
+
+    def test_first_str(self):
+        """first() doesn't know how to handle strings"""
+        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(jf.first(lambda x: "2", igen))
+        expected = '[{"a": 1}]'
+        self.assertEqual(result, expected)
+
     def test_update(self):
         igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
         result = tolist(jf.update(lambda x: {"b": x["a"] + 1}, igen))
