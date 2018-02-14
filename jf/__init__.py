@@ -263,9 +263,9 @@ REVERSE = "\033[;7m"
 
 def colorize(ex):
     """Colorize syntax error"""
-    if not isinstance(ex.args, list):
+    if not isinstance(ex.args, (list, tuple)):
         return repr(ex.args)
-    if not isinstance(ex.args[1], list):
+    if not isinstance(ex.args[1], (list, tuple)):
         return repr(ex.args)
     string = [c for c in ex.args[1][3]]
     start = ex.args[1][2]-ex.args[1][1]
@@ -303,6 +303,7 @@ def query_convert(query):
         query = jfkwre.sub(r'.__JFESCAPED_\1', query)
         logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
+    #except SyntaxError as ex:
     except (TypeError, SyntaxError) as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
         query = colorize(ex)
