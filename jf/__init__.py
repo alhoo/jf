@@ -173,6 +173,22 @@ def yield_all(fun, arr):
             yield val
 
 
+def unique(*args):
+    """Calculate unique according to function"""
+    if len(args) > 1:
+        fun = args[0]
+    else:
+        fun = lambda x: repr(x)
+    seen = set()
+    for it in args[-1]:
+        h = hash(fun(it))
+        if h in seen:
+            continue
+        else:
+            seen.add(h)
+            yield it
+
+
 def hide(elements, arr):
     """Hide elements from items"""
     logger.info("Using hide-pipeline")
@@ -247,6 +263,10 @@ REVERSE = "\033[;7m"
 
 def colorize(ex):
     """Colorize syntax error"""
+    if not isinstance(ex.args, list):
+        return repr(ex.args)
+    if not isinstance(ex.args[1], list):
+        return repr(ex.args)
     string = [c for c in ex.args[1][3]]
     start = ex.args[1][2]-ex.args[1][1]
     stop = ex.args[1][2]
@@ -283,7 +303,7 @@ def query_convert(query):
         query = jfkwre.sub(r'.__JFESCAPED_\1', query)
         logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
-    except SyntaxError as ex:
+    except (TypeError, SyntaxError) as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
         query = colorize(ex)
         ijfkwre = re.compile(r'\.__JFESCAPED_([a-z]+[.)><\!=, ])')
@@ -328,6 +348,7 @@ def run_query(query, data, imports=None, import_from=None):
         "re": re,
         "date": parse_value,
         "hide": hide,
+        "unique": unique,
         "ipy": ipy,
         "reduce": reduce,
         "reduce_list": reduce_list,
@@ -347,6 +368,9 @@ def run_query(query, data, imports=None, import_from=None):
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
 
-    res = eval(query, globalscope)
-    for val in res:
-        yield val
+    try:
+        res = eval(query, globalscope)
+        for val in res:
+            yield val
+    except (ValueError, TypeError) as ex:
+        logger.warning("Exception: %s", repr(ex))

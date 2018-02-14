@@ -52,6 +52,43 @@ class TestJfFunctions(unittest.TestCase):
         self.assertEqual(head, [1, 2])
         self.assertEqual(list(data), [1, 2, 3])
 
+    def test_unique(self):
+        """Test date parsing"""
+        result = tolist(jf.unique([1,2,4,5,5,6,7]))
+        expected = tolist([1,2,4,5,6,7])
+        self.assertEqual(result, expected)
+
+    def test_unique2(self):
+        """Test date parsing"""
+        fieldsel = lambda x: x["b"]
+        result = tolist(jf.unique(fieldsel, [
+          {"a": 235, "b": 643},
+          {"a": 435, "b": 643},
+          {"a": 636, "b": 636},
+          {"a": 237, "b": 613},
+        ]))
+        expected = tolist([
+          {"a": 235, "b": 643},
+          {"a": 636, "b": 636},
+          {"a": 237, "b": 613},
+        ])
+        self.assertEqual(result, expected)
+
+    def test_unique3(self):
+        """Test date parsing"""
+        fieldsel = lambda x: repr(x["b"] == x["a"])
+        result = tolist(jf.unique(fieldsel, [
+          {"a": 235, "b": 643},
+          {"a": 435, "b": 643},
+          {"a": 636, "b": 636},
+          {"a": 237, "b": 613},
+        ]))
+        expected = tolist([
+          {"a": 235, "b": 643},
+          {"a": 636, "b": 636},
+        ])
+        self.assertEqual(result, expected)
+
     def test_dateparser(self):
         """Test date parsing"""
         result = jf.parse_value("2018-01-01")
