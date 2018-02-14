@@ -143,7 +143,7 @@ def parse_query(string):
             logger.debug("Shallow: %s", func)
             ret += func[0]
             continue
-        if func[0][0] == '{':
+        if func[0][0] in '{.x':
             logger.debug("Detected short syntax. Guessing.")
             func = [['map'], [['(']] + [func] + [[')']]]
         if func[0][0] == '(':

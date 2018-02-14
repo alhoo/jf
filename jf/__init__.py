@@ -173,6 +173,22 @@ def yield_all(fun, arr):
             yield val
 
 
+def unique(*args):
+    """Calculate unique according to function"""
+    if len(args) > 1:
+        fun = args[0]
+    else:
+        fun = lambda x: repr(x)
+    seen = set()
+    for it in args[-1]:
+        h = hash(fun(it))
+        if h in seen:
+            continue
+        else:
+            seen.add(h)
+            yield it
+
+
 def hide(elements, arr):
     """Hide elements from items"""
     logger.info("Using hide-pipeline")
@@ -328,6 +344,7 @@ def run_query(query, data, imports=None, import_from=None):
         "re": re,
         "date": parse_value,
         "hide": hide,
+        "unique": unique,
         "ipy": ipy,
         "reduce": reduce,
         "reduce_list": reduce_list,

@@ -36,6 +36,7 @@ def main(args=None):
                         help="query string for extracting wanted information")
     parser.add_argument("-d", "--debug", action="store_true",
                         help="print debug messages")
+    parser.add_argument('-c', '--compact', action="store_true")
     parser.add_argument("--indent", type=int, default=2,
                         help="pretty-printed with given indent level")
     parser.add_argument("--import_from",
@@ -75,6 +76,8 @@ def main(args=None):
 
     if args.indent < 0:
         args.indent = None
+    if args.compact:
+        args.indent = None
 
     set_loggers(args.debug)
 
@@ -99,7 +102,10 @@ def main(args=None):
             sys.stdin = open('/dev/tty')
         ipy(banner, data, args.ipyfake)
         return
-    print_results(data, args)
+    try:
+        print_results(data, args)
+    except FileNotFoundError as ex:
+        logger.warning("%s", ex)
 
 
 if __name__ == "__main__":
