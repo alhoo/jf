@@ -10,6 +10,12 @@ It supports evaluation of python oneliners, making it especially appealing for d
 who are used to working with python.
 
 
+Installing
+==
+
+    pip install jf
+
+
 How does it work
 ==
 
@@ -226,12 +232,6 @@ Use pythonic conditional operation, string.split() and complex string and date f
 
 
 
-
-
-Installing
-==
-
-    pip install jf
 
 
 Features
