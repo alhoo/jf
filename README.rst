@@ -8,6 +8,13 @@ jq-clone written in python. It supports evaluation of python oneliners,
 making it especially appealing for data scientists who are used to
 working with python.
 
+Installing
+==========
+
+::
+
+    pip install jf
+
 How does it work
 ================
 
@@ -250,13 +257,6 @@ the power of regular expressions by including the re-library.
     27.01.2018 11:25 matti_7626: configuration = parameters, configuration files (audio files, from customer, ask Suvi to request today?), add audio files to system (via GUI)
     27.01.2018 11:26 matti_7626: Testing = specify how we do testing, for example written test cases by the customer.
     27.01.2018 11:28 matti_7626: Need test group (testgroup 1 prob easiest to recognise says Lasse)
-
-Installing
-==========
-
-::
-
-    pip install jf
 
 Features
 ========
