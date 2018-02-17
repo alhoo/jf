@@ -348,6 +348,7 @@ def query_convert(query):
     import regex as re
     indentre = re.compile(r'\n *')
     namere = re.compile(r'([{,] *)([^{} "\[\]\',]+):')
+    firstxre = re.compile(r'^(\.[a-zA-Z])')
     makexre = re.compile(r'([ (])(\.[a-zA-Z])')
     keywordunpackingre = re.compile(r'\( *\*\*x *\)')
     nowre = re.compile(r"NOW\(\)")
@@ -356,6 +357,7 @@ def query_convert(query):
     logger.debug("After indent removal: %s", query)
     query = namere.sub(r'\1"\2":', query)
     logger.debug("After namere: %s", query)
+    query = firstxre.sub(r'x\1', query)
     query = makexre.sub(r'\1x\2', query)
     logger.debug("After makex: %s", query)
     query = keywordunpackingre.sub('(**x.dict())', query)
