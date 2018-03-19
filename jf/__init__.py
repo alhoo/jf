@@ -188,6 +188,26 @@ def excel(*args, **kwargs):
     #yield None
 
 
+def md(*args, **kwargs):
+    from csvtomd import md_table
+    arr = args[-1]
+    if len(args) > 1:
+        args = [open(args[0](0), 'w')]
+    else:
+        args = [sys.stdout]
+    table = []
+    first = True
+    for row in map(result_cleaner, arr):
+        logger.info("Writing row %s", row)
+        if first:
+            table.append(list(row.keys()))
+            first = False
+        table.append(list(row.values()))
+    args[0].write(md_table(table)+"\n")
+    raise StopIteration()
+    #yield None
+
+
 def csv(*args, **kwargs):
     import csv
     arr = args[-1]
@@ -419,6 +439,7 @@ def run_query(query, data, imports=None, import_from=None):
         "unique": unique,
         "ipy": ipy,
         "csv": csv,
+        "md": md,
         "excel": excel,
         "flatten": flatten,
         "reduce": reduce,
