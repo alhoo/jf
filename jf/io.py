@@ -6,6 +6,10 @@ import logging
 import json
 import yaml
 
+#import cElementTree as ElementTree
+from lxml import etree as ElementTree
+from lxml import etree, objectify
+
 from pygments import highlight
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import get_lexer_by_name
@@ -24,6 +28,42 @@ GREEN = "\033[0;32m"
 RESET = "\033[0;0m"
 BOLD = "\033[;1m"
 REVERSE = "\033[;7m"
+
+
+def formatXML(parent):
+    """
+    Recursive operation which returns a tree formated
+    as dicts and lists.
+    Decision to add a list is to find the 'List' word
+    in the actual parent tag.    
+    """
+    ret = {}
+    try:
+        if parent.items(): ret.update(dict(parent.items()))
+        #if parent.text: return 
+        #if parent.text: return {"C": parent.text}
+        if parent.text: ret['__content__'] = parent.text
+        if ('List' in parent.tag):
+            ret['__list__'] = []
+            for element in parent:
+                ret['__list__'].append(formatXML(element))
+        else:
+            for element in parent:
+                if element.tag not in ret:
+                    ret[element.tag] = []
+                ret[element.tag].append(formatXML(element))
+        if len(ret) == 1 and '__content__' in ret:
+            return ret['__content__']
+        elif '__content__' in ret:
+            del ret['__content__']
+        for key in list(ret.keys()):
+            if not isinstance(key, str):
+                del ret[key]
+            elif len(ret[key]) == 1:
+                ret[key] = ret[key][0]
+    except Exception as ex:
+        logger.info("Error while decoding xml %s", ex)
+    return ret
 
 
 def colorize_json_error(ex):
@@ -96,19 +136,31 @@ def import_error():
 def read_input(args, openhook=fileinput.hook_compressed):
     """Read json, jsonl and yaml data from file defined in args"""
     try:
-        if args.files[0].endswith("xml") or args.files[0].endswith("html"):
-            logger.warning("XML and html support has not yet been implemented")
-            logger.warning("Comment here: https://github.com/alhoo/jf/issues/1")
+        # FIXME these only outputs from the first line
+        if args.files[0].endswith("xml"):
+            tree = ElementTree.parse(args.files[0])
+            root = tree.getroot()
+            #xmldict = XmlDictConfig(root)
+            xmldict = formatXML(root)
+            logger.info("Got dict from xml %s", xmldict)
+            yield xmldict
+            return
+        elif args.files[0].endswith("html"):
+            parser = ElementTree.HTMLParser()
+            tree = ElementTree.parse(args.files[0], parser=parser)
+            root = tree.getroot()
+            #xmldict = XmlDictConfig(root)
+            xmldict = formatXML(root)
+            logger.info("Got dict from xml %s", xmldict)
+            yield xmldict
             return
         elif args.files[0].endswith("xlsx"):
-            # FIXME only outputs from the first line
             import xlrd
             import pandas
             for val in pandas.read_excel(args.files[0]).to_dict("records"):
                 yield val
             return
         elif args.files[0].endswith("csv"):
-            # FIXME only outputs from the first line
             import pandas
             for val in pandas.read_csv(args.files[0]).to_dict("records"):
                 yield val

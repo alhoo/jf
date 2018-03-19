@@ -137,9 +137,94 @@ def jfislice(*args):
     return islice(arr, start, stop, step)
 
 
+def flatten_item(it, root=''):
+    if not isinstance(it, dict):
+        return it
+    ret = {}
+    logger.info("Flattening %s", it)
+    for key, val in it.items():
+        logger.info("%s: %s", key, val)
+        if isinstance(val, dict):
+            for k2, v2 in flatten_item(val, key+'.').items():
+                ret[k2] = v2
+        elif isinstance(val, list):
+            for idx, v2 in enumerate(val):
+                for k3, v3 in flatten_item(v2, key+'.%d.' % idx).items():
+                    ret[k3] = v3
+        else:
+            ret[root+key] = val
+    logger.debug("Flattening %s => %s", it, ret)
+    return ret
+
+
+def flatten(*args):
+    logger.info("Flattening")
+    arr = args[-1]
+    try:
+        for it in map(result_cleaner, arr):
+            yield flatten_item(it)
+    except TypeError as err:
+        logger.error("Got an value error while flattening dict %s", err)
+
+
 def result_cleaner(val):
     """Cleanup the result"""
     return json.loads(json.dumps(val, cls=StructEncoder))
+
+
+def excel(*args, **kwargs):
+    import pandas as pd
+    arr = args[-1]
+    if len(args) > 1:
+        args = [args[0](0)]
+    else:
+        args = ['-']
+    logger.info("Writing excel with args: %s and kwargs: %s", args, kwargs)
+    writer = pd.ExcelWriter(*args, **kwargs)
+    df = pd.DataFrame(list(map(result_cleaner, arr)))
+    df.to_excel(writer)
+    writer.save()
+    raise StopIteration()
+    #yield None
+
+
+def md(*args, **kwargs):
+    from csvtomd import md_table
+    arr = args[-1]
+    if len(args) > 1:
+        args = [open(args[0](0), 'w')]
+    else:
+        args = [sys.stdout]
+    table = []
+    first = True
+    for row in map(result_cleaner, arr):
+        logger.info("Writing row %s", row)
+        if first:
+            table.append(list(row.keys()))
+            first = False
+        table.append(list(row.values()))
+    args[0].write(md_table(table)+"\n")
+    raise StopIteration()
+    #yield None
+
+
+def csv(*args, **kwargs):
+    import csv
+    arr = args[-1]
+    if len(args) > 1:
+        args = [open(args[0](0), 'w')]
+    else:
+        args = [sys.stdout]
+    r = csv.writer(*args, **kwargs)
+    first = True
+    for row in map(result_cleaner, arr):
+        logger.info("Writing row %s", row)
+        if first:
+            r.writerow(row.keys())
+            first = False
+        r.writerow(row.values())
+    raise StopIteration()
+    #yield None
 
 
 def ipy(banner, data, fakerun=False):
@@ -283,6 +368,7 @@ def query_convert(query):
     import regex as re
     indentre = re.compile(r'\n *')
     namere = re.compile(r'([{,] *)([^{} "\[\]\',]+):')
+    firstxre = re.compile(r'^(\.[a-zA-Z])')
     makexre = re.compile(r'([ (])(\.[a-zA-Z])')
     keywordunpackingre = re.compile(r'\( *\*\*x *\)')
     nowre = re.compile(r"NOW\(\)")
@@ -291,6 +377,7 @@ def query_convert(query):
     logger.debug("After indent removal: %s", query)
     query = namere.sub(r'\1"\2":', query)
     logger.debug("After namere: %s", query)
+    query = firstxre.sub(r'x\1', query)
     query = makexre.sub(r'\1x\2', query)
     logger.debug("After makex: %s", query)
     query = keywordunpackingre.sub('(**x.dict())', query)
@@ -351,6 +438,10 @@ def run_query(query, data, imports=None, import_from=None):
         "hide": hide,
         "unique": unique,
         "ipy": ipy,
+        "csv": csv,
+        "md": md,
+        "excel": excel,
+        "flatten": flatten,
         "reduce": reduce,
         "reduce_list": reduce_list,
         "yield_all": yield_all,

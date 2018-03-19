@@ -4,3 +4,5 @@ python-dateutil>=2.6.1
 PyYAML>=3.12
 dateparser>=0.6.0
 ipython>=6.2.0
+lxml>=3.5.0
+csvtomd>=0.3.0
