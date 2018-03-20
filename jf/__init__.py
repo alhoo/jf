@@ -188,6 +188,24 @@ def excel(*args, **kwargs):
     #yield None
 
 
+def profile(*args, **kwargs):
+    import pandas as pd
+    import pandas_profiling
+
+    arr = args[-1]
+    if len(args) > 1:
+        args = [open(args[0](0), 'w')]
+    else:
+        args = [sys.stdout]
+    data = list(map(result_cleaner, arr))
+    df = pd.DataFrame(data)
+    profile = pandas_profiling.ProfileReport(df)
+    html_report = profile.templates.template('wrapper').render(content=profile.html)
+    args[0].write(htmlreport)
+    raise StopIteration()
+    #yield None
+
+
 def md(*args, **kwargs):
     from csvtomd import md_table
     arr = args[-1]
@@ -440,6 +458,7 @@ def run_query(query, data, imports=None, import_from=None):
         "ipy": ipy,
         "csv": csv,
         "md": md,
+        "profile": profile,
         "excel": excel,
         "flatten": flatten,
         "reduce": reduce,
