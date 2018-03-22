@@ -189,8 +189,25 @@ def excel(*args, **kwargs):
 
 
 def profile(*args, **kwargs):
+    """
+    Make a profiling report from data
+
+    This function tries to convert strings to numeric values or datetime
+    objects.
+    """
     import pandas as pd
     import pandas_profiling
+    def is_numeric(df):
+        try:
+            counts = df.value_counts()
+            if len(counts) > 100:
+                pd.to_numeric(df.value_counts()[4:24].keys())
+            else:
+                pd.to_numeric(df.value_counts().keys())
+            return True
+        except:
+            pass
+        return False
 
     arr = args[-1]
     if len(args) > 1:
@@ -199,9 +216,22 @@ def profile(*args, **kwargs):
         args = [sys.stdout]
     data = list(map(result_cleaner, arr))
     df = pd.DataFrame(data)
+    na_value = None
+    if 'nan' in kwargs:
+        na_value = kwargs['nan']
+    for col in df.columns:
+        try:
+            if is_numeric(df[col]):
+                if na_value:
+                    df[col] = df[col].str.replace(na_value, None)
+                df[col] = pd.to_numeric(df[col].str.replace(",", '.'), errors='coerce')
+            else:
+                df[col] = pd.to_datetime(df[col].str.replace(",", '.'))
+        except:
+            pass
     profile = pandas_profiling.ProfileReport(df)
-    html_report = profile.templates.template('wrapper').render(content=profile.html)
-    args[0].write(htmlreport)
+    html_report = pandas_profiling.templates.template('wrapper').render(content=profile.html)
+    args[0].write(html_report+"\n")
     raise StopIteration()
     #yield None
 
