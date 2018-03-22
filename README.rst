@@ -8,6 +8,13 @@ jq-clone written in python. It supports evaluation of python oneliners,
 making it especially appealing for data scientists who are used to
 working with python.
 
+Installing
+==========
+
+::
+
+    pip install jf
+
 How does it work
 ================
 
@@ -251,27 +258,24 @@ the power of regular expressions by including the re-library.
     27.01.2018 11:26 matti_7626: Testing = specify how we do testing, for example written test cases by the customer.
     27.01.2018 11:28 matti_7626: Need test group (testgroup 1 prob easiest to recognise says Lasse)
 
-Installing
-==========
-
-::
-
-    pip install jf
-
 Features
 ========
 
 -  json, jsonl and yaml files for input and output
 -  bz2 and gzip compressed input for json, jsonl and yaml
 -  csv and xlsx support if pandas and xlrd is installed
+-  markdown table output support
 -  construct generator pipeline with map, hide, filter
 -  access json dict as classes with dot-notation for attributes
 -  datetime and timedelta comparison
 -  age() for timedelta between datetime and current time
 -  first(N), last(N), islice(start, stop, step)
+-  head and tail alias for last and first
+-  firstnlast(N) (or headntail(N))
 -  import your own modules for more complex filtering
 -  Support stateful classes for complex interactions between items
--  Drop your filtered data to IPython for manual data exploration
+-  drop your filtered data to IPython for manual data exploration
+-  pandas profiling support for quick data exploration
 
 Known bugs
 ==========

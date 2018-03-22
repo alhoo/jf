@@ -85,7 +85,10 @@ def main(args=None):
     imports = None
     if 'import' in args.__dict__:
         imports = args.__dict__["import"]
-    data = run_query(args.query, inq, imports=imports,
+    query = args.query
+    if args.query == '':
+        query = 'I'
+    data = run_query(query, inq, imports=imports,
                      import_from=args.import_from)
     if args.ipy or args.ipyfake:
         banner = ''
