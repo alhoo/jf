@@ -335,6 +335,17 @@ def hide(elements, arr):
         yield item
 
 
+def firstnlast(*args):
+    """Show first and last (N) items"""
+    arr = args[-1]
+    shown = 1
+    if len(args) == 2:
+        shown = args[0](arr)
+    if not isinstance(shown, int):
+        shown = 1
+    return [list(islice(arr, 0, shown)), list(iter(deque(arr, maxlen=shown)))]
+
+
 def first(*args):
     """Show first (N) items"""
     arr = args[-1]
@@ -477,6 +488,8 @@ def run_query(query, data, imports=None, import_from=None):
         "update": update,
         "tail": last,
         "first": first,
+        "firstnlast": firstnlast,
+        "headntail": firstnlast,
         "last": last,
         "null": None,
         "I": lambda arr: arr,

@@ -240,14 +240,18 @@ Features
 * json, jsonl and yaml files for input and output
   * bz2 and gzip compressed input for json, jsonl and yaml
 * csv and xlsx support if pandas and xlrd is installed
+* markdown table output support
 * construct generator pipeline with map, hide, filter
 * access json dict as classes with dot-notation for attributes
 * datetime and timedelta comparison
   * age() for timedelta between datetime and current time
 * first(N), last(N), islice(start, stop, step)
+  * head and tail alias for last and first
+* firstnlast(N) (or headntail(N))
 * import your own modules for more complex filtering
   * Support stateful classes for complex interactions between items
-* Drop your filtered data to IPython for manual data exploration
+* drop your filtered data to IPython for manual data exploration
+* pandas profiling support for quick data exploration
 
 Known bugs
 ==
