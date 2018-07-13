@@ -35,12 +35,12 @@ def formatXML(parent):
     Recursive operation which returns a tree formated
     as dicts and lists.
     Decision to add a list is to find the 'List' word
-    in the actual parent tag.    
+    in the actual parent tag.
     """
     ret = {}
     try:
         if parent.items(): ret.update(dict(parent.items()))
-        #if parent.text: return 
+        #if parent.text: return
         #if parent.text: return {"C": parent.text}
         if parent.text: ret['__content__'] = parent.text
         if ('List' in parent.tag):
@@ -133,7 +133,7 @@ def import_error():
         logger.warning("pip install xlrd")
 
 
-def read_input(args, openhook=fileinput.hook_compressed):
+def read_input(args, openhook=fileinput.hook_compressed, **kwargs):
     """Read json, jsonl and yaml data from file defined in args"""
     try:
         # FIXME these only outputs from the first line
@@ -162,7 +162,7 @@ def read_input(args, openhook=fileinput.hook_compressed):
             return
         elif args.files[0].endswith("csv"):
             import pandas
-            for val in pandas.read_csv(args.files[0]).to_dict("records"):
+            for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records"):
                 yield val
             return
     except ImportError:

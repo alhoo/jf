@@ -213,7 +213,7 @@ def profile(*args, **kwargs):
     if len(args) > 1:
         args = [open(args[0](0), 'w')]
     else:
-        args = [sys.stdout]
+        args = []
     data = list(map(result_cleaner, arr))
     df = pd.DataFrame(data)
     na_value = None
@@ -231,27 +231,47 @@ def profile(*args, **kwargs):
             pass
     profile = pandas_profiling.ProfileReport(df)
     html_report = pandas_profiling.templates.template('wrapper').render(content=profile.html)
-    args[0].write(html_report+"\n")
+    if len(args):
+        args[0].write(html_report+"\n")
+    else:
+        yield html_report
     raise StopIteration()
     #yield None
 
 
+def browser(*args, **kwargs):
+    import webbrowser
+    import tempfile
+    import time
+    arr = args[-1]
+    with tempfile.NamedTemporaryFile('w') as f:
+        for line in arr:
+            f.write(line)
+        webbrowser.open(f.name)
+        time.sleep(1) #Hack to give the browser some time
+
+
 def md(*args, **kwargs):
     from csvtomd import md_table
+    from math import isnan
     arr = args[-1]
     if len(args) > 1:
         args = [open(args[0](0), 'w')]
     else:
-        args = [sys.stdout]
+        args = []
     table = []
     first = True
     for row in map(result_cleaner, arr):
         logger.info("Writing row %s", row)
         if first:
-            table.append(list(row.keys()))
+            #table.append(list(map(str, row.keys())))
+            table.append([str(v) if v else '' for v in row.keys()])
             first = False
-        table.append(list(row.values()))
-    args[0].write(md_table(table)+"\n")
+        table.append([str(v) if isinstance(v, str) or not isnan(v) else '' for v in row.values()])
+    if len(args):
+        args[0].write(md_table(table)+"\n")
+    else:
+        yield md_table(table)+"\n"
     raise StopIteration()
     #yield None
 
@@ -501,6 +521,7 @@ def run_query(query, data, imports=None, import_from=None):
         "ipy": ipy,
         "csv": csv,
         "md": md,
+        "browser": browser,
         "profile": profile,
         "excel": excel,
         "flatten": flatten,
