@@ -67,6 +67,8 @@ def main(args=None):
                         help="unescape html entities")
     parser.add_argument('-i', '--input', metavar='FILE',
                         help='files to read. Overrides files argument list')
+    parser.add_argument('-k', '--kwargs',
+                        help='files to read. Overrides files argument list')
     parser.add_argument('files', metavar='FILE', nargs='*', default="-",
                         help='files to read, if empty, stdin is used')
     args = parser.parse_args(args)
@@ -81,7 +83,14 @@ def main(args=None):
 
     set_loggers(args.debug)
 
-    inq = read_input(args)
+    kwargs = {}
+    if args.kwargs:
+        import re
+        kwargsre = re.compile(r'([^:,]+)')
+        kwargs = kwargsre.subn(r'"\1"', args.kwargs.replace("=", ":"))[0]
+        kwargs = "{%s}" % kwargs
+        kwargs = json.loads(kwargs)
+    inq = read_input(args, **kwargs)
     imports = None
     if 'import' in args.__dict__:
         imports = args.__dict__["import"]
