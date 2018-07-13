@@ -44,6 +44,8 @@ setup(
     'regex>=2016.3.2',
     'python-dateutil>=2.6.1',
     'PyYAML>=3.12',
+    'PyYAML>=3.12',
+    'lxml>=4.0.1',
     'dateparser>=0.6.0',
     'ipython>=6.2.0',
     'csvtomd>=0.3.0',
