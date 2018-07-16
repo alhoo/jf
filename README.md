@@ -252,6 +252,7 @@ Features
   * Support stateful classes for complex interactions between items
 * drop your filtered data to IPython for manual data exploration
 * pandas profiling support for quick data exploration
+* user --ordered\_dict to keep items in order
 
 Known bugs
 ==
