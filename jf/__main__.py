@@ -53,6 +53,8 @@ def main(args=None):
                         help="sort json output values")
     parser.add_argument("--bw", action="store_true", default=False,
                         help="remove colors")
+    parser.add_argument("--ordered_dict", action="store_true", default=False,
+                        help="user ordered dict")
     parser.add_argument("-r", "--raw", action="store_true", default=False,
                         help="raw output")
     parser.add_argument("-a", "--ensure_ascii", action="store_true",
@@ -90,7 +92,7 @@ def main(args=None):
         kwargs = kwargsre.subn(r'"\1"', args.kwargs.replace("=", ":"))[0]
         kwargs = "{%s}" % kwargs
         kwargs = json.loads(kwargs)
-    inq = read_input(args, **kwargs)
+    inq = read_input(args, ordered_dict=args.ordered_dict, **kwargs)
     imports = None
     if 'import' in args.__dict__:
         imports = args.__dict__["import"]
@@ -98,7 +100,8 @@ def main(args=None):
     if args.query == '':
         query = 'I'
     data = run_query(query, inq, imports=imports,
-                     import_from=args.import_from)
+                     import_from=args.import_from,
+                     ordered_dict=args.ordered_dict)
     if args.ipy or args.ipyfake:
         banner = ''
         if not sys.stdin.isatty():

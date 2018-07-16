@@ -3,6 +3,8 @@ import sys
 import fileinput
 import logging
 
+from collections import OrderedDict
+
 import json
 import yaml
 
@@ -98,7 +100,13 @@ def print_results(data, args):
     retlist = []
     try:
         for out in data:
-            out = json.loads(json.dumps(out, cls=StructEncoder))
+            logger.info("printing %s", type(out))
+            if args.ordered_dict:
+                out = json.loads(json.dumps(out.data, cls=StructEncoder),
+                                 object_pairs_hook=OrderedDict)
+            else:
+                out = json.loads(json.dumps(out, cls=StructEncoder))
+            logger.info("out: %s", out)
             if args.list:
                 retlist.append(out)
                 continue
@@ -133,7 +141,8 @@ def import_error():
         logger.warning("pip install xlrd")
 
 
-def read_input(args, openhook=fileinput.hook_compressed, **kwargs):
+def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
+               **kwargs):
     """Read json, jsonl and yaml data from file defined in args"""
     try:
         # FIXME these only outputs from the first line
@@ -162,8 +171,12 @@ def read_input(args, openhook=fileinput.hook_compressed, **kwargs):
             return
         elif args.files[0].endswith("csv"):
             import pandas
-            for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records"):
-                yield val
+            if ordered_dict:
+                for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records", into=OrderedDict):
+                    yield val
+            else:
+                for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records"):
+                    yield val
             return
     except ImportError:
         return import_error()

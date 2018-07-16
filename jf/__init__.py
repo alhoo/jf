@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from itertools import islice, chain
-from collections import deque
+from collections import deque, OrderedDict
 from functools import reduce
 from jf.parser import parse_query
 
@@ -50,6 +50,49 @@ def parse_value(val):
         return val
 
 
+class OrderedStruct:
+    """Class representation of dict"""
+
+    def __init__(self, entries):
+        self.__jf_struct_hidden_fields = ["_Struct__jf_struct_hidden_fields"]
+        self.data = OrderedDict()
+        logger.info("Filling Ordered Struct with %s", type(entries))
+        logger.info("Filling Ordered Struct with %s", repr(entries))
+        self.update(entries)
+
+    def __getattr__(self, item):
+        """Return item attribute if exists"""
+        return self.__getitem__(item.replace("__JFESCAPED_", ''))
+
+    def __getitem__(self, item):
+        """Return item attribute if exists"""
+        if item in self.data:
+            return self.data[item]
+        return None
+
+    def dict(self):
+        """Convert item to dict"""
+        return OrderedDict([(k, v) for k, v in self.data.items()
+                if k not in self.__jf_struct_hidden_fields])
+
+    def hide(self, dct):
+        """Mark item attribute as hidden"""
+        if isinstance(dct, (list, set, tuple)):
+            self.__jf_struct_hidden_fields.extend(dct)
+        else:
+            self.__jf_struct_hidden_fields.append(dct)
+        return self
+
+    def update(self, dct):
+        """Update item with key/values from a dict"""
+        for key, val in dct.items():
+            if isinstance(val, (list, dict)):
+                self.data[key] = to_ordered_struct(val)
+            else:
+                self.data[key] = val  # parse_value(val)
+        return self
+
+
 class Struct:
     """Class representation of dict"""
 
@@ -90,6 +133,18 @@ class Struct:
         return self
 
 
+def to_ordered_struct(val):
+    """Convert v to a class representing v"""
+    logger.info("Converting %s to ordered struct", type(val))
+    if isinstance(val, OrderedDict):
+        return OrderedStruct(val)
+    if isinstance(val, dict):
+        return OrderedStruct(val)
+    if isinstance(val, list):
+        return [to_ordered_struct(a) for a in val]
+    return val
+
+
 def to_struct(val):
     """Convert v to a class representing v"""
     if isinstance(val, dict):
@@ -99,9 +154,13 @@ def to_struct(val):
     return val
 
 
-def to_struct_gen(arr):
+def to_struct_gen(arr, ordered_dict=False):
     """Convert all items in arr to struct"""
 #    logger.info("Converting to struct: %s", arr)
+    if ordered_dict:
+        logger.info("Converting array to ordered stucts")
+        #logger.info("struct item: %s", type(list(islice(arr, 1, None))[0]))
+        return (to_ordered_struct(x) for x in arr)
     return (to_struct(x) for x in arr)
 
 
@@ -396,6 +455,26 @@ def update(fun, arr):
         yield val
 
 
+class OrderedGenProcessor:
+    """Make a generator pipeline"""
+
+    def __init__(self, igen, filters):
+        """Initialize item processor"""
+        self.igen = igen
+        self._filters = filters
+
+    def add_filter(self, fun):
+        """Add filter to pipeline"""
+        self._filters.append(fun)
+
+    def process(self):
+        """Process items"""
+        pipeline = self.igen
+        for fun in self._filters:
+            pipeline = fun(to_struct_gen(pipeline, ordered_dict=True))
+        return pipeline
+
+
 class GenProcessor:
     """Make a generator pipeline"""
 
@@ -485,7 +564,7 @@ def query_convert(query):
     return query
 
 
-def run_query(query, data, imports=None, import_from=None):
+def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
     """Run a query against given data"""
     import regex as re
 #    try:
@@ -542,6 +621,9 @@ def run_query(query, data, imports=None, import_from=None):
             sys.path.append(os.path.dirname(import_from))
         globalscope.update({imp: importlib.import_module(imp)
                             for imp in imports.split(",")})
+
+    if ordered_dict:
+        globalscope["gp"] = OrderedGenProcessor
 
     try:
         res = eval(query, globalscope)
