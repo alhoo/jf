@@ -100,13 +100,11 @@ def print_results(data, args):
     retlist = []
     try:
         for out in data:
-            logger.info("printing %s", type(out))
             if args.ordered_dict:
                 out = json.loads(json.dumps(out.data, cls=StructEncoder),
                                  object_pairs_hook=OrderedDict)
             else:
                 out = json.loads(json.dumps(out, cls=StructEncoder))
-            logger.info("out: %s", out)
             if args.list:
                 retlist.append(out)
                 continue

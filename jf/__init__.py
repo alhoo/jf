@@ -228,7 +228,15 @@ def flatten(*args):
 
 def result_cleaner(val):
     """Cleanup the result"""
-    return json.loads(json.dumps(val, cls=StructEncoder))
+    #logger.info("Cleaning %s", type(val))
+    if isinstance(val, OrderedStruct):
+        logger.info("Cleaning ordered sturct")
+        val = json.loads(json.dumps(val.data, cls=StructEncoder),
+                         object_pairs_hook=OrderedDict)
+    else:
+        val = json.loads(json.dumps(val, cls=StructEncoder))
+    return val
+    #return json.loads(json.dumps(val, cls=StructEncoder))
 
 
 def excel(*args, **kwargs):
@@ -330,7 +338,8 @@ def md(*args, **kwargs):
     if len(args):
         args[0].write(md_table(table)+"\n")
     else:
-        yield md_table(table)+"\n"
+        #yield md_table(table)+"\n"
+        print(md_table(table))
     raise StopIteration()
     #yield None
 
@@ -625,9 +634,9 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
     if ordered_dict:
         globalscope["gp"] = OrderedGenProcessor
 
-    try:
-        res = eval(query, globalscope)
-        for val in res:
-            yield val
-    except (ValueError, TypeError) as ex:
-        logger.warning("Exception: %s", repr(ex))
+#    try:
+    res = eval(query, globalscope)
+    for val in res:
+        yield val
+#    except (ValueError, TypeError) as ex:
+#        logger.warning("Exception: %s", repr(ex))
