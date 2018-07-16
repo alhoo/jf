@@ -66,6 +66,9 @@ class OrderedStruct:
         >>> list(it.dict().keys())
         ['a']
         >>> it.c
+        >>> _ = it.hide(['b', 'a'])
+        >>> list(it.dict().keys())
+        []
         """
         self.__jf_struct_hidden_fields = ["_Struct__jf_struct_hidden_fields"]
         self.data = OrderedDict()
@@ -465,7 +468,10 @@ def hide(elements, arr):
 
 
 def firstnlast(*args):
-    """Show first and last (N) items"""
+    """Show first and last (N) items
+    >>> firstnlast(lambda x: 2, [1,2,3,4,5])
+    [[1, 2], [4, 5]]
+    """
     arr = args[-1]
     shown = 1
     if len(args) == 2:
@@ -509,7 +515,12 @@ class OrderedGenProcessor:
     """Make a generator pipeline"""
 
     def __init__(self, igen, filters):
-        """Initialize item processor"""
+        """Initialize item processor
+        >>> gp = OrderedGenProcessor(['a','21','3'], [lambda arr: map(len, arr)])
+        >>> gp.add_filter(lambda arr: filter(lambda x: x > 1, arr))
+        >>> list(gp.process())
+        [2]
+        """
         self.igen = igen
         self._filters = filters
 
