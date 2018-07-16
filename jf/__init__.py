@@ -280,15 +280,8 @@ def result_cleaner(val):
 
 def excel(*args, **kwargs):
     """Convert input to excel
-    >>> excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
-    Traceback (most recent call last):
-      File "/usr/lib/python3.5/doctest.py", line 1321, in __run
-        compileflags, 1), test.globs)
-      File "<doctest jf.excel[0]>", line 1, in <module>
-        excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
-      File "/home/lasse/Desktop/programming/jf/jf/__init__.py", line 298, in excel
-        raise StopIteration()
-    StopIteration: All results written
+    >>> list(excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}]))
+    []
     """
     import pandas as pd
     arr = args[-1]
@@ -301,7 +294,8 @@ def excel(*args, **kwargs):
     df = pd.DataFrame(list(map(result_cleaner, arr)))
     df.to_excel(writer)
     writer.save()
-    raise StopIteration("All results written")
+    return
+    yield
 
 
 def profile(*args, **kwargs):
@@ -356,7 +350,8 @@ def profile(*args, **kwargs):
         args[0].write(html_report+"\n")
     else:
         yield html_report
-    raise StopIteration()
+    return
+    yield
 
 
 def browser(*args, **kwargs):
@@ -391,7 +386,8 @@ def md(*args, **kwargs):
         args[0].write(md_table(table)+"\n")
     else:
         print(md_table(table))
-    raise StopIteration()
+    return
+    yield
 
 
 def csv(*args, **kwargs):
@@ -409,7 +405,8 @@ def csv(*args, **kwargs):
             r.writerow(row.keys())
             first = False
         r.writerow(row.values())
-    raise StopIteration()
+    return
+    yield
 
 
 def ipy(banner, data, fakerun=False):
@@ -575,7 +572,20 @@ def colorize(ex):
 
 
 def query_convert(query):
-    """Convert query for evaluation"""
+    """Convert query for evaluation
+
+    >>> cmd = 'map({id: x.a, data: x.b.d'
+    >>> query_convert(cmd)
+    Traceback (most recent call last):
+      File "/usr/lib/python3.7/doctest.py", line 1329, in __run
+        compileflags, 1), test.globs)
+      File "<doctest jf.query_convert[1]>", line 1, in <module>
+        query_convert(cmd)
+      File "/home/lasse/Desktop/programming/jf/jf/__init__.py", line 610, in query_convert
+        raise SyntaxError
+      File "<string>", line None
+    SyntaxError: <no detail available>
+    """
     import regex as re
     indentre = re.compile(r'\n *')
     namere = re.compile(r'([{,] *)([^{} "\[\]\',]+):')
@@ -604,7 +614,7 @@ def query_convert(query):
         ijfkwre = re.compile(r'\.__JFESCAPED_([a-z]+[.)><\!=, ])')
         query = ijfkwre.sub(r'.\1', query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
-        raise StopIteration
+        raise SyntaxError
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)
