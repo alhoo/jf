@@ -70,7 +70,7 @@ kwargre = re.compile(r'[^!><=]+=[^><=]+')
 
 def tag_keywords(val):
     """Tag keywords"""
-    return (val, kwargre.match(val) is None)
+    return val, kwargre.match(val) is None
 
 
 def join_tokens(arr):

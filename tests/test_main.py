@@ -47,6 +47,10 @@ class TestJfMain(unittest.TestCase):
         """Test log setting"""
         main(['--list', 'I', 'tests/test.jsonl'])
 
+    def test_main_jsonl3(self):
+        """Test log setting"""
+        main(['-k', 'sep=;', '--list', 'I', 'tests/test.jsonl'])
+
     def test_main_help(self):
         """Test log setting"""
         with self.assertRaises(SystemExit):

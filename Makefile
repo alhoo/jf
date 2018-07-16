@@ -16,7 +16,7 @@ jf/jsonlgen.so: jf/jsonlgen.o
 
 
 test: jf/jsonlgen.so
-	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-id tests/
+	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-doctest
 
 devinstall: README.rst
 	pip install -e .

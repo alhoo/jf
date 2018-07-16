@@ -8,16 +8,14 @@ from collections import OrderedDict
 import json
 import yaml
 
-#import cElementTree as ElementTree
 from lxml import etree as ElementTree
-from lxml import etree, objectify
 
 from pygments import highlight
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import get_lexer_by_name
 
 from jf import StructEncoder
-from jf import jsonlgen
+from jf import jsonlgen  # cpython from jsonlgen.cc
 
 logger = logging.getLogger(__name__)
 
@@ -38,14 +36,15 @@ def formatXML(parent):
     as dicts and lists.
     Decision to add a list is to find the 'List' word
     in the actual parent tag.
+    >>> tree = ElementTree.fromstring('<doc><a>1</a></doc>')
+    >>> formatXML(tree)
+    {'a': '1'}
     """
     ret = {}
     try:
         if parent.items(): ret.update(dict(parent.items()))
-        #if parent.text: return
-        #if parent.text: return {"C": parent.text}
         if parent.text: ret['__content__'] = parent.text
-        if ('List' in parent.tag):
+        if 'List' in parent.tag:
             ret['__list__'] = []
             for element in parent:
                 ret['__list__'].append(formatXML(element))
@@ -147,7 +146,6 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
         if args.files[0].endswith("xml"):
             tree = ElementTree.parse(args.files[0])
             root = tree.getroot()
-            #xmldict = XmlDictConfig(root)
             xmldict = formatXML(root)
             logger.info("Got dict from xml %s", xmldict)
             yield xmldict
@@ -156,7 +154,6 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
             parser = ElementTree.HTMLParser()
             tree = ElementTree.parse(args.files[0], parser=parser)
             root = tree.getroot()
-            #xmldict = XmlDictConfig(root)
             xmldict = formatXML(root)
             logger.info("Got dict from xml %s", xmldict)
             yield xmldict
@@ -180,7 +177,6 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
         return import_error()
 
     data = ''
-    # inf = fileinput.input(files=args.files, openhook=openhook)
     inp = json.loads
     inf = (x.decode('UTF-8') for x in
            fileinput.input(files=args.files, openhook=openhook, mode='rb'))
@@ -193,7 +189,6 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
                 obj = json.loads(val)
                 yield obj
             except json.JSONDecodeError as ex:
-                # logger.warning('Error while parsing json: "%s"', ex.msg);
                 logger.warning("Exception %s", repr(ex))
                 jerr = colorize_json_error(ex)
                 logger.warning("Error at code marker q4eh\ndata:\n%s", jerr)

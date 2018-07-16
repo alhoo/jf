@@ -54,6 +54,19 @@ class OrderedStruct:
     """Class representation of dict"""
 
     def __init__(self, entries):
+        """
+        :param entries: data used to make the ordered struct
+
+        >>> it = OrderedStruct(OrderedDict([['a', 3], ['b', 19]]))
+        >>> it.a
+        3
+        >>> it.dict()['b']
+        19
+        >>> _ = it.hide('b')
+        >>> list(it.dict().keys())
+        ['a']
+        >>> it.c
+        """
         self.__jf_struct_hidden_fields = ["_Struct__jf_struct_hidden_fields"]
         self.data = OrderedDict()
         logger.info("Filling Ordered Struct with %s", type(entries))
@@ -134,7 +147,11 @@ class Struct:
 
 
 def to_ordered_struct(val):
-    """Convert v to a class representing v"""
+    """Convert v to a class representing v
+    >>> arr = list(to_ordered_struct([{'a': 1}, {'a': 3}]))
+    >>> arr[0].a
+    1
+    """
     logger.info("Converting %s to ordered struct", type(val))
     if isinstance(val, OrderedDict):
         return OrderedStruct(val)
@@ -156,10 +173,8 @@ def to_struct(val):
 
 def to_struct_gen(arr, ordered_dict=False):
     """Convert all items in arr to struct"""
-#    logger.info("Converting to struct: %s", arr)
     if ordered_dict:
         logger.info("Converting array to ordered stucts")
-        #logger.info("struct item: %s", type(list(islice(arr, 1, None))[0]))
         return (to_ordered_struct(x) for x in arr)
     return (to_struct(x) for x in arr)
 
@@ -197,6 +212,21 @@ def jfislice(*args):
 
 
 def flatten_item(it, root=''):
+    """
+    Make item flat
+    :param it: item
+    :param root: root node
+    :return: flattened version of the item
+    >>> flatten_item("foo")
+    'foo'
+    >>> flatten_item({"a": 1})
+    {'a': 1}
+    >>> from pprint import pprint
+    >>> pprint(flatten_item({"a": 1, "b":{"c":2}}))
+    {'a': 1, 'b.c': 2}
+    >>> list(sorted(flatten_item({"a": 1, "b":{"c":2}}).items()))
+    [('a', 1), ('b.c', 2)]
+    """
     if not isinstance(it, dict):
         return it
     ret = {}
@@ -217,6 +247,14 @@ def flatten_item(it, root=''):
 
 
 def flatten(*args):
+    """
+    Flatten array
+    :param args: array to flatten
+    :return: array of flattened items
+    >>> from pprint import pprint
+    >>> pprint(list(flatten([{'a': 1, 'b':{'c': 2}}])))
+    [{'a': 1, 'b.c': 2}]
+    """
     logger.info("Flattening")
     arr = args[-1]
     try:
@@ -227,19 +265,31 @@ def flatten(*args):
 
 
 def result_cleaner(val):
-    """Cleanup the result"""
-    #logger.info("Cleaning %s", type(val))
+    """Cleanup the result
+    >>> result_cleaner({'a': 1})
+    {'a': 1}
+    >>> from pprint import pprint
+    >>> pprint(result_cleaner(OrderedStruct(OrderedDict([['b', 1], ['a', 2]]))))
+    OrderedDict([('b', 1), ('a', 2)])
+    """
     if isinstance(val, OrderedStruct):
-        logger.info("Cleaning ordered sturct")
-        val = json.loads(json.dumps(val.data, cls=StructEncoder),
+        return json.loads(json.dumps(val.data, cls=StructEncoder),
                          object_pairs_hook=OrderedDict)
-    else:
-        val = json.loads(json.dumps(val, cls=StructEncoder))
-    return val
-    #return json.loads(json.dumps(val, cls=StructEncoder))
+    return json.loads(json.dumps(val, cls=StructEncoder))
 
 
 def excel(*args, **kwargs):
+    """Convert input to excel
+    >>> excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
+    Traceback (most recent call last):
+      File "/usr/lib/python3.5/doctest.py", line 1321, in __run
+        compileflags, 1), test.globs)
+      File "<doctest jf.excel[0]>", line 1, in <module>
+        excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
+      File "/home/lasse/Desktop/programming/jf/jf/__init__.py", line 298, in excel
+        raise StopIteration()
+    StopIteration: All results written
+    """
     import pandas as pd
     arr = args[-1]
     if len(args) > 1:
@@ -251,8 +301,7 @@ def excel(*args, **kwargs):
     df = pd.DataFrame(list(map(result_cleaner, arr)))
     df.to_excel(writer)
     writer.save()
-    raise StopIteration()
-    #yield None
+    raise StopIteration("All results written")
 
 
 def profile(*args, **kwargs):
@@ -260,19 +309,24 @@ def profile(*args, **kwargs):
     Make a profiling report from data
 
     This function tries to convert strings to numeric values or datetime
-    objects.
+    objects and makes a html profiling report as the only result to be yielded.
+    Notice! This fails if used with ordered_dict output.
+
+    >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
+    [True]
     """
     import pandas as pd
     import pandas_profiling
-    def is_numeric(df):
+
+    def is_numeric(df_):
         try:
-            counts = df.value_counts()
+            counts = df_.value_counts()
             if len(counts) > 100:
                 pd.to_numeric(df.value_counts()[4:24].keys())
             else:
                 pd.to_numeric(df.value_counts().keys())
             return True
-        except:
+        except (ValueError, AttributeError):
             pass
         return False
 
@@ -294,16 +348,15 @@ def profile(*args, **kwargs):
                 df[col] = pd.to_numeric(df[col].str.replace(",", '.'), errors='coerce')
             else:
                 df[col] = pd.to_datetime(df[col].str.replace(",", '.'))
-        except:
+        except (AttributeError, KeyError, ValueError):
             pass
-    profile = pandas_profiling.ProfileReport(df)
-    html_report = pandas_profiling.templates.template('wrapper').render(content=profile.html)
+    profile_data = pandas_profiling.ProfileReport(df)
+    html_report = pandas_profiling.templates.template('wrapper').render(content=profile_data.html)
     if len(args):
         args[0].write(html_report+"\n")
     else:
         yield html_report
     raise StopIteration()
-    #yield None
 
 
 def browser(*args, **kwargs):
@@ -315,7 +368,7 @@ def browser(*args, **kwargs):
         for line in arr:
             f.write(line)
         webbrowser.open(f.name)
-        time.sleep(1) #Hack to give the browser some time
+        time.sleep(1)  # Hack to give the browser some time
 
 
 def md(*args, **kwargs):
@@ -331,17 +384,14 @@ def md(*args, **kwargs):
     for row in map(result_cleaner, arr):
         logger.info("Writing row %s", row)
         if first:
-            #table.append(list(map(str, row.keys())))
             table.append([str(v) if v else '' for v in row.keys()])
             first = False
         table.append([str(v) if isinstance(v, str) or not isnan(v) else '' for v in row.values()])
     if len(args):
         args[0].write(md_table(table)+"\n")
     else:
-        #yield md_table(table)+"\n"
         print(md_table(table))
     raise StopIteration()
-    #yield None
 
 
 def csv(*args, **kwargs):
@@ -360,7 +410,6 @@ def csv(*args, **kwargs):
             first = False
         r.writerow(row.values())
     raise StopIteration()
-    #yield None
 
 
 def ipy(banner, data, fakerun=False):
@@ -415,11 +464,6 @@ def hide(elements, arr):
     logger.info("Using hide-pipeline")
     for item in arr:
         item.hide(elements(item))
-#        try:
-#            item.hide(items(item))
-#        except Exception as ex:
-#            logger.warning("Got an exception while hiding")
-#            logger.warning("Exception %s", repr(ex))
         yield item
 
 
@@ -549,15 +593,11 @@ def query_convert(query):
     logger.debug("After makex: %s", query)
     query = keywordunpackingre.sub('(**x.dict())', query)
     logger.debug("After kw-unpacking: %s", query)
-    # from jf.parser import reparser
-    # q2 = query
-    # reparser(q2)
     try:
         jfkwre = re.compile(r'\.([a-z]+[.)><\!=, ])')
         query = jfkwre.sub(r'.__JFESCAPED_\1', query)
         logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
-    #except SyntaxError as ex:
     except (TypeError, SyntaxError) as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
         query = colorize(ex)
@@ -576,18 +616,8 @@ def query_convert(query):
 def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
     """Run a query against given data"""
     import regex as re
-#    try:
-#        query = simple_query_convert(query)
     query = query_convert(query)
-#    except SyntaxError:
-#        return []
-    # print("List of known functions")
-    # functiontypes = (type(map), type(json), type(print), type(run_query))
-    # isfunctypes = isinstance(x[1], functiontypes)
-    # isfunction = lambda x: x[0][0] != '_' and isfunctype
-    # global_functions = filter(functypes, globals().items())
-    # funcs = map(lambda x: (x[0], repr(type(x[1]))), global_functions)
-    # print(json.dumps(list(funcs), indent=2))
+
     globalscope = {
         "data": data,
         "gp": GenProcessor,
@@ -634,9 +664,9 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
     if ordered_dict:
         globalscope["gp"] = OrderedGenProcessor
 
-#    try:
-    res = eval(query, globalscope)
-    for val in res:
-        yield val
-#    except (ValueError, TypeError) as ex:
-#        logger.warning("Exception: %s", repr(ex))
+    try:
+        res = eval(query, globalscope)
+        for val in res:
+            yield val
+    except (ValueError, TypeError) as ex:
+        logger.warning("Exception: %s", repr(ex))
