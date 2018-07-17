@@ -66,6 +66,9 @@ class OrderedStruct:
         >>> list(it.dict().keys())
         ['a']
         >>> it.c
+        >>> _ = it.hide(['b', 'a'])
+        >>> list(it.dict().keys())
+        []
         """
         self.__jf_struct_hidden_fields = ["_Struct__jf_struct_hidden_fields"]
         self.data = OrderedDict()
@@ -226,6 +229,8 @@ def flatten_item(it, root=''):
     {'a': 1, 'b.c': 2}
     >>> list(sorted(flatten_item({"a": 1, "b":{"c":2}}).items()))
     [('a', 1), ('b.c', 2)]
+    >>> list(sorted(flatten_item({"a": 1, "b":[1,2]}).items()))
+    [('a', 1), ('b.0', 1), ('b.1', 2)]
     """
     if not isinstance(it, dict):
         return it
@@ -238,8 +243,12 @@ def flatten_item(it, root=''):
                 ret[k2] = v2
         elif isinstance(val, list):
             for idx, v2 in enumerate(val):
-                for k3, v3 in flatten_item(v2, key+'.%d.' % idx).items():
-                    ret[k3] = v3
+                dct2 = flatten_item(v2, key+'.%d.' % idx)
+                if isinstance(dct2, dict):
+                    for k3, v3 in dct2.items():
+                        ret[k3] = v3
+                else:
+                    ret[key+".%d" % idx] = dct2
         else:
             ret[root+key] = val
     logger.debug("Flattening %s => %s", it, ret)
@@ -280,15 +289,8 @@ def result_cleaner(val):
 
 def excel(*args, **kwargs):
     """Convert input to excel
-    >>> excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
-    Traceback (most recent call last):
-      File "/usr/lib/python3.5/doctest.py", line 1321, in __run
-        compileflags, 1), test.globs)
-      File "<doctest jf.excel[0]>", line 1, in <module>
-        excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
-      File "/home/lasse/Desktop/programming/jf/jf/__init__.py", line 298, in excel
-        raise StopIteration()
-    StopIteration: All results written
+    >>> list(excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}]))
+    []
     """
     import pandas as pd
     arr = args[-1]
@@ -301,7 +303,8 @@ def excel(*args, **kwargs):
     df = pd.DataFrame(list(map(result_cleaner, arr)))
     df.to_excel(writer)
     writer.save()
-    raise StopIteration("All results written")
+    return
+    yield
 
 
 def profile(*args, **kwargs):
@@ -314,6 +317,8 @@ def profile(*args, **kwargs):
 
     >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
     [True]
+    >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}]))
+    []
     """
     import pandas as pd
     import pandas_profiling
@@ -322,6 +327,7 @@ def profile(*args, **kwargs):
         try:
             counts = df_.value_counts()
             if len(counts) > 100:
+                # Only look a some of the values if we have a large input dataset
                 pd.to_numeric(df.value_counts()[4:24].keys())
             else:
                 pd.to_numeric(df.value_counts().keys())
@@ -356,10 +362,13 @@ def profile(*args, **kwargs):
         args[0].write(html_report+"\n")
     else:
         yield html_report
-    raise StopIteration()
+    return
+    yield
 
 
 def browser(*args, **kwargs):
+    """ Send output to browser (no unittesting available)
+    """
     import webbrowser
     import tempfile
     import time
@@ -391,7 +400,8 @@ def md(*args, **kwargs):
         args[0].write(md_table(table)+"\n")
     else:
         print(md_table(table))
-    raise StopIteration()
+    return
+    yield
 
 
 def csv(*args, **kwargs):
@@ -409,7 +419,8 @@ def csv(*args, **kwargs):
             r.writerow(row.keys())
             first = False
         r.writerow(row.values())
-    raise StopIteration()
+    return
+    yield
 
 
 def ipy(banner, data, fakerun=False):
@@ -468,7 +479,10 @@ def hide(elements, arr):
 
 
 def firstnlast(*args):
-    """Show first and last (N) items"""
+    """Show first and last (N) items
+    >>> firstnlast(lambda x: 2, [1,2,3,4,5])
+    [[1, 2], [4, 5]]
+    """
     arr = args[-1]
     shown = 1
     if len(args) == 2:
@@ -512,7 +526,12 @@ class OrderedGenProcessor:
     """Make a generator pipeline"""
 
     def __init__(self, igen, filters):
-        """Initialize item processor"""
+        """Initialize item processor
+        >>> gp = OrderedGenProcessor(['a','21','3'], [lambda arr: map(len, arr)])
+        >>> gp.add_filter(lambda arr: filter(lambda x: x > 1, arr))
+        >>> list(gp.process())
+        [2]
+        """
         self.igen = igen
         self._filters = filters
 
@@ -575,7 +594,20 @@ def colorize(ex):
 
 
 def query_convert(query):
-    """Convert query for evaluation"""
+    """Convert query for evaluation
+
+    >>> cmd = 'map({id: x.a, data: x.b.d'
+    >>> query_convert(cmd)
+    Traceback (most recent call last):
+      File "/usr/lib/python3.7/doctest.py", line 1329, in __run
+        compileflags, 1), test.globs)
+      File "<doctest jf.query_convert[1]>", line 1, in <module>
+        query_convert(cmd)
+      File "/home/lasse/Desktop/programming/jf/jf/__init__.py", line 610, in query_convert
+        raise SyntaxError
+      File "<string>", line None
+    SyntaxError: <no detail available>
+    """
     import regex as re
     indentre = re.compile(r'\n *')
     namere = re.compile(r'([{,] *)([^{} "\[\]\',]+):')
@@ -604,7 +636,7 @@ def query_convert(query):
         ijfkwre = re.compile(r'\.__JFESCAPED_([a-z]+[.)><\!=, ])')
         query = ijfkwre.sub(r'.\1', query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
-        raise StopIteration
+        raise SyntaxError
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)
