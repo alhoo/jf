@@ -229,6 +229,8 @@ def flatten_item(it, root=''):
     {'a': 1, 'b.c': 2}
     >>> list(sorted(flatten_item({"a": 1, "b":{"c":2}}).items()))
     [('a', 1), ('b.c', 2)]
+    >>> list(sorted(flatten_item({"a": 1, "b":[1,2]}).items()))
+    [('a', 1), ('b.0', 1), ('b.1', 2)]
     """
     if not isinstance(it, dict):
         return it
@@ -241,8 +243,12 @@ def flatten_item(it, root=''):
                 ret[k2] = v2
         elif isinstance(val, list):
             for idx, v2 in enumerate(val):
-                for k3, v3 in flatten_item(v2, key+'.%d.' % idx).items():
-                    ret[k3] = v3
+                dct2 = flatten_item(v2, key+'.%d.' % idx)
+                if isinstance(dct2, dict):
+                    for k3, v3 in dct2.items():
+                        ret[k3] = v3
+                else:
+                    ret[key+".%d" % idx] = dct2
         else:
             ret[root+key] = val
     logger.debug("Flattening %s => %s", it, ret)
@@ -311,6 +317,8 @@ def profile(*args, **kwargs):
 
     >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
     [True]
+    >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}]))
+    []
     """
     import pandas as pd
     import pandas_profiling
@@ -319,6 +327,7 @@ def profile(*args, **kwargs):
         try:
             counts = df_.value_counts()
             if len(counts) > 100:
+                # Only look a some of the values if we have a large input dataset
                 pd.to_numeric(df.value_counts()[4:24].keys())
             else:
                 pd.to_numeric(df.value_counts().keys())
@@ -358,6 +367,8 @@ def profile(*args, **kwargs):
 
 
 def browser(*args, **kwargs):
+    """ Send output to browser (no unittesting available)
+    """
     import webbrowser
     import tempfile
     import time
