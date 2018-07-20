@@ -53,7 +53,7 @@ def main(args=None):
                         help="sort json output values")
     parser.add_argument("--bw", action="store_true", default=False,
                         help="remove colors")
-    parser.add_argument("--ordered_dict", action="store_true", default=False,
+    parser.add_argument("--ordered_dict", action="store_true", default=True,
                         help="user ordered dict")
     parser.add_argument("-r", "--raw", action="store_true", default=False,
                         help="raw output")
