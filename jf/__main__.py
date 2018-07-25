@@ -5,8 +5,9 @@ import json
 import argparse
 import logging
 
-from jf import run_query, ipy
-from jf.io import read_input, print_results
+from jf import run_query
+from jf.output import ipy, print_results
+from jf.input import read_input
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ def main(args=None):
                         help="sort json output values")
     parser.add_argument("--bw", action="store_true", default=False,
                         help="remove colors")
-    parser.add_argument("--ordered_dict", action="store_true", default=False,
+    parser.add_argument("--ordered_dict", action="store_true", default=True,
                         help="user ordered dict")
     parser.add_argument("-r", "--raw", action="store_true", default=False,
                         help="raw output")
