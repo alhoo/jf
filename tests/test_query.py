@@ -7,18 +7,21 @@ import re
 from datetime import datetime, date
 
 import jf
+import jf.process as process
+from jf.meta import Struct
+import jf.output as output
 
 
 def tolist(igen):
     """Convert gen to list"""
-    return json.dumps([x for x in igen], cls=jf.StructEncoder, sort_keys=True)
+    return json.dumps([x for x in igen], cls=process.StructEncoder, sort_keys=True)
 
 
 class TestJfGenProcessor(unittest.TestCase):
     """Basic jf io testcases"""
 
     def test_param_list(self):
-        gp = jf.GenProcessor((1, 2, 3), [lambda arr: map(lambda x: 2*x, arr)])
+        gp = process.GenProcessor((1, 2, 3), [lambda arr: map(lambda x: 2*x, arr)])
         gp.add_filter(lambda arr: map(lambda x: 2*x, arr))
         self.assertEqual(list(gp.process()), [4, 8, 12])
 
@@ -28,40 +31,40 @@ class TestJfFunctions(unittest.TestCase):
 
     def test_result_cleaner(self):
         """Test peeking"""
-        st = jf.Struct(**{"a": 3})
-        res = jf.result_cleaner([st])
+        st = Struct(**{"a": 3})
+        res = output.result_cleaner([st])
         self.assertEqual(res, [{"a": 3}])
 
     def test_result_cleaner2(self):
         """Test peeking"""
-        st = jf.Struct(**{"a": datetime(2018, 1, 1)})
-        res = jf.result_cleaner([st])
+        st = Struct(**{"a": datetime(2018, 1, 1)})
+        res = output.result_cleaner([st])
         self.assertEqual(res, [{"a": '2018-01-01 00:00:00'}])
 
     def test_peek(self):
         """Test peeking"""
         data = [1, 2, 3]
-        head, data = jf.peek(data, 1)
+        head, data = output.peek(data, 1)
         self.assertEqual(head, [1])
         self.assertEqual(list(data), [1, 2, 3])
 
     def test_peek_2(self):
         """Test peeking"""
         data = [1, 2, 3]
-        head, data = jf.peek(data, 2)
+        head, data = output.peek(data, 2)
         self.assertEqual(head, [1, 2])
         self.assertEqual(list(data), [1, 2, 3])
 
     def test_unique(self):
         """Test date parsing"""
-        result = tolist(jf.unique([1,2,4,5,5,6,7]))
+        result = tolist(process.unique([1,2,4,5,5,6,7]))
         expected = tolist([1,2,4,5,6,7])
         self.assertEqual(result, expected)
 
     def test_unique2(self):
         """Test date parsing"""
         fieldsel = lambda x: x["b"]
-        result = tolist(jf.unique(fieldsel, [
+        result = tolist(process.unique(fieldsel, [
           {"a": 235, "b": 643},
           {"a": 435, "b": 643},
           {"a": 636, "b": 636},
@@ -77,7 +80,7 @@ class TestJfFunctions(unittest.TestCase):
     def test_unique3(self):
         """Test date parsing"""
         fieldsel = lambda x: repr(x["b"] == x["a"])
-        result = tolist(jf.unique(fieldsel, [
+        result = tolist(process.unique(fieldsel, [
           {"a": 235, "b": 643},
           {"a": 435, "b": 643},
           {"a": 636, "b": 636},
@@ -91,73 +94,73 @@ class TestJfFunctions(unittest.TestCase):
 
     def test_dateparser(self):
         """Test date parsing"""
-        result = jf.parse_value("2018-01-01")
+        result = process.parse_value("2018-01-01")
         expected = datetime(2018, 1, 1, 0, 0)
         self.assertEqual(result, expected)
 
     def test_dateparser_nondate(self):
         """Test date parsing"""
-        result = jf.parse_value({"not": "a date"})
+        result = process.parse_value({"not": "a date"})
         expected = {"not": "a date"}
         self.assertEqual(result, expected)
 
     def test_dateparser_nondate2(self):
         """Test date parsing"""
-        result = jf.parse_value("n")
+        result = process.parse_value("n")
         expected = "n"
         self.assertEqual(result, expected)
 
     def test_dateparser_nondate3(self):
         """Test date parsing"""
-        result = jf.parse_value("not a date")
+        result = process.parse_value("not a date")
         expected = "not a date"
         self.assertEqual(result, expected)
 
     def test_dateparser_empty(self):
         """Test date parsing"""
-        result = jf.parse_value("")
+        result = process.parse_value("")
         expected = ""
         self.assertEqual(result, expected)
 
     def test_yield_all(self):
-        result = list(jf.yield_all(lambda x: x, [[1, 2], [3, 4]]))
+        result = list(process.yield_all(lambda x: x, [[1, 2], [3, 4]]))
         expected = [1, 2, 3, 4]
         self.assertEqual(result, expected)
 
     def test_last(self):
-        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
-        result = tolist(jf.last(lambda x: 1, igen))
+        igen = process.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(process.last(lambda x: 1, igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_last_str(self):
         """last() doesn't know how to handle strings"""
-        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
-        result = tolist(jf.last(lambda x: "2", igen))
+        igen = process.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(process.last(lambda x: "2", igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_first(self):
-        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
-        result = tolist(jf.first(lambda x: 1, igen))
+        igen = process.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(process.first(lambda x: 1, igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
     def test_first_str(self):
         """first() doesn't know how to handle strings"""
-        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
-        result = tolist(jf.first(lambda x: "2", igen))
+        igen = process.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(process.first(lambda x: "2", igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
     def test_update(self):
-        igen = jf.to_struct_gen([{"a": 1},{"a": 2}])
-        result = tolist(jf.update(lambda x: {"b": x["a"] + 1}, igen))
+        igen = process.to_struct_gen([{"a": 1},{"a": 2}])
+        result = tolist(process.update(lambda x: {"b": x["a"] + 1}, igen))
         expected = '[{"a": 1, "b": 2}, {"a": 2, "b": 3}]'
         self.assertEqual(result, expected)
 
     def test_reduce_list(self):
-        result = jf.reduce_list(None, [1, 2])
+        result = process.reduce_list(None, [1, 2])
         expected = [[1, 2]]
         self.assertEqual(result, expected)
 
@@ -165,7 +168,7 @@ class TestJfFunctions(unittest.TestCase):
         result = None
         try:
             query = "{x.id]"
-            query = jf.parse_query(query).rstrip(",")
+            query = process.parse_query(query).rstrip(",")
         except SyntaxError as ex:
             print(ex)
             result = jf.colorize(ex)
@@ -242,7 +245,7 @@ class TestJf(unittest.TestCase):
     def test_ipython(self):
         """Test simple query"""
 
-        jf.ipy(None, [1, 2, 3], fakerun=True)
+        output.ipy(None, [1, 2, 3], fakerun=True)
 
     def test_get_item(self):
         """Test simple query"""

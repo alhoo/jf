@@ -7,9 +7,9 @@ import yaml
 
 from io import BytesIO
 
-from jf.io import read_input, yield_json_and_json_lines
-from jf.io import print_results, import_error
-from jf import Struct
+from jf.input import read_input, yield_json_and_json_lines, import_error
+from jf.output import print_results
+from jf.meta import Struct
 
 from contextlib import contextmanager
 from io import StringIO
