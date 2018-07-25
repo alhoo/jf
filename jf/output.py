@@ -93,6 +93,9 @@ def result_cleaner(val):
     if isinstance(val, OrderedStruct):
         return json.loads(json.dumps(val.data, cls=StructEncoder),
                          object_pairs_hook=OrderedDict)
+    elif isinstance(val, OrderedDict):
+        return json.loads(json.dumps(val, cls=StructEncoder),
+                         object_pairs_hook=OrderedDict)
     return json.loads(json.dumps(val, cls=StructEncoder))
 
 
@@ -190,6 +193,13 @@ def browser(*args, **kwargs):
 
 
 def md(*args, **kwargs):
+    """ Convert dict to markdown
+    >>> r = list(md([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])]))
+    a  |  b
+    ---|---
+    1  |  2
+    2  |  3
+    """
     from csvtomd import md_table
     from math import isnan
     arr = args[-1]
@@ -214,6 +224,12 @@ def md(*args, **kwargs):
 
 
 def csv(*args, **kwargs):
+    """ Convert dict to markdown
+    >>> r = list(csv([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])], lineterminator="\\n"))
+    a,b
+    1,2
+    2,3
+    """
     import csv
     arr = args[-1]
     if len(args) > 1:
