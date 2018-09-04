@@ -121,7 +121,21 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
     inp = json.loads
     inf = (x.decode('UTF-8') for x in
            fileinput.input(files=args.files, openhook=openhook, mode='rb'))
+
+    def generic_constructor(loader, tag, node):
+        classname = node.__class__.__name__
+        if (classname == 'SequenceNode'):
+            return loader.construct_sequence(node)
+        elif (classname == 'MappingNode'):
+            return loader.construct_mapping(node)
+        else:
+            return loader.construct_scalar(node)
+
+
+    yaml.add_multi_constructor('', generic_constructor)
+
     if args.yamli or args.files[0].endswith("yaml"):
+
         inp = yaml.load
         data = "\n".join([l for l in inf])
     else:
