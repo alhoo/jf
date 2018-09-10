@@ -46,7 +46,7 @@ def print_results(data, args):
                     out = json.loads(json.dumps(out, cls=StructEncoder),
                                      object_pairs_hook=OrderedDict)
                 else:
-                    out = json.loads(json.dumps(out.data, cls=StructEncoder),
+                    out = json.loads(json.dumps(out.dict(), cls=StructEncoder),
                                      object_pairs_hook=OrderedDict)
             else:
                 out = json.loads(json.dumps(out, cls=StructEncoder))
