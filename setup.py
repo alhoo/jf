@@ -50,7 +50,7 @@ setup(
     'ipython>=6.2.0',
     'csvtomd>=0.3.0',
     'pandas>=0.22.0',
-    'pandas-profiling>=1.4.1'
+    'pandas-profiling==1.4.0'
   ],
   tests_require = [
     'nose>=1.3.0',
