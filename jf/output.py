@@ -42,12 +42,14 @@ def print_results(data, args):
     try:
         for out in data:
             if args.ordered_dict:
-                if isinstance(out, str):
-                    out = json.loads(json.dumps(out, cls=StructEncoder),
-                                     object_pairs_hook=OrderedDict)
-                else:
+                if not isinstance(out, str):
                     out = json.loads(json.dumps(out.dict(), cls=StructEncoder),
                                      object_pairs_hook=OrderedDict)
+                elif args.raw:
+                    print(out)
+                    continue
+#                    out = json.loads(json.dumps(out, cls=StructEncoder),
+#                                     object_pairs_hook=OrderedDict)
             else:
                 out = json.loads(json.dumps(out, cls=StructEncoder))
             if args.list:
