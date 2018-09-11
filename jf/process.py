@@ -155,7 +155,6 @@ def unique(*args):
 
 def hide(elements, arr):
     """Hide elements from items"""
-    logger.info("Using hide-pipeline")
     for item in arr:
         item.hide(elements(item))
         yield item
@@ -201,7 +200,10 @@ def last(*args):
 def update(fun, arr):
     """update all items using function"""
     for val in arr:
-        val.__dict__.update(fun(val))
+        if val.data is not None:
+            val.data.update(fun(val))
+        else:
+            val.update(fun(val))
         yield val
 
 
