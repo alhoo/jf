@@ -42,12 +42,17 @@ def print_results(data, args):
     try:
         for out in data:
             if args.ordered_dict:
-                if isinstance(out, list) or isinstance(out, str):
+                if isinstance(out, list):
                     out = json.loads(json.dumps(out, cls=StructEncoder),
                                      object_pairs_hook=OrderedDict)
-                else:
+                elif not isinstance(out, str):
                     out = json.loads(json.dumps(out.dict(), cls=StructEncoder),
                                      object_pairs_hook=OrderedDict)
+                elif args.raw:
+                    print(out)
+                    continue
+#                    out = json.loads(json.dumps(out, cls=StructEncoder),
+#                                     object_pairs_hook=OrderedDict)
             else:
                 out = json.loads(json.dumps(out, cls=StructEncoder))
             if args.list:
@@ -137,6 +142,7 @@ def profile(*args, **kwargs):
     []
     """
     import pandas as pd
+    from pandas.io.json import json_normalize
     import pandas_profiling
 
     def is_numeric(df_):
@@ -158,7 +164,10 @@ def profile(*args, **kwargs):
     else:
         args = []
     data = list(map(result_cleaner, arr))
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(json_normalize(data))
+    #df = pd.DataFrame(data)
+    #df = pd.DataFrame([{k: str(v) for k, v in it.items()} for it in data])
+    #print(df)
     na_value = None
     if 'nan' in kwargs:
         na_value = kwargs['nan']
@@ -170,7 +179,7 @@ def profile(*args, **kwargs):
                 df[col] = pd.to_numeric(df[col].str.replace(",", '.'), errors='coerce')
             else:
                 df[col] = pd.to_datetime(df[col].str.replace(",", '.'))
-        except (AttributeError, KeyError, ValueError):
+        except (AttributeError, KeyError, ValueError, OverflowError):
             pass
     profile_data = pandas_profiling.ProfileReport(df)
     html_report = pandas_profiling.templates.template('wrapper').render(content=profile_data.html)
