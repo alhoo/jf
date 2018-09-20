@@ -102,7 +102,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
         elif args.files[0].endswith("xlsx"):
             import xlrd
             import pandas
-            for val in pandas.read_excel(args.files[0]).to_dict("records"):
+            for val in pandas.read_excel(args.files[0]).to_dict("records", into=OrderedDict):
                 yield val
             return
         elif args.files[0].endswith("csv"):
