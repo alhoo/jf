@@ -141,7 +141,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
     else:
         for val in yield_json_and_json_lines(inf):
             try:
-                obj = json.loads(val)
+                obj = json.loads(val, object_pairs_hook=OrderedDict)
                 yield obj
             except json.JSONDecodeError as ex:
                 logger.warning("Exception %s", repr(ex))
