@@ -122,6 +122,18 @@ def flatten(*args):
         logger.error("Got an value error while flattening dict %s", err)
 
 
+def transpose(*args):
+    import pandas as pd
+    arr = args[-1]
+    data = [x.dict() for x in arr]
+    #data = arr[0]
+    df = pd.DataFrame(data).T
+    df['key'] = df.index
+    df.columns = ['value', 'key']
+    for it in df[['key', 'value']].T.to_dict(into=OrderedDict).values():
+        yield OrderedStruct(it)
+
+
 def reduce_list(*args):
     """Reduce array to a single list"""
     ret = []
