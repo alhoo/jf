@@ -123,6 +123,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "excel": output.excel,
         "flatten": process.flatten,
         "reduce": reduce,
+        "transpose": process.transpose,
         "reduce_list": process.reduce_list,
         "yield_all": process.yield_all,
         "yield_from": process.yield_all,
