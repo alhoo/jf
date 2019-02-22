@@ -42,15 +42,6 @@ def query_convert(query):
 
     >>> cmd = 'map({id: x.a, data: x.b.d'
     >>> query_convert(cmd)
-    Traceback (most recent call last):
-      File "/usr/lib/python3.7/doctest.py", line 1329, in __run
-        compileflags, 1), test.globs)
-      File "<doctest jf.query_convert[1]>", line 1, in <module>
-        query_convert(cmd)
-      File "/home/lasse/Desktop/programming/jf/jf/__init__.py", line 610, in query_convert
-        raise SyntaxError
-      File "<string>", line None
-    SyntaxError: <no detail available>
     """
     import regex as re
     indentre = re.compile(r'\n *')
@@ -81,6 +72,7 @@ def query_convert(query):
         query = ijfkwre.sub(r'.\1', query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
         # raise SyntaxError
+        return
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)

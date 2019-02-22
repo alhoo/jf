@@ -204,7 +204,7 @@ def browser(*args, **kwargs):
 
 def md(*args, **kwargs):
     """ Convert dict to markdown
-    >>> r = list(md([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])]))
+    >>> md([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
     a  |  b
     ---|---
     1  |  2
@@ -233,7 +233,7 @@ def md(*args, **kwargs):
 
 def csv(*args, **kwargs):
     """ Convert dict to markdown
-    >>> r = list(csv([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])], lineterminator="\\n"))
+    >>> csv([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])], lineterminator="\\n")
     a,b
     1,2
     2,3
