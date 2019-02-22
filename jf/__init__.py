@@ -128,6 +128,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "yield_all": process.yield_all,
         "yield_from": process.yield_all,
         "group": process.reduce_list,
+        "group_by": process.group_by,
         "chain": process.reduce_list,
         "sorted": lambda x, arr=None, **kwargs: sorted(arr, key=x, **kwargs),
         "datetime": datetime,

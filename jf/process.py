@@ -149,6 +149,19 @@ def yield_all(fun, arr):
             yield val
 
 
+def group_by(fun, arr):
+    """Group items by value"""
+    ret = {}
+    for item in arr:
+        val = fun(item)
+        if val in ret:
+            ret[val].append(item)
+        else:
+            ret[val] = [item]
+    for k,v in ret.items():
+        yield {"key": k, "items": v}
+
+
 def unique(*args):
     """Calculate unique according to function"""
     if len(args) > 1:
