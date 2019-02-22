@@ -3,6 +3,7 @@ import logging
 from collections import OrderedDict
 logger = logging.getLogger(__name__)
 
+
 class OrderedStruct:
     """Class representation of dict"""
 
@@ -10,7 +11,7 @@ class OrderedStruct:
         """
         :param entries: data used to make the ordered struct
 
-        >>> it = OrderedStruct(OrderedDict([['a', 3], ['b', 19]]))
+        >>> it = OrderedStruct(OrderedDict([('a', 3), ('b', 19)]))
         >>> it.a
         3
         >>> it.dict()['b']
@@ -42,7 +43,7 @@ class OrderedStruct:
     def dict(self):
         """Convert item to dict"""
         return OrderedDict([(k, v) for k, v in self.data.items()
-                if k not in self.__jf_struct_hidden_fields])
+                            if k not in self.__jf_struct_hidden_fields])
 
     def hide(self, dct):
         """Mark item attribute as hidden"""
@@ -146,5 +147,3 @@ class StructEncoder(json.JSONEncoder):
                 return obj.__dict__
             except AttributeError:
                 return obj.__str__()
-
-

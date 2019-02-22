@@ -1,15 +1,11 @@
 """Pyq python json/yaml query engine"""
 
-import sys
-import json
 import logging
 from datetime import datetime, timezone
-from itertools import islice, chain
+from itertools import islice
 from collections import deque, OrderedDict
-from functools import reduce
-from jf.parser import parse_query
 from jf.output import result_cleaner
-from jf.meta import OrderedStruct, StructEncoder, to_struct_gen
+from jf.meta import OrderedStruct, to_struct_gen
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +14,6 @@ def age(datestr):
     """Try to guess the age of datestr"""
     from dateparser import parse as parsedate
     logger.debug("Calculating the age of '%s'", datestr)
-    ret = 0
     try:
         ret = datetime.now() - parsedate(str(datestr))
     except TypeError:
@@ -126,7 +121,7 @@ def transpose(*args):
     import pandas as pd
     arr = args[-1]
     data = [x.dict() for x in arr]
-    #data = arr[0]
+    # data = arr[0]
     df = pd.DataFrame(data).T
     df['key'] = df.index
     df.columns = ['value', 'key']
@@ -158,7 +153,7 @@ def group_by(fun, arr):
             ret[val].append(item)
         else:
             ret[val] = [item]
-    for k,v in ret.items():
+    for k, v in ret.items():
         yield {"key": k, "items": v}
 
 
@@ -167,7 +162,9 @@ def unique(*args):
     if len(args) > 1:
         fun = args[0]
     else:
-        fun = lambda x: repr(x)
+        # fun = lambda x: repr(x)
+        def fun(x):
+            return repr(x)
     seen = set()
     for it in args[-1]:
         h = hash(fun(it))

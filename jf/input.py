@@ -1,5 +1,4 @@
 """JF io library"""
-import sys
 import fileinput
 import logging
 
@@ -8,10 +7,9 @@ from collections import OrderedDict
 import json
 import yaml
 
-from lxml import etree as ElementTree
+from lxml import etree
 
-from jf.process import StructEncoder
-from jf import jsonlgen  # cpython from jsonlgen.cc
+from jf import jsonlgen   # cpython from jsonlgen.cc
 
 logger = logging.getLogger(__name__)
 
@@ -26,29 +24,31 @@ BOLD = "\033[;1m"
 REVERSE = "\033[;7m"
 
 
-def formatXML(parent):
+def format_xml(parent):
     """
     Recursive operation which returns a tree formated
     as dicts and lists.
     Decision to add a list is to find the 'List' word
     in the actual parent tag.
-    >>> tree = ElementTree.fromstring('<doc><a>1</a></doc>')
-    >>> formatXML(tree)
+    >>> tree = etree.fromstring('<doc><a>1</a></doc>')
+    >>> format_xml(tree)
     {'a': '1'}
     """
     ret = {}
     try:
-        if parent.items(): ret.update(dict(parent.items()))
-        if parent.text: ret['__content__'] = parent.text
+        if parent.items():
+            ret.update(dict(parent.items()))
+        if parent.text:
+            ret['__content__'] = parent.text
         if 'List' in parent.tag:
             ret['__list__'] = []
             for element in parent:
-                ret['__list__'].append(formatXML(element))
+                ret['__list__'].append(format_xml(element))
         else:
             for element in parent:
                 if element.tag not in ret:
                     ret[element.tag] = []
-                ret[element.tag].append(formatXML(element))
+                ret[element.tag].append(format_xml(element))
         if len(ret) == 1 and '__content__' in ret:
             return ret['__content__']
         elif '__content__' in ret:
@@ -83,19 +83,19 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
                **kwargs):
     """Read json, jsonl and yaml data from file defined in args"""
     try:
-        # FIXME these only outputs from the first line
+        # FIXME these only output from the first line
         if args.files[0].endswith("xml"):
-            tree = ElementTree.parse(args.files[0])
+            tree = etree.parse(args.files[0])
             root = tree.getroot()
-            xmldict = formatXML(root)
+            xmldict = format_xml(root)
             logger.info("Got dict from xml %s", xmldict)
             yield xmldict
             return
         elif args.files[0].endswith("html"):
-            parser = ElementTree.HTMLParser()
-            tree = ElementTree.parse(args.files[0], parser=parser)
+            parser = etree.HTMLParser()
+            tree = etree.parse(args.files[0], parser=parser)
             root = tree.getroot()
-            xmldict = formatXML(root)
+            xmldict = format_xml(root)
             logger.info("Got dict from xml %s", xmldict)
             yield xmldict
             return
@@ -124,13 +124,12 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
 
     def generic_constructor(loader, tag, node):
         classname = node.__class__.__name__
-        if (classname == 'SequenceNode'):
+        if classname == 'SequenceNode':
             return loader.construct_sequence(node)
-        elif (classname == 'MappingNode'):
+        elif classname == 'MappingNode':
             return loader.construct_mapping(node)
         else:
             return loader.construct_scalar(node)
-
 
     yaml.add_multi_constructor('', generic_constructor)
 

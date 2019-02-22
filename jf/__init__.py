@@ -1,11 +1,8 @@
 """Pyq python json/yaml query engine"""
 
 import sys
-import json
 import logging
 from datetime import datetime, timezone
-from itertools import islice, chain
-from collections import deque, OrderedDict
 from functools import reduce
 from jf.parser import parse_query
 import jf.process as process
