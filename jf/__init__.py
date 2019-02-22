@@ -83,7 +83,7 @@ def query_convert(query):
         ijfkwre = re.compile(r'\.__JFESCAPED_([a-z]+[.)><\!=, ])')
         query = ijfkwre.sub(r'.\1', query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
-        raise SyntaxError
+        # raise SyntaxError
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)
@@ -151,3 +151,5 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
             yield val
     except (ValueError, TypeError) as ex:
         logger.warning("Exception: %s", repr(ex))
+    except SyntaxError as ex:
+        logger.debug("Syntax error: %s", repr(ex))
