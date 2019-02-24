@@ -39,6 +39,22 @@ class BrokenPipeOutput:
 class TestJfMain(unittest.TestCase):
     """Basic jf main"""
 
+    def test_main_text(self):
+        """Test log setting"""
+        main(['--indent=-1', 'I', 'tests/test.txt'])
+
+    def test_main_json_text_list(self):
+        """Test log setting"""
+        main(['--indent=-1', 'I', 'tests/test.list.json'])
+
+    def test_main_json_text(self):
+        """Test log setting"""
+        main(['--indent=-1', 'I', 'tests/test.txt.json'])
+
+    def test_main_jsonl(self):
+        """Test log setting"""
+        main(['--indent=-1', '-r', 'I', 'tests/test.json'])
+
     def test_main_jsonl(self):
         """Test log setting"""
         main(['--indent=-1', 'I', 'tests/test.json'])

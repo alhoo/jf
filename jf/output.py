@@ -52,8 +52,6 @@ def print_results(data, args):
                 elif args.raw:
                     print(out)
                     continue
-#                    out = json.loads(json.dumps(out, cls=StructEncoder),
-#                                     object_pairs_hook=OrderedDict)
             else:
                 out = json.loads(json.dumps(out, cls=StructEncoder))
             if args.list:
@@ -137,7 +135,7 @@ def profile(*args, **kwargs):
 
     >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
     [True]
-    >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}]))
+    >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}], nan='NA'))
     []
     """
     import pandas as pd
