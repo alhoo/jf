@@ -245,14 +245,22 @@ class OrderedGenProcessor:
     def add_filter(self, fun):
         """Add filter to pipeline"""
         self._filters.append(fun)
-
-    def process(self):
+    
+    def process1(self):
         """Process items"""
-        pipeline = self.igen
         for fun in self._filters:
             pipeline = fun(to_struct_gen(pipeline, ordered_dict=True))
         return pipeline
 
+    def process(self):
+        """Process items"""
+        import pathos.pools as pp
+        with pp.ProcessPool(8) as pool:
+          pipeline = self.igen
+          ret = pool.imap_unordered(pipeline, self.igen)
+          for fun in self._filters:
+              pipeline = fun(to_struct_gen(pipeline, ordered_dict=True))
+        return ret
 
 class GenProcessor:
     """Make a generator pipeline"""
