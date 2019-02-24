@@ -164,6 +164,14 @@ class TestJfIO(unittest.TestCase):
         self.assertEqual(result, [{'a': 1, 'b': 2, 'c': 3},
                                   {'a': 4, 'b': 5, 'c': 6}])
 
+    def test_xml_string(self):
+        """Test simple query"""
+        args = Struct(**{'files': ['tests/test.xml']})
+
+        result = list(read_input(args))
+        self.assertEqual(result, [{"item": [{'a': '1', 'b': '2', 'c': '3'},
+                                            {'a': '4', 'b': '5', 'c': '6'}]}])
+
     def test_csv_string(self):
         """Test simple query"""
         args = Struct(**{'files': ['tests/test.csv']})

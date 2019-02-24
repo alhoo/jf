@@ -8,13 +8,14 @@ from datetime import datetime, date
 
 import jf
 import jf.process as process
-from jf.meta import Struct
+from jf.parser import parse_query
+from jf.meta import Struct, StructEncoder
 import jf.output as output
 
 
 def tolist(igen):
     """Convert gen to list"""
-    return json.dumps([x for x in igen], cls=process.StructEncoder, sort_keys=True)
+    return json.dumps([x for x in igen], cls=StructEncoder, sort_keys=True)
 
 
 class TestJfGenProcessor(unittest.TestCase):
@@ -168,7 +169,7 @@ class TestJfFunctions(unittest.TestCase):
         result = None
         try:
             query = "{x.id]"
-            query = process.parse_query(query).rstrip(",")
+            query = parse_query(query).rstrip(",")
         except SyntaxError as ex:
             print(ex)
             result = jf.colorize(ex)

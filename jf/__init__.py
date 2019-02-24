@@ -1,11 +1,8 @@
 """Pyq python json/yaml query engine"""
 
 import sys
-import json
 import logging
 from datetime import datetime, timezone
-from itertools import islice, chain
-from collections import deque, OrderedDict
 from functools import reduce
 from jf.parser import parse_query
 import jf.process as process
@@ -45,15 +42,6 @@ def query_convert(query):
 
     >>> cmd = 'map({id: x.a, data: x.b.d'
     >>> query_convert(cmd)
-    Traceback (most recent call last):
-      File "/usr/lib/python3.7/doctest.py", line 1329, in __run
-        compileflags, 1), test.globs)
-      File "<doctest jf.query_convert[1]>", line 1, in <module>
-        query_convert(cmd)
-      File "/home/lasse/Desktop/programming/jf/jf/__init__.py", line 610, in query_convert
-        raise SyntaxError
-      File "<string>", line None
-    SyntaxError: <no detail available>
     """
     import regex as re
     indentre = re.compile(r'\n *')
@@ -83,7 +71,8 @@ def query_convert(query):
         ijfkwre = re.compile(r'\.__JFESCAPED_([a-z]+[.)><\!=, ])')
         query = ijfkwre.sub(r'.\1', query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
-        raise SyntaxError
+        # raise SyntaxError
+        return
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r'datetime.now(timezone.utc)', query)
     logger.debug("After nowre: %s", query)
@@ -128,6 +117,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "yield_all": process.yield_all,
         "yield_from": process.yield_all,
         "group": process.reduce_list,
+        "group_by": process.group_by,
         "chain": process.reduce_list,
         "sorted": lambda x, arr=None, **kwargs: sorted(arr, key=x, **kwargs),
         "datetime": datetime,
@@ -150,3 +140,5 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
             yield val
     except (ValueError, TypeError) as ex:
         logger.warning("Exception: %s", repr(ex))
+    except SyntaxError as ex:
+        logger.debug("Syntax error: %s", repr(ex))

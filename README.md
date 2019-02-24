@@ -52,6 +52,7 @@ Similar changes are done for some other useful functions:
 * last(N=1) => iter(deque(arr, maxlen=N))
 * I = arr (== identity operation)
 * yield\_from(x) => yield items from x
+* group\_by(key) => group items by data key value
 * chain() => combine items into a list
 
 For datetime processing, two useful helper functions are imported by default:

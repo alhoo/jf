@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
   name = 'jf',
-  version = '0.6.1',
+  version = '0.6.3',
   description = 'Python jsonl query engine',
   long_description=long_description,
   author = 'Lasse Hyyrynen',
@@ -20,7 +20,7 @@ setup(
   maintainer_email = 'leh@protonmail.com',
   license = 'MIT',
   keywords = ['json', 'yaml', 'jq'],
-  download_url = 'https://github.com/alhoo/jf/archive/0.6.1.tar.gz',
+  download_url = 'https://github.com/alhoo/jf/archive/0.6.3.tar.gz',
   url = 'https://github.com/alhoo/jf',
   classifiers=[
     'Development Status :: 2 - Pre-Alpha',
@@ -42,8 +42,7 @@ setup(
   install_requires = [
     'pygments>=2.0.0',
     'regex>=2016.3.2',
-    'python-dateutil>=2.6.1',
-    'PyYAML>=3.12',
+    'python-dateutil>=2.4.1',
     'PyYAML>=3.12',
     'lxml>=4.0.1',
     'dateparser>=0.6.0',

@@ -1,15 +1,11 @@
 """Pyq python json/yaml query engine"""
 
-import sys
-import json
 import logging
 from datetime import datetime, timezone
-from itertools import islice, chain
+from itertools import islice
 from collections import deque, OrderedDict
-from functools import reduce
-from jf.parser import parse_query
 from jf.output import result_cleaner
-from jf.meta import OrderedStruct, StructEncoder, to_struct_gen
+from jf.meta import to_struct_gen
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +14,6 @@ def age(datestr):
     """Try to guess the age of datestr"""
     from dateparser import parse as parsedate
     logger.debug("Calculating the age of '%s'", datestr)
-    ret = 0
     try:
         ret = datetime.now() - parsedate(str(datestr))
     except TypeError:
@@ -115,23 +110,23 @@ def flatten(*args):
     """
     logger.info("Flattening")
     arr = args[-1]
-    try:
-        for it in map(result_cleaner, arr):
-            yield flatten_item(it)
-    except TypeError as err:
-        logger.error("Got an value error while flattening dict %s", err)
+    for it in map(result_cleaner, arr):
+        yield flatten_item(it)
 
 
 def transpose(*args):
+    """ Transpose input
+    >>> data = [{'a': 1, 'b': 2}, {'a': 2, 'b': 3}]
+    >>> arr = to_struct_gen(data)
+    >>> list(sorted(map(lambda x: list(x.items()), transpose(arr)), key=lambda x: x[0][1]))
+    [[(0, 1), (1, 2)], [(0, 2), (1, 3)]]
+    """
     import pandas as pd
     arr = args[-1]
     data = [x.dict() for x in arr]
-    #data = arr[0]
-    df = pd.DataFrame(data).T
-    df['key'] = df.index
-    df.columns = ['value', 'key']
-    for it in df[['key', 'value']].T.to_dict(into=OrderedDict).values():
-        yield OrderedStruct(it)
+    df = pd.DataFrame(data)
+    for it in df.to_dict(into=OrderedDict).values():
+        yield it
 
 
 def reduce_list(*args):
@@ -149,12 +144,31 @@ def yield_all(fun, arr):
             yield val
 
 
+def group_by(fun, arr):
+    """Group items by value
+    >>> arr = [{'item': '1', 'v': 2},{'item': '2', 'v': 3},{'item': '1', 'v': 3}]
+    >>> list(sorted(map(lambda x: len(x['items']), group_by(lambda x: x['item'], arr))))
+    [1, 2]
+    """
+    ret = {}
+    for item in arr:
+        val = fun(item)
+        if val in ret:
+            ret[val].append(item)
+        else:
+            ret[val] = [item]
+    for k, v in ret.items():
+        yield {"key": k, "items": v}
+
+
 def unique(*args):
     """Calculate unique according to function"""
     if len(args) > 1:
         fun = args[0]
     else:
-        fun = lambda x: repr(x)
+        # fun = lambda x: repr(x)
+        def fun(x):
+            return repr(x)
     seen = set()
     for it in args[-1]:
         h = hash(fun(it))

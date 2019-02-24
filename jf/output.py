@@ -4,10 +4,8 @@ import sys
 import json
 import yaml
 import logging
-from datetime import datetime, timezone
 from itertools import islice, chain
 from collections import deque, OrderedDict
-from functools import reduce
 
 from jf.meta import OrderedStruct, StructEncoder
 
@@ -54,8 +52,6 @@ def print_results(data, args):
                 elif args.raw:
                     print(out)
                     continue
-#                    out = json.loads(json.dumps(out, cls=StructEncoder),
-#                                     object_pairs_hook=OrderedDict)
             else:
                 out = json.loads(json.dumps(out, cls=StructEncoder))
             if args.list:
@@ -99,22 +95,21 @@ def result_cleaner(val):
     >>> result_cleaner({'a': 1})
     {'a': 1}
     >>> from pprint import pprint
-    >>> pprint(result_cleaner(OrderedStruct(OrderedDict([['b', 1], ['a', 2]]))))
+    >>> pprint(result_cleaner(OrderedStruct(OrderedDict([('b', 1), ('a', 2)]))))
     OrderedDict([('b', 1), ('a', 2)])
     """
     if isinstance(val, OrderedStruct):
         return json.loads(json.dumps(val.data, cls=StructEncoder),
-                         object_pairs_hook=OrderedDict)
+                          object_pairs_hook=OrderedDict)
     elif isinstance(val, OrderedDict):
         return json.loads(json.dumps(val, cls=StructEncoder),
-                         object_pairs_hook=OrderedDict)
+                          object_pairs_hook=OrderedDict)
     return json.loads(json.dumps(val, cls=StructEncoder))
 
 
 def excel(*args, **kwargs):
     """Convert input to excel
-    >>> list(excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}]))
-    []
+    >>> excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
     """
     import pandas as pd
     arr = args[-1]
@@ -128,7 +123,6 @@ def excel(*args, **kwargs):
     df.to_excel(writer)
     writer.save()
     return
-    yield
 
 
 def profile(*args, **kwargs):
@@ -141,7 +135,7 @@ def profile(*args, **kwargs):
 
     >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
     [True]
-    >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}]))
+    >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}], nan='NA'))
     []
     """
     import pandas as pd
@@ -168,9 +162,9 @@ def profile(*args, **kwargs):
         args = []
     data = list(map(result_cleaner, arr))
     df = pd.DataFrame(json_normalize(data))
-    #df = pd.DataFrame(data)
-    #df = pd.DataFrame([{k: str(v) for k, v in it.items()} for it in data])
-    #print(df)
+    # df = pd.DataFrame(data)
+    # df = pd.DataFrame([{k: str(v) for k, v in it.items()} for it in data])
+    # print(df)
     na_value = None
     if 'nan' in kwargs:
         na_value = kwargs['nan']
@@ -190,8 +184,6 @@ def profile(*args, **kwargs):
         args[0].write(html_report+"\n")
     else:
         yield html_report
-    return
-    yield
 
 
 def browser(*args, **kwargs):
@@ -204,13 +196,13 @@ def browser(*args, **kwargs):
     with tempfile.NamedTemporaryFile('w') as f:
         for line in arr:
             f.write(line)
-        webbrowser.open(f.name)
+        webbrowser.open(f.name, **kwargs)
         time.sleep(1)  # Hack to give the browser some time
 
 
 def md(*args, **kwargs):
     """ Convert dict to markdown
-    >>> r = list(md([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])]))
+    >>> md([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
     a  |  b
     ---|---
     1  |  2
@@ -232,27 +224,25 @@ def md(*args, **kwargs):
             first = False
         table.append([str(v) if isinstance(v, str) or not isnan(v) else '' for v in row.values()])
     if len(args):
-        args[0].write(md_table(table)+"\n")
+        args[0].write(md_table(table, **kwargs)+"\n")
     else:
-        print(md_table(table))
-    return
-    yield
+        print(md_table(table, **kwargs))
 
 
 def csv(*args, **kwargs):
     """ Convert dict to markdown
-    >>> r = list(csv([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])], lineterminator="\\n"))
+    >>> csv([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])], lineterminator="\\n")
     a,b
     1,2
     2,3
     """
-    import csv
+    from csv import writer as cvs_writer
     arr = args[-1]
     if len(args) > 1:
         args = [open(args[0](0), 'w')]
     else:
         args = [sys.stdout]
-    r = csv.writer(*args, **kwargs)
+    r = cvs_writer(*args, **kwargs)
     first = True
     for row in map(result_cleaner, arr):
         logger.info("Writing row %s", row)
@@ -260,8 +250,6 @@ def csv(*args, **kwargs):
             r.writerow(row.keys())
             first = False
         r.writerow(row.values())
-    return
-    yield
 
 
 def ipy(banner, data, fakerun=False):
