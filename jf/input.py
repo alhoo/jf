@@ -91,14 +91,6 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
             logger.info("Got dict from xml %s", xmldict)
             yield xmldict
             return
-        elif args.files[0].endswith("html"):
-            parser = etree.HTMLParser()
-            tree = etree.parse(args.files[0], parser=parser)
-            root = tree.getroot()
-            xmldict = format_xml(root)
-            logger.info("Got dict from xml %s", xmldict)
-            yield xmldict
-            return
         elif args.files[0].endswith("xlsx"):
             import xlrd
             import pandas
