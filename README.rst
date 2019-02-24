@@ -53,12 +53,12 @@ useful functions:
 
 -  islice(stop) => islice(arr, start=0, stop, step=1)
 -  islice(start, stop, step=1) => islice(arr, start, stop, step)
--  first(N=1) => islice(N)
+-  first(N=1) => islice(arr, N)
 -  last(N=1) => iter(deque(arr, maxlen=N))
 -  I = arr (== identity operation)
 -  yield\_from(x) => yield items from x
 -  group\_by(key) => group items by data key value
--  chain() => combine items into a list
+-  chain() => chain(\*arr) - combine items into a list
 
 For datetime processing, two useful helper functions are imported by
 default:
