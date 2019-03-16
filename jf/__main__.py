@@ -115,7 +115,10 @@ def main(args=None):
                      'load the full dataset in memory.\n' + \
                      'This might take a while...\n'
             data = list(data)
-            sys.stdin = open('/dev/tty')
+            try:
+                sys.stdin = open('/dev/tty')
+            except OSError:
+                pass
         ipy(banner, data, args.ipyfake)
         return
     try:
