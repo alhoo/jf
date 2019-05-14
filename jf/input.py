@@ -125,7 +125,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
 
     yaml.add_multi_constructor('', generic_constructor)
 
-    if args.yamli or args.files[0].endswith("yaml"):
+    if args.yamli or args.files[0].endswith("yaml") or args.files[0].endswith("yml"):
 
         inp = yaml.load
         data = "\n".join([l for l in inf])
