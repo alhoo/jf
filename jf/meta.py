@@ -32,7 +32,13 @@ class OrderedStruct:
 
     def __getattr__(self, item):
         """Return item attribute if exists"""
-        return self.__getitem__(item.replace("__JFESCAPED_", ''))
+        try:
+            return self.__getitem__(item.replace("__JFESCAPED_", ''))
+        except KeyError:
+            try:
+                return OrderedStruct([[k, v] for k,v in self.items() if k.startswith(item)])
+            except:
+                pass
 
     def __getitem__(self, item):
         """Return item attribute if exists"""
@@ -44,6 +50,9 @@ class OrderedStruct:
         """Convert item to dict"""
         return OrderedDict([(k, v) for k, v in self.data.items()
                             if k not in self.__jf_struct_hidden_fields])
+
+    def items(self):
+        return self.dict().items()
 
     def hide(self, dct):
         """Mark item attribute as hidden"""
