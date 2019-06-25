@@ -10,3 +10,4 @@ README.rst
 dist/
 coverage/
 .*
+build/
