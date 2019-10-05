@@ -58,6 +58,8 @@ def main(args=None):
                         help="user ordered dict")
     parser.add_argument("-r", "--raw", action="store_true", default=False,
                         help="raw output")
+    parser.add_argument("-f", "--cmdfile",
+                        help="read command from file")
     parser.add_argument("-a", "--ensure_ascii", action="store_true",
                         default=False, help="ensure ascii only characters")
     parser.add_argument('--ipyfake', action="store_true",
@@ -97,7 +99,18 @@ def main(args=None):
     imports = None
     if 'import' in args.__dict__:
         imports = args.__dict__["import"]
-    query = args.query
+    if args.cmdfile is None:
+      query = args.query
+    else:
+      query = ", ".join(filter(lambda x: len(x) and x[0] != "#", open(args.cmdfile, 'r').read().split("\n")))
+      new_imports = list(map(lambda x: x.split()[1], filter(lambda x: len(x) and x.startswith("#import "), open(args.cmdfile, 'r').read().split("\n"))))
+      if len(new_imports):
+        if imports is None:
+          imports = []
+        else:
+          imports = imports.split(",")
+        imports = ",".join(imports + new_imports)
+
     if args.query == '':
         query = 'I'
     data = run_query(query, inq, imports=imports,
