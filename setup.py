@@ -9,9 +9,11 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+version = '0.6.5'
+
 setup(
   name = 'jf',
-  version = '0.6.4',
+  version = version,
   description = 'Python jsonl query engine',
   long_description=long_description,
   author = 'Lasse Hyyrynen',
@@ -20,7 +22,7 @@ setup(
   maintainer_email = 'leh@protonmail.com',
   license = 'MIT',
   keywords = ['json', 'jsonl', 'yaml', 'jq'],
-  download_url = 'https://github.com/alhoo/jf/archive/0.6.4.tar.gz',
+  download_url = 'https://github.com/alhoo/jf/archive/%s.tar.gz' % version,
   url = 'https://github.com/alhoo/jf',
   classifiers=[
     'Development Status :: 4 - Beta',
