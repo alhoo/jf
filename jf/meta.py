@@ -51,7 +51,7 @@ class OrderedStruct:
         return OrderedDict([(k, v) for k, v in self.data.items()
                             if k not in self.__jf_struct_hidden_fields])
 
-    def items(self):
+    def dictitems(self):
         return self.dict().items()
 
     def hide(self, dct):
