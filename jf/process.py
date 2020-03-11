@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 def age(datestr):
     """Try to guess the age of datestr"""
     from dateparser import parse as parsedate
+
     logger.debug("Calculating the age of '%s'", datestr)
     try:
         ret = datetime.now() - parsedate(str(datestr))
@@ -26,6 +27,7 @@ def parse_value(val):
     """Parse value to complex types"""
     logger.debug("Parsing date from '%s'", val)
     from dateutil import parser as dateutil
+
     try:
         if len(val) > 1:
             time = dateutil.parse(val)
@@ -58,7 +60,7 @@ def jfislice(*args):
     return islice(arr, start, stop, step)
 
 
-def flatten_item(it, root=''):
+def flatten_item(it, root=""):
     """
     Make item flat
     :param it: item
@@ -83,18 +85,18 @@ def flatten_item(it, root=''):
     for key, val in it.items():
         logger.info("%s: %s", key, val)
         if isinstance(val, dict):
-            for k2, v2 in flatten_item(val, key+'.').items():
+            for k2, v2 in flatten_item(val, key + ".").items():
                 ret[k2] = v2
         elif isinstance(val, list):
             for idx, v2 in enumerate(val):
-                dct2 = flatten_item(v2, key+'.%d.' % idx)
+                dct2 = flatten_item(v2, key + ".%d." % idx)
                 if isinstance(dct2, dict):
                     for k3, v3 in dct2.items():
                         ret[k3] = v3
                 else:
-                    ret[key+".%d" % idx] = dct2
+                    ret[key + ".%d" % idx] = dct2
         else:
-            ret[root+key] = val
+            ret[root + key] = val
     logger.debug("Flattening %s => %s", it, ret)
     return ret
 
@@ -122,6 +124,7 @@ def transpose(*args):
     [[(0, 1), (1, 2)], [(0, 2), (1, 3)]]
     """
     import pandas as pd
+
     arr = args[-1]
     data = [x.dict() for x in arr]
     df = pd.DataFrame(data)
@@ -169,6 +172,7 @@ def unique(*args):
         # fun = lambda x: repr(x)
         def fun(x):
             return repr(x)
+
     seen = set()
     for it in args[-1]:
         h = hash(fun(it))

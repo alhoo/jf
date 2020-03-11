@@ -27,18 +27,18 @@ def flatten(tree):
     return tree
 
 
-def merge_not(arr, char=','):
+def merge_not(arr, char=","):
     """Merge items until character is detected before yielding them."""
     logger.debug(arr)
-    merged = ''
+    merged = ""
     for val in arr:
         if val != char:
             if merged:
-                merged += ' '
+                merged += " "
             merged += val
         else:
             yield merged
-            merged = ''
+            merged = ""
     if merged:
         yield merged
 
@@ -46,26 +46,26 @@ def merge_not(arr, char=','):
 def merge_lambdas(arr):
     """Merge jf lambdas to mappers and filters"""
     logger.debug("merge lambdas: %s", arr)
-    ret = ''
+    ret = ""
     rest = False
     first = True
     for val, keep in arr:
         if not keep and not rest:
-            ret += '), arr'
+            ret += "), arr"
             rest = True
         if not first:
-            ret += ', '
+            ret += ", "
         ret += val
         first = False
-    if ret == '':
-        return 'arr'
+    if ret == "":
+        return "arr"
     if not rest:
-        ret += '), arr'
+        ret += "), arr"
     logger.debug("ret: %s", ret)
-    return 'lambda x, *rest: (' + ret
+    return "lambda x, *rest: (" + ret
 
 
-kwargre = re.compile(r'[^!><=]+=[^><=]+')
+kwargre = re.compile(r"[^!><=]+=[^><=]+")
 
 
 def tag_keywords(val):
@@ -76,12 +76,12 @@ def tag_keywords(val):
 def join_tokens(arr):
     """Join tokens if joined tokens contain the same instructions"""
     logger.debug("join_tokens '%s'", arr)
-    ret = ''
+    ret = ""
     for tok in arr:
         if not ret:
             ret += tok
-        elif ret[-1] not in '(){}[],.:"\'' and tok[0] not in '(){}[],.:"\'':
-            ret = ret + ' ' + tok
+        elif ret[-1] not in "(){}[],.:\"'" and tok[0] not in "(){}[],.:\"'":
+            ret = ret + " " + tok
         else:
             ret += tok
 
@@ -108,12 +108,12 @@ def make_param_list(part):
 
 def parse_part(function):
     """Parse a part of pipeline definition"""
-    ret = 'lambda arr: '
+    ret = "lambda arr: "
     arr_set = False
     for part in function:
         logger.debug(part)
-        if part[0][0] == '(':
-            paramlist = ['']
+        if part[0][0] == "(":
+            paramlist = [""]
             if len(part) == 3:
                 paramlist = make_param_list(part[1])
             logger.debug("paramlist '%s'", paramlist)
@@ -122,7 +122,7 @@ def parse_part(function):
                 lambda_params = merge_lambdas(params)
             else:
                 lambda_params = " ".join([x[0] for x in params])
-            ret += "(" + lambda_params + ')'
+            ret += "(" + lambda_params + ")"
             arr_set = True
         elif isinstance(part[0], list):
             ret += "".join([x[0] for x in part])
@@ -136,7 +136,7 @@ def parse_query(string):
     """Parse query string and convert it to a evaluatable pipeline argument"""
     logger.debug("Parsing: %s", string)
     query_tree = filter_tree(parser.expr("%s," % string).tolist())[0]
-    ret = ''
+    ret = ""
     for func in query_tree:
         logger.debug("Function definition length: %d", len(func))
         if maxdepth(func) < 3:
@@ -145,12 +145,12 @@ def parse_query(string):
             continue
         if not isinstance(func[0][0], str):
             raise SyntaxError("Weird: %s" % repr(func[0][0]))
-        if func[0][0] in '{.x':
+        if func[0][0] in "{.x":
             logger.debug("Detected short syntax. Guessing.")
-            func = [['map'], [['(']] + [func] + [[')']]]
-        if func[0][0] == '(':
+            func = [["map"], [["("]] + [func] + [[")"]]]
+        if func[0][0] == "(":
             logger.debug("Detected short syntax. Guessing.")
-            func = [['filter'], func]
+            func = [["filter"], func]
         logger.debug("Parsing parts: %s", func)
         if len(func) == 2:
             part = parse_part(func)

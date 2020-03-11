@@ -9,11 +9,11 @@ from ruamel import yaml
 
 from lxml import etree
 
-from jf import jsonlgen   # cpython from jsonlgen.cc
+from jf import jsonlgen  # cpython from jsonlgen.cc
 
 logger = logging.getLogger(__name__)
 
-UEE = 'Got an unexpected exception'
+UEE = "Got an unexpected exception"
 
 RED = "\033[1;31m"
 BLUE = "\033[1;34m"
@@ -39,20 +39,20 @@ def format_xml(parent):
         if parent.items():
             ret.update(dict(parent.items()))
         if parent.text:
-            ret['__content__'] = parent.text
-        if 'List' in parent.tag:
-            ret['__list__'] = []
+            ret["__content__"] = parent.text
+        if "List" in parent.tag:
+            ret["__list__"] = []
             for element in parent:
-                ret['__list__'].append(format_xml(element))
+                ret["__list__"].append(format_xml(element))
         else:
             for element in parent:
                 if element.tag not in ret:
                     ret[element.tag] = []
                 ret[element.tag].append(format_xml(element))
-        if len(ret) == 1 and '__content__' in ret:
-            return ret['__content__']
-        elif '__content__' in ret:
-            del ret['__content__']
+        if len(ret) == 1 and "__content__" in ret:
+            return ret["__content__"]
+        elif "__content__" in ret:
+            del ret["__content__"]
         for key in list(ret.keys()):
             if not isinstance(key, str):
                 del ret[key]
@@ -68,19 +68,18 @@ def colorize_json_error(ex):
     string = [c for c in ex.doc]
     start = ex.pos
     stop = ex.pos + 1
-    string[start] = RED+string[start]
-    string[stop] = RESET+string[stop]
-    return ''.join(string[max(0, start - 500):min(len(string), stop + 500)])
+    string[start] = RED + string[start]
+    string[stop] = RESET + string[stop]
+    return "".join(string[max(0, start - 500) : min(len(string), stop + 500)])
 
 
 def import_error():
-        logger.warning("Install pandas and xlrd to read csv and excel")
-        logger.warning("pip install pandas")
-        logger.warning("pip install xlrd")
+    logger.warning("Install pandas and xlrd to read csv and excel")
+    logger.warning("pip install pandas")
+    logger.warning("pip install xlrd")
 
 
-def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
-               **kwargs):
+def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
     """Read json, jsonl and yaml data from file defined in args"""
     try:
         # FIXME these only output from the first line
@@ -94,36 +93,45 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False,
         elif args.files[0].endswith("xlsx"):
             import xlrd
             import pandas
-            for val in pandas.read_excel(args.files[0]).to_dict("records", into=OrderedDict):
+
+            for val in pandas.read_excel(args.files[0]).to_dict(
+                "records", into=OrderedDict
+            ):
                 yield val
             return
         elif args.files[0].endswith("csv"):
             import pandas
+
             if ordered_dict:
-                for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records", into=OrderedDict):
+                for val in pandas.read_csv(args.files[0], **kwargs).to_dict(
+                    "records", into=OrderedDict
+                ):
                     yield val
             else:
                 for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records"):
                     yield val
             return
     except ImportError:
-        return import_error()
+        # return import_error()
+        raise
 
-    data = ''
+    data = ""
     inp = json.loads
-    inf = (x.decode('UTF-8') for x in
-           fileinput.input(files=args.files, openhook=openhook, mode='rb'))
+    inf = (
+        x.decode("UTF-8")
+        for x in fileinput.input(files=args.files, openhook=openhook, mode="rb")
+    )
 
     def generic_constructor(loader, tag, node):
         classname = node.__class__.__name__
-        if classname == 'SequenceNode':
+        if classname == "SequenceNode":
             return loader.construct_sequence(node)
-        elif classname == 'MappingNode':
+        elif classname == "MappingNode":
             return loader.construct_mapping(node)
         else:
             return loader.construct_scalar(node)
 
-    yaml.add_multi_constructor('', generic_constructor)
+    yaml.add_multi_constructor("", generic_constructor)
 
     if args.yamli or args.files[0].endswith("yaml") or args.files[0].endswith("yml"):
 
