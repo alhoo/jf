@@ -3,7 +3,7 @@
 import sys
 import unittest
 import json
-import yaml
+from ruamel import yaml
 
 from io import BytesIO
 

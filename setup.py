@@ -45,7 +45,7 @@ setup(
     'pygments>=2.0.0',
     'regex>=2016.3.2',
     'python-dateutil>=2.4.1',
-    'PyYAML>=3.12',
+    'ruamel.yaml>=0.16.10',
     'lxml>=4.0.1',
     'dateparser>=0.6.0',
     'ipython>=6.2.0',

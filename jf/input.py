@@ -5,7 +5,7 @@ import logging
 from collections import OrderedDict
 
 import json
-import yaml
+from ruamel import yaml
 
 from lxml import etree
 
