@@ -1,6 +1,7 @@
 import json
 import logging
 from collections import OrderedDict
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,10 +34,12 @@ class OrderedStruct:
     def __getattr__(self, item):
         """Return item attribute if exists"""
         try:
-            return self.__getitem__(item.replace("__JFESCAPED_", ''))
+            return self.__getitem__(item.replace("__JFESCAPED_", ""))
         except KeyError:
             try:
-                return OrderedStruct([[k, v] for k,v in self.items() if k.startswith(item)])
+                return OrderedStruct(
+                    [[k, v] for k, v in self.items() if k.startswith(item)]
+                )
             except:
                 pass
 
@@ -48,8 +51,13 @@ class OrderedStruct:
 
     def dict(self):
         """Convert item to dict"""
-        return OrderedDict([(k, v) for k, v in self.data.items()
-                            if k not in self.__jf_struct_hidden_fields])
+        return OrderedDict(
+            [
+                (k, v)
+                for k, v in self.data.items()
+                if k not in self.__jf_struct_hidden_fields
+            ]
+        )
 
     def dictitems(self):
         return self.dict().items()
@@ -81,7 +89,7 @@ class Struct:
 
     def __getattr__(self, item):
         """Return item attribute if exists"""
-        return self.__getitem__(item.replace("__JFESCAPED_", ''))
+        return self.__getitem__(item.replace("__JFESCAPED_", ""))
 
     def __getitem__(self, item):
         """Return item attribute if exists"""
@@ -91,8 +99,11 @@ class Struct:
 
     def dict(self):
         """Convert item to dict"""
-        return {k: v for k, v in self.__dict__.items()
-                if k not in self.__jf_struct_hidden_fields}
+        return {
+            k: v
+            for k, v in self.__dict__.items()
+            if k not in self.__jf_struct_hidden_fields
+        }
 
     def hide(self, dct):
         """Mark item attribute as hidden"""
