@@ -13,7 +13,7 @@ from io import StringIO
 
 
 def disable_loggers():
-    logger = logging.getLogger('jf')
+    logger = logging.getLogger("jf")
     logger.setLevel(logging.ERROR)
 
 
@@ -41,70 +41,70 @@ class TestJfMain(unittest.TestCase):
 
     def test_main_text(self):
         """Test log setting"""
-        main(['--indent=-1', 'I', 'tests/test.txt'])
+        main(["--indent=-1", "I", "tests/test.txt"])
 
     def test_main_json_text_list(self):
         """Test log setting"""
-        main(['--indent=-1', 'I', 'tests/test.list.json'])
+        main(["--indent=-1", "I", "tests/test.list.json"])
 
     def test_main_json_text(self):
         """Test log setting"""
-        main(['--indent=-1', 'I', 'tests/test.txt.json'])
+        main(["--indent=-1", "I", "tests/test.txt.json"])
 
     def test_main_jsonl(self):
         """Test log setting"""
-        main(['--indent=-1', '-r', 'I', 'tests/test.json'])
+        main(["--indent=-1", "-r", "I", "tests/test.json"])
 
     def test_main_jsonl(self):
         """Test log setting"""
-        main(['--indent=-1', 'I', 'tests/test.json'])
+        main(["--indent=-1", "I", "tests/test.json"])
 
     def test_main_jsonl2(self):
         """Test log setting"""
-        main(['--list', 'I', 'tests/test.jsonl'])
+        main(["--list", "I", "tests/test.jsonl"])
 
     def test_main_jsonl3(self):
         """Test log setting"""
-        main(['-k', 'sep=;', '--list', 'I', 'tests/test.jsonl'])
+        main(["-k", "sep=;", "--list", "I", "tests/test.jsonl"])
 
     def test_main_help(self):
         """Test log setting"""
         with self.assertRaises(SystemExit):
-            main(['--help'])
+            main(["--help"])
 
     def test_main_json(self):
         """Test log setting"""
-        main(['--list', '--raw', '--yaml', 'I', 'tests/test.json'])
+        main(["--list", "--raw", "--yaml", "I", "tests/test.json"])
 
     def test_main_json_raw(self):
         """Test log setting"""
-        main(['--raw', '--yaml', 'I', 'tests/test.json'])
+        main(["--raw", "--yaml", "I", "tests/test.json"])
 
     def test_main_json_list(self):
         """Test log setting"""
-        main(['--list', '--yaml', 'I', 'tests/test.json'])
+        main(["--list", "--yaml", "I", "tests/test.json"])
 
     def test_main_yaml(self):
         """Test log setting"""
         with captured_output(BrokenPipeOutput) as (out, err):
-            main(['-'])
+            main(["-"])
 
     def test_main_yaml(self):
         """Test log setting"""
-        main(['I', 'tests/test.yaml'])
+        main(["I", "tests/test.yaml"])
 
     def test_main_yaml_ipy(self):
         """Test log setting"""
         sys.stdin = StringIO("quit\n")
-        main(['--ipyfake', 'I', 'tests/test.yaml'])
+        main(["--ipyfake", "I", "tests/test.yaml"])
 
     def test_main_input_arg(self):
         """Test log setting"""
-        main(['--input', 'tests/test.yaml', 'I'])
+        main(["--input", "tests/test.yaml", "I"])
 
     def test_main_yaml_input(self):
         """Test log setting"""
-        main(['--yamli', 'I', 'tests/test.yaml'])
+        main(["--yamli", "I", "tests/test.yaml"])
 
     def test_logger_setting(self):
         """Test log setting"""
