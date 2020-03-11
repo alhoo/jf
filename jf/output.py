@@ -2,7 +2,7 @@
 
 import sys
 import json
-import yaml
+from ruamel import yaml
 import logging
 from itertools import islice, chain
 from collections import deque, OrderedDict
@@ -27,10 +27,14 @@ def print_results(data, args):
                    "ensure_ascii": args.ensure_ascii}
     outfmt = json.dumps
     if args.yaml and not args.json:
+        yaml.RoundTripDumper.add_representer(OrderedDict, yaml.RoundTripRepresenter.represent_dict)
+
         outfmt = yaml.dump
+
         out_kw_args = {"allow_unicode": not args.ensure_ascii,
                        "indent": args.indent,
-                       "default_flow_style": False}
+                       "default_flow_style": False,
+                       "Dumper": yaml.RoundTripDumper}
         lexertype = 'yaml'
     lexer = get_lexer_by_name(lexertype, stripall=True)
     formatter = TerminalFormatter()
