@@ -65,7 +65,7 @@ def merge_lambdas(arr):
     return "lambda x, *rest: (" + ret
 
 
-kwargre = re.compile(r"[^!><=]+=[^><=]+")
+kwargre = re.compile(r"[^!><(=]+=[^><=]+")
 
 
 def tag_keywords(val):

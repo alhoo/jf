@@ -7,6 +7,9 @@ from functools import reduce
 from jf.parser import parse_query
 import jf.process as process
 import jf.output as output
+import jf.ml
+import jf.service
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +43,6 @@ def colorize(ex):
 def query_convert(query):
     """Convert query for evaluation
 
-    >>> cmd = 'map({id: x.a, data: x.b.d'
-    >>> query_convert(cmd)
     """
     import regex as re
 
@@ -51,16 +52,16 @@ def query_convert(query):
     makexre = re.compile(r"([ (])(\.[a-zA-Z])")
     keywordunpackingre = re.compile(r"\( *\*\*x *\)")
     nowre = re.compile(r"NOW\(\)")
-    logger.debug("Before conversion: %s", query)
+    logger.debug("Before conversion: %s", json.dumps(query, indent=2))
     query = indentre.sub(r" ", query)
-    logger.debug("After indent removal: %s", query)
+    logger.debug("After indent removal: %s", json.dumps(query, indent=2))
     query = namere.sub(r'\1"\2":', query)
-    logger.debug("After namere: %s", query)
+    logger.debug("After namere: %s", json.dumps(query, indent=2))
     query = firstxre.sub(r"x\1", query)
     query = makexre.sub(r"\1x\2", query)
-    logger.debug("After makex: %s", query)
+    logger.debug("After makex: %s", json.dumps(query, indent=2))
     query = keywordunpackingre.sub("(**x.dict())", query)
-    logger.debug("After kw-unpacking: %s", query)
+    logger.debug("After kw-unpacking: %s", json.dumps(query, indent=2))
     try:
         jfkwre = re.compile(r"\.([a-z]+[.)><\!=, ])")
         query = jfkwre.sub(r".__JFESCAPED_\1", query)
@@ -114,6 +115,8 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "excel": output.excel,
         "flatten": process.flatten,
         "reduce": reduce,
+        "ml": jf.ml.import_resolver,
+        "service": jf.service,
         "transpose": process.transpose,
         "reduce_list": process.reduce_list,
         "yield_all": process.yield_all,
@@ -145,5 +148,6 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
             yield val
     except (ValueError, TypeError) as ex:
         logger.warning("Exception: %s", repr(ex))
+        raise
     except SyntaxError as ex:
         logger.debug("Syntax error: %s", repr(ex))

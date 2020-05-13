@@ -53,12 +53,12 @@ useful functions:
 
 -  islice(stop) => islice(arr, start=0, stop, step=1)
 -  islice(start, stop, step=1) => islice(arr, start, stop, step)
--  first(N=1) => islice(arr, N)
+-  first(N=1) => islice(N)
 -  last(N=1) => iter(deque(arr, maxlen=N))
 -  I = arr (== identity operation)
 -  yield\_from(x) => yield items from x
 -  group\_by(key) => group items by data key value
--  chain() => chain(\*arr) - combine items into a list
+-  chain() => combine items into a list
 
 For datetime processing, two useful helper functions are imported by
 default:
@@ -258,6 +258,48 @@ the power of regular expressions by including the re-library.
     27.01.2018 11:25 matti_7626: configuration = parameters, configuration files (audio files, from customer, ask Suvi to request today?), add audio files to system (via GUI)
     27.01.2018 11:26 matti_7626: Testing = specify how we do testing, for example written test cases by the customer.
     27.01.2018 11:28 matti_7626: Need test group (testgroup 1 prob easiest to recognise says Lasse)
+
+ML features
+===========
+
+JF is integrated with SKlearn for building fast prototype machine
+learning systems from your data. The machine learning tools are packaged
+into the ml-module.
+
+Building a machine learning model from your dataset:
+
+::
+
+    $ jf 'head(5000),
+          map([x.text, x.status]),
+          ml.persistent_trainer("model.pkl",
+             ml.make_pipeline(
+                 ml.make_union(ml.CountVectorizer(),
+                               ml.CountVectorizer(analyzer="char", ngram_range=(4,4))),
+                 ml.LogisticRegression()))' dataset.jsonl.gz
+
+In the above script we take the first 5000 samples, select the
+"text"-column as the model features and "status"-column as the
+classifier target. We use the sklearn ``CountVectorizer`` to build both
+word and character level features, which we pass to the logistic
+regression. The ml.persistent\_trainer
+
+To further serve your models, you can use the jf-service-module to build
+an API from your model:
+
+::
+
+    $ jf 'head(5000),
+          map([x.text, x.status]),
+          ml.persistent_trainer("model.pkl",
+             ml.make_pipeline(
+                 ml.make_union(ml.CountVectorizer(),
+                               ml.CountVectorizer(analyzer="char", ngram_range=(4,4))),
+                 ml.LogisticRegression())),
+          service.RESTful("/predict")' dataset.jsonl.gz &
+
+    $ curl --silent -X POST -d '["Donald Trump is a bit simple"]' localhost:5002/predict
+    [ "TRUMP_RANT", [0.9532, 0.0468] ]
 
 Features
 ========

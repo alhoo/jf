@@ -15,3 +15,5 @@ openpyxl>=2.5.4
 pylint>=1.8.2
 pytest
 pytest-flake8
+scikit-learn==0.23.0
+Flask==1.1.2
