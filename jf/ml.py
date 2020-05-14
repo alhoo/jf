@@ -1,10 +1,12 @@
 import jf.sklearn_import
+import numpy as np
 import pandas as pd
 
 
 class ColumnSelector:
-    def __init__(self, column):
+    def __init__(self, column, default=["unk"]):
         self.column = column
+        self.default = default
 
     def fit(self, X, y=None):
         return self
@@ -12,8 +14,32 @@ class ColumnSelector:
     def transform(self, X, y=None):
         if isinstance(X, list):
             X = pd.DataFrame(X)
-        # ret = [x[self.column] for x in X]
+        # Add selected columns to dataframe if needed
+        if isinstance(self.column, list):
+            for col in self.column:
+                if col not in X.columns:
+                    X[col] = 'unk'
+        else:
+            if self.column not in X.columns:
+                X[self.column] = 'unk'
         return X[self.column]
+
+
+def transform(args, arr):
+    params = args(arr)
+    model = params
+
+    print(model)
+
+    data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
+    try:
+        data = [x.dict() for x in data]
+    except:
+        pass
+    try:
+        yield from np.array(model.fit_transform(data).todense())
+    except:
+        yield from np.array(model.fit_transform(data))
 
 
 def trainer(args, arr):
@@ -51,6 +77,8 @@ class importResolver:
             return persistent_trainer
         if k == "trainer":
             return trainer
+        if k == "transform":
+            return transform
         if k == "ColumnSelector":
             return ColumnSelector
         else:
