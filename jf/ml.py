@@ -25,50 +25,53 @@ class ColumnSelector:
         return X[self.column]
 
 
-def transform(args, arr):
-    params = args(arr)
-    model = params
+class transform(jf.process.JFTransformation):
+    def _fn(self, arr):
+        params = self.args[0](arr)
+        model = params
 
-    print(model)
+        print(model)
 
-    data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
-    try:
-        data = [x.dict() for x in data]
-    except:
-        pass
-    try:
-        yield from np.array(model.fit_transform(data).todense())
-    except:
-        yield from np.array(model.fit_transform(data))
-
-
-def trainer(args, arr):
-    params = args(arr)
-    model = params
-
-    data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
-    try:
-        data = [x.dict() for x in data]
-    except:
-        pass
-    print(f"Training the model ({model}):")
-    model.fit(data, y)
-
-    yield model
+        data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
+        try:
+            data = [x.dict() for x in data]
+        except:
+            pass
+        try:
+            yield from np.array(model.fit_transform(data).todense())
+        except:
+            yield from np.array(model.fit_transform(data))
 
 
-def persistent_trainer(args, arr):
-    import pickle
+class trainer(jf.process.JFTransformation):
+    def _fn(self, arr):
+        params = self.args[0](arr)
+        model = params
 
-    params = args(arr)
-    ofn, model = params
+        data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
+        try:
+            data = [x.dict() for x in data]
+        except:
+            pass
+        print(f"Training the model ({model}):")
+        model.fit(data, y)
 
-    model = next(trainer(lambda x: model, arr))
+        yield model
 
-    print(f"Saving model to {ofn}")
-    with open(ofn, "wb") as f:
-        f.write(pickle.dumps(model))
-    yield model
+
+class persistent_trainer(jf.process.JFTransformation):
+    def _fn(self, arr):
+        import pickle
+
+        params = self.args[0](arr)
+        ofn, model = params
+
+        model = next(trainer(lambda x: model).transform(arr))
+
+        print(f"Saving model to {ofn}")
+        with open(ofn, "wb") as f:
+            f.write(pickle.dumps(model))
+        yield model
 
 
 class importResolver:

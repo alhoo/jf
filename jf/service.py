@@ -1,29 +1,30 @@
 import json
+from jf.process import JFTransformation
 from flask import Flask, request, Response
 
+class RESTful(JFTransformation):
+    def _fn(self, arr):
 
-def RESTful(args, arr):
+        params = self.args[0](arr)
+        base_path = params
+        model = next(iter(arr))
+        yield "Starting restful service"
+        print("Model: {}".format(model))
+        yield "BasePath: {}".format(base_path)
 
-    params = args(arr)
-    base_path = params
-    model = next(iter(arr))
-    yield "Starting restful service"
-    print("Model: {}".format(model))
-    yield "BasePath: {}".format(base_path)
+        app = Flask(__name__)
 
-    app = Flask(__name__)
+        def get_request_data():
+            return request.get_json(force=True, silent=True)
 
-    def get_request_data():
-        return request.get_json(force=True, silent=True)
+        @app.route(f"{base_path}", methods=["POST", "GET"])
+        def predict():
+            if request.method == "POST":
+                data = get_request_data()
+                probs = model.predict_proba(data)
+                prediction = [list(x) for x in probs]
+                results = model.predict(data)
+                # prediction = list(model.predict(data))
+                return Response(json.dumps(list(zip(results, prediction))), 200)
 
-    @app.route(f"{base_path}", methods=["POST", "GET"])
-    def predict():
-        if request.method == "POST":
-            data = get_request_data()
-            probs = model.predict_proba(data)
-            prediction = [list(x) for x in probs]
-            results = model.predict(data)
-            # prediction = list(model.predict(data))
-            return Response(json.dumps(list(zip(results, prediction))), 200)
-
-    app.run(port="5002")
+        app.run(port="5002")

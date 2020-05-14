@@ -101,7 +101,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "headntail": process.firstnlast,
         "last": process.last,
         "null": None,
-        "I": lambda arr: arr,
+        "I": jf.process.Identity,
         "age": process.age,
         "re": re,
         "date": process.parse_value,
@@ -110,11 +110,13 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "ipy": output.ipy,
         "csv": output.csv,
         "md": output.md,
+        "filter": jf.process.Filter,
         "browser": output.browser,
         "profile": output.profile,
         "excel": output.excel,
         "flatten": process.flatten,
         "reduce": reduce,
+        "map": jf.process.Map,
         "ml": jf.ml.import_resolver,
         "service": jf.service,
         "transpose": process.transpose,
@@ -124,7 +126,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "group": process.reduce_list,
         "group_by": process.group_by,
         "chain": process.reduce_list,
-        "sorted": lambda x, arr=None, **kwargs: sorted(arr, key=x, **kwargs),
+        "sorted": jf.process.Sorted,
         "datetime": datetime,
         "timezone": timezone,
     }
@@ -143,6 +145,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         globalscope["gp"] = process.OrderedGenProcessor
 
     try:
+        print(query)
         res = eval(query, globalscope)
         for val in res:
             yield val
