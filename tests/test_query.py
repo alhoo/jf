@@ -138,34 +138,28 @@ class TestJfFunctions(unittest.TestCase):
 
     def test_last(self):
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.last(lambda x: 1).transform(igen))
+        result = tolist(process.last(1).transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_last_str(self):
         """last() doesn't know how to handle strings"""
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.last(lambda x: "2").transform(igen))
+        result = tolist(process.last("2").transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_first(self):
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.first(lambda x: 1).transform(igen))
+        result = tolist(process.first(1).transform(igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
     def test_first_str(self):
         """first() doesn't know how to handle strings"""
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.first(lambda x: "2").transform(igen))
+        result = tolist(process.first("2").transform(igen))
         expected = '[{"a": 1}]'
-        self.assertEqual(result, expected)
-
-    def test_update(self):
-        igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.update(lambda x: {"b": x["a"] + 1}).transform(igen))
-        expected = '[{"a": 1, "b": 2}, {"a": 2, "b": 3}]'
         self.assertEqual(result, expected)
 
     def test_reduce_list(self):
@@ -189,7 +183,7 @@ class TestJfFunctions(unittest.TestCase):
 class TestJfquery(unittest.TestCase):
     """Basic jf testcases"""
 
-    unescapere = re.compile(r"__JFESCAPED_")
+    unescapere = re.compile(r"__JFESCAPED__")
 
     def test_query_converter(self):
         """Test simple query"""
@@ -199,7 +193,7 @@ class TestJfquery(unittest.TestCase):
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
             expr,
-            "gp(data, [map(lambda x, " + "*rest: (x.id))]).process()",
+            "gp(data, [map(x.id)]).process()",
         )
 
     def test_py_while(self):
@@ -210,8 +204,7 @@ class TestJfquery(unittest.TestCase):
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
             expr,
-            "gp(data, [map(lambda x, "
-            + "*rest: (x.while))]).process()",
+            "gp(data, [map(x.while)]).process()",
         )
 
     def test_py_if(self):
@@ -222,8 +215,7 @@ class TestJfquery(unittest.TestCase):
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
             expr,
-            "gp(data, [map(lambda x, "
-            + "*rest: (x.if > 0))]).process()",
+            "gp(data, [map(x.if > 0)]).process()",
         )
 
     def test_py_else1(self):
@@ -234,9 +226,7 @@ class TestJfquery(unittest.TestCase):
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
             expr,
-            "gp(data, [map(lambda x, "
-            + '*rest: (x.else != "expression"))'
-            + "]).process()",
+            'gp(data, [map(x.else != "expression")]).process()',
         )
 
     def test_py_else(self):
@@ -247,9 +237,7 @@ class TestJfquery(unittest.TestCase):
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
             expr,
-            "gp(data, [map(lambda x, "
-            + '*rest: (x.else != "expression"))'
-            + "]).process()",
+            'gp(data, [map(x.else != "expression")]).process()',
         )
 
     def test_py_from(self):
@@ -260,8 +248,7 @@ class TestJfquery(unittest.TestCase):
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
             expr,
-            "gp(data, [map(lambda x, "
-            + "*rest: (x.from, x.id))]).process()",
+            "gp(data, [map(x.from, x.id)]).process()",
         )
 
 

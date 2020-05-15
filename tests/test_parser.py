@@ -24,14 +24,14 @@ class TestJfIO(unittest.TestCase):
     def test_module_parse(self):
         """Test simple filter"""
         test_str = "demomodule.timestamppipe()"
-        expected = "demomodule.timestamppipe(lambda x, *rest: ()),"
+        expected = "demomodule.timestamppipe(),"
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
     def test_filter(self):
         """Test simple filter"""
         test_str = 'filter(x.id == "123")'
-        expected = "filter(lambda x, " + '*rest: (x.id == "123")),'
+        expected = 'filter(x.id == "123"),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
@@ -39,8 +39,7 @@ class TestJfIO(unittest.TestCase):
         """Test simple filter"""
         test_str = 'filter(x.commit.committer.name == "Lasse Hyyrynen")'
         expected = (
-            "filter(lambda x, *rest: "
-            + '(x.commit.committer.name == "Lasse Hyyrynen")),'
+            'filter(x.commit.committer.name == "Lasse Hyyrynen"),'
         )
         result = parse_query(test_str)
         self.assertEqual(result, expected)
@@ -48,14 +47,14 @@ class TestJfIO(unittest.TestCase):
     def test_filter_shortened(self):
         """Test simple filter"""
         test_str = '(x.id == "123")'
-        expected = 'filter(lambda x, *rest: (x.id == "123")),'
+        expected = 'filter(x.id == "123"),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
     def test_map_shortened(self):
         """Test simple filter"""
         test_str = "{id: x.id}"
-        expected = "map(lambda x, *rest: ({ id:x.id })),"
+        expected = "map({ id:x.id }),"
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
@@ -63,10 +62,7 @@ class TestJfIO(unittest.TestCase):
         """Test simple filter"""
         test_str = 'map({id: x.id}), filter(x.id == "123")'
         expected = (
-            "map(lambda x, "
-            + "*rest: ({ id:x.id })),"
-            + "filter(lambda x, "
-            + '*rest: (x.id == "123")),'
+            'map({ id:x.id }),filter(x.id == "123"),'
         )
         result = parse_query(test_str)
         self.assertEqual(result, expected)
@@ -74,7 +70,7 @@ class TestJfIO(unittest.TestCase):
     def test_simple(self):
         """Test simple query"""
         test_str = "map(x.id)"
-        expected = "map(lambda x, *rest: (x.id)),"
+        expected = "map(x.id),"
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
@@ -84,8 +80,7 @@ class TestJfIO(unittest.TestCase):
             + '.process(lambda x: {"dup": x.id})'
         )
         expected = (
-            "demomod.Dup(lambda x, *rest: "
-            + "(int(age(x.c.author).total()/ 3)), group = 1)"
+            "demomod.Dup(int(age(x.c.author).total()/ 3), group = 1)"
             + '.process(lambda x : {"dup":x.id}),'
         )
         result = parse_query(test_str)
@@ -95,8 +90,7 @@ class TestJfIO(unittest.TestCase):
         """Test simple query"""
         test_str = "map(x.id), sorted(x.id)"
         expected = (
-            "map(lambda x, *rest: (x.id)),"
-            + "sorted(lambda x, *rest: (x.id)),"
+            "map(x.id), sorted(x.id),"
         )
         result = parse_query(test_str)
         self.assertEqual(result, expected)
@@ -105,9 +99,8 @@ class TestJfIO(unittest.TestCase):
         """Test simple query"""
         test_str = "map(x.id), sorted(x.id, reverse=True)"
         expected = (
-            "map(lambda x, *rest: (x.id)),"
-            + "sorted(lambda x, *rest: (x.id), "
-            + "reverse = True),"
+            "map(x.id),"
+            + "sorted(x.id, reverse = True),"
         )
         result = parse_query(test_str)
         self.assertEqual(result, expected)

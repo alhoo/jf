@@ -27,7 +27,7 @@ class ColumnSelector:
 
 class transform(jf.process.JFTransformation):
     def _fn(self, arr):
-        params = self.args[0](arr)
+        params = self.args[0]
         model = params
 
         print(model)
@@ -45,7 +45,7 @@ class transform(jf.process.JFTransformation):
 
 class trainer(jf.process.JFTransformation):
     def _fn(self, arr):
-        params = self.args[0](arr)
+        params = self.args[0]
         model = params
 
         data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
@@ -63,10 +63,10 @@ class persistent_trainer(jf.process.JFTransformation):
     def _fn(self, arr):
         import pickle
 
-        params = self.args[0](arr)
+        params = self.args
         ofn, model = params
 
-        model = next(trainer(lambda x: model).transform(arr))
+        model = next(trainer(model).transform(arr))
 
         print(f"Saving model to {ofn}")
         with open(ofn, "wb") as f:
@@ -76,6 +76,7 @@ class persistent_trainer(jf.process.JFTransformation):
 
 class importResolver:
     def __getattribute__(self, k):
+        k = k.replace("__JFESCAPED__", "")
         if k == "persistent_trainer":
             return persistent_trainer
         if k == "trainer":

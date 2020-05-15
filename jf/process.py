@@ -24,17 +24,20 @@ class JFTransformation:
         return self._fn(X, **kwargs)
 
 
-def age(datestr):
+def age(datecol):
     """Try to guess the age of datestr"""
     from dateparser import parse as parsedate
 
-    logger.debug("Calculating the age of '%s'", datestr)
-    try:
-        ret = datetime.now() - parsedate(str(datestr))
-    except TypeError:
-        ret = datetime.now(timezone.utc) - parsedate(str(datestr))
-    logger.debug("Age of '%s' is %s", datestr, repr(ret))
-    return ret
+    def fn(d):
+        datestr = datecol(d)
+        logger.debug("Calculating the age of '%s'", datestr)
+        try:
+            ret = datetime.now() - parsedate(str(datestr))
+        except TypeError:
+            ret = datetime.now(timezone.utc) - parsedate(str(datestr))
+        logger.debug("Age of '%s' is %s", datestr, repr(ret))
+        return ret
+    return fn
 
 
 def parse_value(val):
@@ -58,7 +61,7 @@ def parse_value(val):
 class jfislice(JFTransformation):
     def _fn(self, arr):
         """jf wrapper for itertools.islice"""
-        args = self.args[0](0)
+        args = self.args
         start = None
         step = None
         stop = 1
@@ -203,21 +206,20 @@ class unique(JFTransformation):
 class hide(JFTransformation):
     def _fn(self, arr):
         """Hide elements from items"""
-        elements = self.args[0]
+        elements = self.args
         for item in arr:
-            item.hide(elements(item))
-            yield item
+            yield {k:v for k,v in item.items() if k not in elements}
 
 
 class firstnlast(JFTransformation):
     def _fn(self, arr):
         """Show first and last (N) items
-        >>> firstnlast(lambda x: 2).transform([1,2,3,4,5])
+        >>> firstnlast(2).transform([1,2,3,4,5])
         [[1, 2], [4, 5]]
         """
         shown = 1
         if len(self.args) == 1:
-            shown = self.args[0](arr)
+            shown = self.args[0]
         if not isinstance(shown, int):
             shown = 1
         return [list(islice(arr, 0, shown)), list(iter(deque(arr, maxlen=shown)))]
@@ -228,7 +230,7 @@ class first(JFTransformation):
         """Show first (N) items"""
         shown = 1
         if len(self.args) == 1:
-            shown = self.args[0](arr)
+            shown = self.args[0]
         if not isinstance(shown, int):
             shown = 1
         return islice(arr, 0, shown)
@@ -239,9 +241,65 @@ class Identity(JFTransformation):
         return X
 
 
+class Col:
+    _opstrings = []
+    value = None
+    def __init__(self, k=None):
+        if k is not None:
+            self._opstrings = k
+
+    def __gt__(self, val):
+        self._opstrings.append((lambda x: x > val, ))
+        return self
+
+    def __getitem__(self, k):
+        selfcopy = Col(self._opstrings + [k])
+        return selfcopy
+
+    def __getattr__(self, k):
+        selfcopy = Col(self._opstrings + [k])
+        return selfcopy
+
+    def __call__(self, *args, **kwargs):
+        data = args[0]
+        for s in self._opstrings:
+            if data is None:
+                return None
+            if isinstance(s, str):
+                s = s.replace('__JFESCAPED__', '')
+                if isinstance(data, dict):
+                    data = data.get(s, None)
+                continue 
+            if isinstance(s, int):
+                if isinstance(data, dict):
+                    data = data.get(s, None)
+                if isinstance(data, list):
+                    data = data[s]
+                continue
+            data = s[0](data)
+        return data
+
+
+def evaluate_col(col, x):
+    if isinstance(col, Col):
+        return col(x)
+    return col
+
+
 class Map(JFTransformation):
     def _fn(self, X):
+        """
+        >>> x = Col()
+        >>> list(Map(x.a).transform([{"a": 1}]))
+        [1]
+        """
         fn = self.args[0]
+        if isinstance(fn, (tuple, list)):
+            lst = fn
+            fn = lambda x: [evaluate_col(col, x) for col in lst]
+        if isinstance(fn, dict):
+            dct = fn
+            fn = lambda x: {k: evaluate_col(col, x) for k, col in dct.items()}
         return map(fn, X)
 
 
@@ -256,7 +314,7 @@ class last(JFTransformation):
         """Show last (N) items"""
         shown = 1
         if len(self.args) == 1:
-            shown = self.args[0](X)
+            shown = self.args[0]
         if not isinstance(shown, int):
             shown = 1
         return iter(deque(X, maxlen=shown))
@@ -303,7 +361,7 @@ class OrderedGenProcessor:
         """Process items"""
         pipeline = self.igen
         for fun in self._filters:
-            pipeline = fun.transform(to_struct_gen(pipeline, ordered_dict=True))
+            pipeline = fun.transform(pipeline)
         return pipeline
 
 
@@ -323,5 +381,5 @@ class GenProcessor:
         """Process items"""
         pipeline = self.igen
         for fun in self._filters:
-            pipeline = fun.transform(to_struct_gen(pipeline))
+            pipeline = fun.transform(pipeline)
         return pipeline

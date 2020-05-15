@@ -153,7 +153,7 @@ def to_struct_gen(arr, ordered_dict=False):
     if ordered_dict:
         logger.info("Converting array to ordered stucts")
         return (to_ordered_struct(x) for x in arr)
-    return (to_struct(x) for x in arr)
+    return (to_struct(a) for a in arr)
 
 
 class StructEncoder(json.JSONEncoder):

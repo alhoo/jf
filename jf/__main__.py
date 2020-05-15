@@ -61,7 +61,7 @@ def main(args=None):
         "--bw", action="store_true", default=False, help="remove colors"
     )
     parser.add_argument(
-        "--ordered_dict", action="store_true", default=True, help="user ordered dict"
+        "--ordered_dict", action="store_true", default=False, help="user ordered dict"
     )
     parser.add_argument(
         "-r", "--raw", action="store_true", default=False, help="raw output"

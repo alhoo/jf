@@ -5,7 +5,7 @@ from flask import Flask, request, Response
 class RESTful(JFTransformation):
     def _fn(self, arr):
 
-        params = self.args[0](arr)
+        params = self.args[0]
         base_path = params
         model = next(iter(arr))
         yield "Starting restful service"

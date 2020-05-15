@@ -63,14 +63,14 @@ def query_convert(query):
     query = keywordunpackingre.sub("(**x.dict())", query)
     logger.debug("After kw-unpacking: %s", json.dumps(query, indent=2))
     try:
-        jfkwre = re.compile(r"\.([a-z]+[.)><\!=, ])")
-        query = jfkwre.sub(r".__JFESCAPED_\1", query)
+        jfkwre = re.compile(r"\.([a-z]+)")
+        query = jfkwre.sub(r".__JFESCAPED__\1", query)
         logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
     except (TypeError, SyntaxError) as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
         query = colorize(ex)
-        ijfkwre = re.compile(r"\.__JFESCAPED_([a-z]+[.)><\!=, ])")
+        ijfkwre = re.compile(r"\.__JFESCAPED__([a-z]+)")
         query = ijfkwre.sub(r".\1", query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
         # raise SyntaxError
@@ -83,13 +83,17 @@ def query_convert(query):
     return query
 
 
+
 def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
     """Run a query against given data"""
     import regex as re
 
     query = query_convert(query)
 
+    unknown = process.Col()
+
     globalscope = {
+        "x": unknown,
         "data": data,
         "gp": process.GenProcessor,
         "islice": process.jfislice,
@@ -145,7 +149,6 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         globalscope["gp"] = process.OrderedGenProcessor
 
     try:
-        print(query)
         res = eval(query, globalscope)
         for val in res:
             yield val

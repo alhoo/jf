@@ -47,20 +47,14 @@ def merge_lambdas(arr):
     """Merge jf lambdas to mappers and filters"""
     logger.debug("merge lambdas: %s", arr)
     ret = ""
-    rest = False
     first = True
     for val, keep in arr:
-        if not keep and not rest:
-            ret += ")"
-            rest = True
         if not first:
             ret += ", "
         ret += val
         first = False
-    if not rest:
-        ret += ")"
     logger.debug("ret: %s", ret)
-    return "lambda x, *rest: (" + ret
+    return ret
 
 
 kwargre = re.compile(r"[^!><(=]+=[^><=]+")
