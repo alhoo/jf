@@ -248,8 +248,28 @@ class Col:
         if k is not None:
             self._opstrings = k
 
+    def __lt__(self, val):
+        self._opstrings.append(("<", val))
+        return self
+
     def __gt__(self, val):
-        self._opstrings.append((lambda x: x > val, ))
+        self._opstrings.append((">", val))
+        return self
+
+    def __le__(self, val):
+        self._opstrings.append(("<=", val))
+        return self
+
+    def __ge__(self, val):
+        self._opstrings.append((">=", val))
+        return self
+
+    def __eq__(self, val):
+        self._opstrings.append(("==", val))
+        return self
+
+    def __ne__(self, val):
+        self._opstrings.append(("!=", val))
         return self
 
     def __getitem__(self, k):
@@ -276,7 +296,21 @@ class Col:
                 if isinstance(data, list):
                     data = data[s]
                 continue
-            data = s[0](data)
+            other = s[1]
+            if isinstance(other, Col):
+                other = other(args[0])
+            if s[0] == '<':
+                data = data < other
+            if s[0] == '>':
+                data = data > other
+            if s[0] == '==':
+                data = data == other
+            if s[0] == '!=':
+                data = data != other
+            if s[0] == '>=':
+                data = data >= other
+            if s[0] == '<=':
+                data = data <= other
         return data
 
 

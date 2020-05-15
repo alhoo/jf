@@ -343,6 +343,45 @@ class TestJf(unittest.TestCase):
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
+    def test_filter_query1(self):
+        """Test complex query"""
+
+        data = [
+            {"a": 2, "b": {"c": 632, "d": [1, 2, 3, 4]}},
+            {"a": 1, "b": {"c": 632, "d": [3, 4, 5, 6]}},
+            {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
+        ]
+        cmd = "map({id: x.a, data: x.b.d[0]}), filter(.id == 1)"
+        expected = '[{"data": 3, "id": 1}]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_filter_query2(self):
+        """Test complex query"""
+
+        data = [
+            {"a": 2, "b": {"c": 632, "d": [1, 2, 3, 4]}},
+            {"a": 1, "b": {"c": 632, "d": [3, 4, 5, 6]}},
+            {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
+        ]
+        cmd = "map({id: x.a, data: x.b.d[0]}), filter(.id < 2)"
+        expected = '[{"data": 3, "id": 1}]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_filter_query3(self):
+        """Test complex query"""
+
+        data = [
+            {"a": 2, "b": {"c": 632, "d": [1, 2, 3, 4]}},
+            {"a": 1, "b": {"c": 632, "d": [3, 4, 5, 6]}},
+            {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
+        ]
+        cmd = "map({id: x.a, data: x.b.d[0]}), filter(.id < .data)"
+        expected = '[{"data": 3, "id": 1}]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
     def test_sorting_query(self):
         """Test complex query"""
 
