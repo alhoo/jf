@@ -12,10 +12,10 @@ class ColumnSelector:
         return self
 
     def transform(self, X, y=None):
-        if isinstance(X, list):
+        if isinstance(X, (tuple, list)):
             X = pd.DataFrame(X)
         # Add selected columns to dataframe if needed
-        if isinstance(self.column, list):
+        if isinstance(self.column, (tuple, list)):
             for col in self.column:
                 if col not in X.columns:
                     X[col] = 'unk'
