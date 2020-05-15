@@ -65,6 +65,7 @@ class persistent_trainer(jf.process.JFTransformation):
 
         params = self.args
         ofn, model = params
+        ofn = ofn.replace("__JFESCAPED__", "")
 
         model = next(trainer(model).transform(arr))
 
