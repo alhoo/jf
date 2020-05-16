@@ -4,7 +4,7 @@ import sys
 import logging
 from datetime import datetime, timezone
 from functools import reduce
-from jf.parser import parse_query
+from jf.query_parser import parse_query
 import jf.process as process
 import jf.output as output
 import jf.ml

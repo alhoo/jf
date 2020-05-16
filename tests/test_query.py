@@ -8,7 +8,7 @@ from datetime import datetime, date
 
 import jf
 import jf.process as process
-from jf.parser import parse_query
+from jf.query_parser import parse_query
 from jf.meta import Struct, StructEncoder
 import jf.output as output
 
