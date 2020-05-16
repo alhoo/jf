@@ -5,7 +5,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-classes = 'pipeline,feature_extraction,calibration,cluster,compose,covariance,cross_decomposition,datasets,decomposition,experimental,ensemble,feature_selection,gaussian_process,impute,inspection,linear_model,manifold,metrics,mixture,model_selection,neighbors,neural_network,preprocessing,svm,tree,util,base'.split(",")
+classes = "pipeline,feature_extraction,calibration,cluster,compose,covariance,cross_decomposition,datasets,decomposition,experimental,ensemble,feature_selection,gaussian_process,impute,inspection,linear_model,manifold,metrics,mixture,model_selection,neighbors,neural_network,preprocessing,svm,tree,util,base".split(
+    ","
+)
 mods = []
 for mod in classes:
     try:
@@ -13,7 +15,15 @@ for mod in classes:
         mods.append(mod)
     except ModuleNotFoundError:
         logger.debug(f"No such module: sklearn.%s", mod)
-for mod in list(chain(*[[f"{x}.{y}" for y in dir(eval(f"sklearn.{x}")) if "_" != y[0]] for x in dir(sklearn) if "_" != x[0]])):
+for mod in list(
+    chain(
+        *[
+            [f"{x}.{y}" for y in dir(eval(f"sklearn.{x}")) if "_" != y[0]]
+            for x in dir(sklearn)
+            if "_" != x[0]
+        ]
+    )
+):
     try:
         importlib.import_module(f"sklearn.{mod}")
         mods.append(mod)

@@ -192,8 +192,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [map(x.id)]).process()",
+            expr, "gp(data, [map(x.id)]).process()",
         )
 
     def test_py_while(self):
@@ -203,8 +202,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [map(x.while)]).process()",
+            expr, "gp(data, [map(x.while)]).process()",
         )
 
     def test_py_if(self):
@@ -214,8 +212,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [map(x.if > 0)]).process()",
+            expr, "gp(data, [map(x.if > 0)]).process()",
         )
 
     def test_py_else1(self):
@@ -225,8 +222,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            'gp(data, [map(x.else != "expression")]).process()',
+            expr, 'gp(data, [map(x.else != "expression")]).process()',
         )
 
     def test_py_else(self):
@@ -236,8 +232,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            'gp(data, [map(x.else != "expression")]).process()',
+            expr, 'gp(data, [map(x.else != "expression")]).process()',
         )
 
     def test_py_from(self):
@@ -247,8 +242,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [map(x.from, x.id)]).process()",
+            expr, "gp(data, [map(x.from, x.id)]).process()",
         )
 
 
@@ -391,9 +385,7 @@ class TestJf(unittest.TestCase):
             {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
         ]
         cmd = "map({id: x.a, data: x.b.d[0]}), sorted(.id, reverse=True)"
-        expected = (
-            '[{"data": 5, "id": 5}, {"data": 1, "id": 2}, {"data": 3, "id": 1}]'
-        )
+        expected = '[{"data": 5, "id": 5}, {"data": 1, "id": 2}, {"data": 3, "id": 1}]'
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
@@ -590,9 +582,7 @@ class TestJf(unittest.TestCase):
             {"a": 3, "b": "2018-01-10 15:12:35+00:00"},
             {"a": 5, "b": "2018-01-30 16:06:59+03:00"},
         ]
-        cmd = (
-            "map({id: x.a, date: x.b}), sorted(age(.date), reverse=False), map(.id), first(2)"
-        )
+        cmd = "map({id: x.a, date: x.b}), sorted(age(.date), reverse=False), map(.id), first(2)"
         expected = "[2, 1]"
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)

@@ -1,6 +1,7 @@
 """Pyq python json/yaml query engine"""
 
 import logging
+import inspect
 from datetime import datetime, timezone
 from itertools import islice
 from collections import deque, OrderedDict
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 class JFTransformation:
     def __init__(self, *args, fn=None, **kwargs):
         self.args = args
+        self.gen = False
         self.kwargs = kwargs
         if fn is not None:
             self._fn = fn
@@ -20,7 +22,8 @@ class JFTransformation:
     def fit(self, X, y=None):
         return self
 
-    def transform(self, X, y=None, **kwargs):
+    def transform(self, X, y=None, gen=False, **kwargs):
+        self.gen = gen
         return self._fn(X, **kwargs)
 
 
@@ -29,7 +32,7 @@ def age(datecol):
     from dateparser import parse as parsedate
 
     def fn(d):
-        datestr = datecol(d)
+        datestr = datecol.eval(d)
         logger.debug("Calculating the age of '%s'", datestr)
         try:
             ret = datetime.now() - parsedate(str(datestr))
@@ -37,6 +40,7 @@ def age(datecol):
             ret = datetime.now(timezone.utc) - parsedate(str(datestr))
         logger.debug("Age of '%s' is %s", datestr, repr(ret))
         return ret
+
     return fn
 
 
@@ -145,7 +149,7 @@ class transpose(JFTransformation):
         [[(0, 1), (1, 2)], [(0, 2), (1, 3)]]
         """
         import pandas as pd
-    
+
         arr = X
         data = [x.dict() for x in arr]
         df = pd.DataFrame(data)
@@ -188,11 +192,13 @@ class group_by(JFTransformation):
 class unique(JFTransformation):
     def _fn(self, X):
         """Calculate unique according to function"""
+
         def fun(x):
             return repr(x)
+
         if len(self.args) > 0:
             fun = self.args[0]
-    
+
         seen = set()
         for it in X:
             h = hash(fun(it))
@@ -208,7 +214,7 @@ class hide(JFTransformation):
         """Hide elements from items"""
         elements = self.args
         for item in arr:
-            yield {k:v for k,v in item.items() if k not in elements}
+            yield {k: v for k, v in item.items() if k not in elements}
 
 
 class firstnlast(JFTransformation):
@@ -243,10 +249,38 @@ class Identity(JFTransformation):
 
 class Col:
     _opstrings = []
-    value = None
+
+    def __setstate__(self, state):
+        """
+        >>> import pickle
+        >>> x = Col()
+        >>> col = x.v
+        >>> list(map(col.eval, [{"v": 5}]))
+        [5]
+        >>> mb = pickle.dumps(col)
+        >>> len(mb) > 0
+        True
+        >>> col2 = pickle.loads(mb)
+        >>> list(map(col2.eval, [{"v": 10}]))
+        [10]
+        """
+        self._opstrings = state.get("opstrings", [])
+        return self
+
+    def __getstate__(self):
+        """
+        The column object is pickled by only storing the opstrings.
+        This is needed because the __getattr__ makes pickling hard.
+        """
+        state = dict(opstrings=self._opstrings)
+        return state
+
     def __init__(self, k=None):
         if k is not None:
             self._opstrings = k
+
+    def __call__(self):
+        return self
 
     def __lt__(self, val):
         self._opstrings.append(("<", val))
@@ -280,16 +314,16 @@ class Col:
         selfcopy = Col(self._opstrings + [k])
         return selfcopy
 
-    def __call__(self, *args, **kwargs):
+    def eval(self, *args, **kwargs):
         data = args[0]
         for s in self._opstrings:
             if data is None:
                 return None
             if isinstance(s, str):
-                s = s.replace('__JFESCAPED__', '')
+                s = s.replace("__JFESCAPED__", "")
                 if isinstance(data, dict):
                     data = data.get(s, None)
-                continue 
+                continue
             if isinstance(s, int):
                 if isinstance(data, dict):
                     data = data.get(s, None)
@@ -298,25 +332,25 @@ class Col:
                 continue
             other = s[1]
             if isinstance(other, Col):
-                other = other(args[0])
-            if s[0] == '<':
+                other = other.eval(args[0])
+            if s[0] == "<":
                 data = data < other
-            if s[0] == '>':
+            if s[0] == ">":
                 data = data > other
-            if s[0] == '==':
+            if s[0] == "==":
                 data = data == other
-            if s[0] == '!=':
+            if s[0] == "!=":
                 data = data != other
-            if s[0] == '>=':
+            if s[0] == ">=":
                 data = data >= other
-            if s[0] == '<=':
+            if s[0] == "<=":
                 data = data <= other
         return data
 
 
 def evaluate_col(col, x):
     if isinstance(col, Col):
-        return col(x)
+        return col.eval(x)
     return col
 
 
@@ -334,13 +368,23 @@ class Map(JFTransformation):
         if isinstance(fn, dict):
             dct = fn
             fn = lambda x: {k: evaluate_col(col, x) for k, col in dct.items()}
-        return map(fn, X)
+        if isinstance(fn, Col):
+            fn = fn.eval
+        ret = map(fn, X)
+        if self.gen:
+            return ret
+        return list(ret)
 
 
 class Filter(JFTransformation):
     def _fn(self, X):
         fn = self.args[0]
-        return filter(fn, X)
+        if isinstance(fn, Col):
+            fn = fn.eval
+        ret = filter(fn, X)
+        if self.gen:
+            return ret
+        return list(ret)
 
 
 class last(JFTransformation):
@@ -360,7 +404,12 @@ class Sorted(JFTransformation):
         keyget = None
         if len(self.args) == 1:
             keyget = self.args[0]
-        return sorted(X, key=keyget, **self.kwargs)
+        if isinstance(keyget, Col):
+            keyget = keyget.eval
+        ret = sorted(X, key=keyget, **self.kwargs)
+        if self.gen:
+            return ret
+        return list(ret)
 
 
 class update(JFTransformation):
@@ -395,7 +444,7 @@ class OrderedGenProcessor:
         """Process items"""
         pipeline = self.igen
         for fun in self._filters:
-            pipeline = fun.transform(pipeline)
+            pipeline = fun.transform(pipeline, gen=True)
         return pipeline
 
 
@@ -415,5 +464,5 @@ class GenProcessor:
         """Process items"""
         pipeline = self.igen
         for fun in self._filters:
-            pipeline = fun.transform(pipeline)
+            pipeline = fun.transform(pipeline, gen=True)
         return pipeline

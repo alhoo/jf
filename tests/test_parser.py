@@ -38,9 +38,7 @@ class TestJfIO(unittest.TestCase):
     def test_filter2(self):
         """Test simple filter"""
         test_str = 'filter(x.commit.committer.name == "Lasse Hyyrynen")'
-        expected = (
-            'filter(x.commit.committer.name == "Lasse Hyyrynen"),'
-        )
+        expected = 'filter(x.commit.committer.name == "Lasse Hyyrynen"),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
@@ -61,9 +59,7 @@ class TestJfIO(unittest.TestCase):
     def test_map_filter(self):
         """Test simple filter"""
         test_str = 'map({id: x.id}), filter(x.id == "123")'
-        expected = (
-            'map({ id:x.id }),filter(x.id == "123"),'
-        )
+        expected = 'map({ id:x.id }),filter(x.id == "123"),'
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
@@ -89,18 +85,13 @@ class TestJfIO(unittest.TestCase):
     def _test_two(self):
         """Test simple query"""
         test_str = "map(x.id), sorted(x.id)"
-        expected = (
-            "map(x.id), sorted(x.id),"
-        )
+        expected = "map(x.id), sorted(x.id),"
         result = parse_query(test_str)
         self.assertEqual(result, expected)
 
     def _test_keywords(self):
         """Test simple query"""
         test_str = "map(x.id), sorted(x.id, reverse=True)"
-        expected = (
-            "map(x.id),"
-            + "sorted(x.id, reverse = True),"
-        )
+        expected = "map(x.id)," + "sorted(x.id, reverse = True),"
         result = parse_query(test_str)
         self.assertEqual(result, expected)

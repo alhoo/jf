@@ -5,9 +5,11 @@ test.*
 *.o
 *.so
 *.swp
+*.pkl
 *.egg-info/
 README.rst
 dist/
 coverage/
+patches/
 .*
 build/

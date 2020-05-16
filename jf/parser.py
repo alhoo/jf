@@ -134,8 +134,8 @@ def parse_query(string):
         if maxdepth(func) < 3:
             logger.debug("Shallow: %s", func)
             ret += func[0]
-            if func[0] != ',':
-                ret += '()'
+            if func[0] != ",":
+                ret += "()"
             continue
         if not isinstance(func[0][0], str):
             raise SyntaxError("Weird: %s" % repr(func[0][0]))

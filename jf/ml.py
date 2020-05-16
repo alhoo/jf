@@ -1,4 +1,5 @@
 import jf.sklearn_import
+from itertools import islice
 import numpy as np
 import pandas as pd
 
@@ -18,10 +19,10 @@ class ColumnSelector:
         if isinstance(self.column, (tuple, list)):
             for col in self.column:
                 if col not in X.columns:
-                    X[col] = 'unk'
+                    X[col] = "unk"
         else:
             if self.column not in X.columns:
-                X[self.column] = 'unk'
+                X[self.column] = "unk"
         return X[self.column]
 
 
@@ -32,11 +33,10 @@ class transform(jf.process.JFTransformation):
 
         print(model)
 
-        data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
-        try:
-            data = [x.dict() for x in data]
-        except:
-            pass
+        y = None
+        data = list(zip(*list(arr)))
+        if len(data) == 2:
+            data, y = data
         try:
             yield from np.array(model.fit_transform(data).todense())
         except:
@@ -48,11 +48,10 @@ class trainer(jf.process.JFTransformation):
         params = self.args[0]
         model = params
 
-        data, y = list(zip(*list(map(lambda x: [x[0], x[1]], arr))))
-        try:
-            data = [x.dict() for x in data]
-        except:
-            pass
+        y = None
+        data = list(zip(*list(arr)))
+        if len(data) == 2:
+            data, y = data
         print(f"Training the model ({model}):")
         model.fit(data, y)
 
@@ -75,11 +74,42 @@ class persistent_trainer(jf.process.JFTransformation):
         yield model
 
 
+class persistent_transformation(jf.process.JFTransformation):
+    def _fn(self, arr):
+        import pickle
+
+        params = self.args
+        ofn, model = params
+        ofn = ofn.replace("__JFESCAPED__", "")
+
+        print(model)
+        print(list(model.transform([{"status": 1}])))
+
+        with open(ofn, "wb") as f:
+            f.write(pickle.dumps(model))
+        yield model
+
+
+class Print(jf.process.JFTransformation):
+    def _fn(self, arr):
+        n = 10
+        if len(self.args) > 0:
+            n = self.args[0]
+        arr = list(arr)
+        for it in islice(arr, 0, n):
+            print(it)
+        return arr
+
+
 class importResolver:
     def __getattribute__(self, k):
         k = k.replace("__JFESCAPED__", "")
+        if k == "persistent_transformation":
+            return persistent_transformation
         if k == "persistent_trainer":
             return persistent_trainer
+        if k == "print":
+            return Print
         if k == "trainer":
             return trainer
         if k == "transform":

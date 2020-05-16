@@ -83,7 +83,6 @@ def query_convert(query):
     return query
 
 
-
 def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
     """Run a query against given data"""
     import regex as re
