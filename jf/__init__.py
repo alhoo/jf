@@ -27,7 +27,7 @@ def colorize(ex):
     """Colorize syntax error"""
     if not isinstance(ex.args, (list, tuple)):
         return repr(ex.args)
-    if not isinstance(ex.args[1], (list, tuple)):
+    if len(ex.args) < 2 or not isinstance(ex.args[1], (list, tuple)):
         return repr(ex.args)
     string = [c for c in ex.args[1][3]]
     start = ex.args[1][2] - ex.args[1][1]
