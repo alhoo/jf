@@ -14,6 +14,12 @@ jf/jsonlgen.o: jf/jsonlgen.cc
 jf/jsonlgen.so: jf/jsonlgen.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
+program.prof:
+	python3 -m cProfile -o program.prof jf/__main__.py 'sorted(.cmd)' ~/.zsh_fullhistory.jsonl >/dev/null 2>/dev/null
+
+profile: program.prof
+	pip install -U tuna==0.4.4
+	tuna program.prof
 
 test: jf/jsonlgen.so
 	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-doctest

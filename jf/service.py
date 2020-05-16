@@ -1,11 +1,11 @@
 import json
 import yaml
 from jf.process import JFTransformation
-from flask import Flask, request, Response
 
 
 class RESTful(JFTransformation):
     def _fn(self, arr):
+        from flask import Flask, request, Response
 
         base_path = ''
         if len(self.args) > 0:

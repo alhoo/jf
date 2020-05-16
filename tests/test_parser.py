@@ -3,7 +3,7 @@
 import unittest
 import json
 
-from jf.parser import join_tokens, make_param_list, parse_part, parse_query
+from jf.query_parser import join_tokens, make_param_list, parse_part, parse_query
 
 
 class TestJfIO(unittest.TestCase):
