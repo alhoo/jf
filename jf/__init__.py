@@ -112,6 +112,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "unique": process.unique,
         "ipy": output.ipy,
         "csv": output.csv,
+        "print": process.Print,
         "md": output.md,
         "filter": jf.process.Filter,
         "browser": output.browser,

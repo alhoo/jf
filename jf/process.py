@@ -1,5 +1,7 @@
 """Pyq python json/yaml query engine"""
 
+import sys
+import json
 import logging
 import inspect
 from datetime import datetime, timezone
@@ -421,6 +423,17 @@ class Sorted(JFTransformation):
         if self.gen:
             return ret
         return list(ret)
+
+
+class Print(JFTransformation):
+    def _fn(self, arr):
+        n = 10
+        if len(self.args) > 0:
+            n = self.args[0]
+        arr = list(arr)
+        for it in islice(arr, 0, n):
+            sys.stderr.write(json.dumps(it)+"\n")
+        return arr
 
 
 class update(JFTransformation):

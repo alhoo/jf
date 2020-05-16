@@ -91,10 +91,15 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
             yield xmldict
             return
         elif args.files[0].endswith("parq") or args.files[0].endswith("parquet"):
-            from fastparquet import ParquetFile
-            for val in ParquetFile(args.files[0]).to_pandas().to_dict("records", into=OrderedDict):
-                yield val
-            return
+            import warnings
+            from numba import NumbaDeprecationWarning
+
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
+                from fastparquet import ParquetFile
+                for val in ParquetFile(args.files[0]).to_pandas().to_dict("records", into=OrderedDict):
+                    yield val
+                return
         elif args.files[0].endswith("xlsx"):
             import xlrd
             import pandas

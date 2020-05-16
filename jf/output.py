@@ -164,8 +164,10 @@ class parquet(pandas_writer):
     """
     def __init__(self, *args, **kwargs):
         super(parquet, self).__init__(*args, **kwargs)
+
         self.writefn = "to_parquet"
-        self.kwargs.update({"compression": "GZIP"})
+        self.kwargs.update({"engine": "pyarrow"})
+        # self.kwargs.update({"compression": "GZIP"})
 
 
 class excel(pandas_writer):
