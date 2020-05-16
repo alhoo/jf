@@ -1,7 +1,8 @@
-import jf.sklearn_import
 from itertools import islice
 import numpy as np
 import pandas as pd
+
+import jf.sklearn_import
 
 
 class ColumnSelector:
@@ -88,17 +89,6 @@ class persistent_transformation(jf.process.JFTransformation):
         with open(ofn, "wb") as f:
             f.write(pickle.dumps(model))
         yield model
-
-
-class Print(jf.process.JFTransformation):
-    def _fn(self, arr):
-        n = 10
-        if len(self.args) > 0:
-            n = self.args[0]
-        arr = list(arr)
-        for it in islice(arr, 0, n):
-            print(it)
-        return arr
 
 
 class importResolver:

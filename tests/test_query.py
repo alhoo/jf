@@ -169,15 +169,9 @@ class TestJfFunctions(unittest.TestCase):
 
     def test_colorize(self):
         result = None
-        try:
-            query = "{x.id]"
-            query = parse_query(query).rstrip(",")
-        except SyntaxError as ex:
-            print(ex)
-            result = jf.colorize(ex)
-            pass
-        expected = "{x.id" + jf.RED + "]" + jf.RESET + ","
-        self.assertEqual(result, expected)
+        query = "{x.id]"
+        with self.assertRaises(SyntaxError) as context:
+            parse_query(query)
 
 
 class TestJfquery(unittest.TestCase):

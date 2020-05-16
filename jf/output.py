@@ -7,7 +7,7 @@ import logging
 from itertools import islice, chain
 from collections import deque, OrderedDict
 
-from jf.meta import OrderedStruct, StructEncoder
+from jf.meta import OrderedStruct, StructEncoder, JFTransformation
 
 from pygments.lexers import get_lexer_by_name
 from pygments import highlight
@@ -67,9 +67,12 @@ def print_results(data, args):
                         object_pairs_hook=OrderedDict,
                     )
                 elif args.raw:
-                    print(out)
+                    if isinstance(out, bytes):
+                        sys.stdout.write(out)
+                    else:
+                        print(out)
                     continue
-            else:
+            elif not args.raw:
                 out = json.loads(json.dumps(out, cls=StructEncoder))
             if args.list:
                 retlist.append(out)
@@ -86,7 +89,10 @@ def print_results(data, args):
                 if isinstance(out, str):
                     # Strip quotes
                     ret = ret[1:-1]
-            print(ret)
+            if isinstance(out, bytes):
+                sys.stdout.buffer.write(out)
+            else:
+                print(ret)
         if args.list:
             ret = outfmt(retlist, **out_kw_args)
             if not args.raw or args.yaml:
@@ -94,7 +100,10 @@ def print_results(data, args):
                     ret = html.unescape(ret)
                 if not args.bw:
                     ret = highlight(ret, lexer, formatter).rstrip()
-            print(ret)
+            if isinstance(ret, bytes):
+                sys.stdout.write(ret)
+            else:
+                print(ret)
     except BrokenPipeError:
         return
 
@@ -126,174 +135,206 @@ def result_cleaner(val):
     return json.loads(json.dumps(val, cls=StructEncoder))
 
 
-def excel(*args, **kwargs):
-    """Convert input to excel
-    >>> excel(lambda x: "/tmp/excel.xlsx", [{'a': 1}, {'a': 3}])
+class pandas_writer(JFTransformation):
+    def _fn(self, arr):
+        import pandas as pd
+
+        logger.info("Writing excel with args: %s and kwargs: %s", self.args, self.kwargs)
+        df = pd.DataFrame(list(map(result_cleaner, arr)))
+        if len(self.args) > 0:
+            fn = self.args[0]
+            getattr(df, self.writefn)(fn, *self.args[1:], **self.kwargs)
+            yield f"data written to {fn}"
+        else:
+            import tempfile
+            f = tempfile.NamedTemporaryFile(delete=False)
+            f.close()
+            fn = f.name
+            getattr(df, self.writefn)(fn, *self.args[1:], **self.kwargs)
+            with open(f.name, 'rb') as f:
+                content = f.read()
+            yield content
+
+
+
+class parquet(pandas_writer):
+    """Convert input to parquet
+    >>> list(parquet("/tmp/test.parq").transform([{'a': 1}, {'a': 3}]))
+    ['data written to /tmp/test.parq']
     """
-    import pandas as pd
+    def __init__(self, *args, **kwargs):
+        super(parquet, self).__init__(*args, **kwargs)
 
-    arr = args[-1]
-    if len(args) > 1:
-        args = [args[0](0)]
-    else:
-        args = ["-"]
-    logger.info("Writing excel with args: %s and kwargs: %s", args, kwargs)
-    writer = pd.ExcelWriter(*args, **kwargs)
-    df = pd.DataFrame(list(map(result_cleaner, arr)))
-    df.to_excel(writer)
-    writer.save()
-    return
+        self.writefn = "to_parquet"
+        self.kwargs.update({"engine": "pyarrow"})
+        # self.kwargs.update({"compression": "GZIP"})
 
 
-def profile(*args, **kwargs):
+class excel(pandas_writer):
+    """Convert input to parquet
+    >>> list(excel("/tmp/test.xlsx").transform([{'a': 1}, {'a': 3}]))
+    ['data written to /tmp/test.xlsx']
     """
-    Make a profiling report from data
-
-    This function tries to convert strings to numeric values or datetime
-    objects and makes a html profiling report as the only result to be yielded.
-    Notice! This fails if used with ordered_dict output.
-
-    # >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
-    # [True]
-    # >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}], nan='NA'))
-    # []
-    """
-    import pandas as pd
-    from pandas.io.json import json_normalize
-    import pandas_profiling
-
-    def is_numeric(df_):
-        try:
-            counts = df_.value_counts()
-            if len(counts) > 100:
-                # Only look a some of the values if we have a large input dataset
-                pd.to_numeric(df.value_counts()[4:24].keys())
-            else:
-                pd.to_numeric(df.value_counts().keys())
-            return True
-        except (ValueError, AttributeError):
-            pass
-        return False
-
-    arr = args[-1]
-    if len(args) > 1:
-        args = [open(args[0](0), "w")]
-    else:
-        args = []
-    data = list(map(result_cleaner, arr))
-    df = pd.DataFrame(json_normalize(data))
-    # df = pd.DataFrame(data)
-    # df = pd.DataFrame([{k: str(v) for k, v in it.items()} for it in data])
-    # print(df)
-    na_value = None
-    if "nan" in kwargs:
-        na_value = kwargs["nan"]
-    for col in df.columns:
-        try:
-            if is_numeric(df[col]):
-                if na_value:
-                    df[col] = df[col].str.replace(na_value, None)
-                df[col] = pd.to_numeric(df[col].str.replace(",", "."), errors="coerce")
-            else:
-                df[col] = pd.to_datetime(df[col].str.replace(",", "."))
-        except (AttributeError, KeyError, ValueError, OverflowError):
-            pass
-    profile_data = pandas_profiling.ProfileReport(df)
-    # html_report = profiling_data.to_html()
-    from pandas_profiling.report.presentation.flavours import HTMLReport
-    from pandas_profiling.report.presentation.flavours.html import templates
-
-    html_content = HTMLReport(profile_data).render()
-    html_report = templates.template("wrapper").render(content=html_content)
-    if len(args):
-        args[0].write(html_report + "\n")
-    else:
-        yield html_report
+    def __init__(self, *args, **kwargs):
+        super(excel, self).__init__(*args, **kwargs)
+        self.writefn = "to_excel"
 
 
-def browser(*args, **kwargs):
-    """ Send output to browser (no unittesting available)
-    """
-    import webbrowser
-    import tempfile
-    import time
+class profile(JFTransformation):
+    def _fn(self, arr):
+        """
+        Make a profiling report from data
 
-    arr = args[-1]
-    with tempfile.NamedTemporaryFile("w") as f:
-        for line in arr:
-            f.write(line)
-        webbrowser.open(f.name, **kwargs)
-        time.sleep(1)  # Hack to give the browser some time
+        This function tries to convert strings to numeric values or datetime
+        objects and makes a html profiling report as the only result to be yielded.
+        Notice! This fails if used with ordered_dict output.
 
+        # >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
+        # [True]
+        # >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}], nan='NA'))
+        # []
+        """
+        import pandas as pd
+        from pandas.io.json import json_normalize
+        import pandas_profiling
 
-def md(*args, **kwargs):
-    """ Convert dict to markdown
-    >>> md([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
-    a  |  b
-    ---|---
-    1  |  2
-    2  |  3
-    """
-    from csvtomd import md_table
-    from math import isnan
+        def is_numeric(df_):
+            try:
+                counts = df_.value_counts()
+                if len(counts) > 100:
+                    # Only look a some of the values if we have a large input dataset
+                    pd.to_numeric(df.value_counts()[4:24].keys())
+                else:
+                    pd.to_numeric(df.value_counts().keys())
+                return True
+            except (ValueError, AttributeError):
+                pass
+            return False
 
-    arr = args[-1]
-    if len(args) > 1:
-        args = [open(args[0](0), "w")]
-    else:
-        args = []
-    table = []
-    first = True
-    for row in map(result_cleaner, arr):
-        logger.info("Writing row %s", row)
-        if first:
-            table.append([str(v) if v else "" for v in row.keys()])
-            first = False
-        table.append(
-            [str(v) if isinstance(v, str) or not isnan(v) else "" for v in row.values()]
-        )
-    if len(args):
-        args[0].write(md_table(table, **kwargs) + "\n")
-    else:
-        print(md_table(table, **kwargs))
+        if len(self.args) > 1:
+            args = [open(self.args[0], "w")]
+        else:
+            args = []
+        data = list(map(result_cleaner, arr))
+        df = pd.DataFrame(json_normalize(data))
+        # df = pd.DataFrame(data)
+        # df = pd.DataFrame([{k: str(v) for k, v in it.items()} for it in data])
+        # print(df)
+        na_value = None
+        if "nan" in self.kwargs:
+            na_value = self.kwargs["nan"]
+        for col in df.columns:
+            try:
+                if is_numeric(df[col]):
+                    if na_value:
+                        df[col] = df[col].str.replace(na_value, None)
+                    df[col] = pd.to_numeric(df[col].str.replace(",", "."), errors="coerce")
+                else:
+                    df[col] = pd.to_datetime(df[col].str.replace(",", "."))
+            except (AttributeError, KeyError, ValueError, OverflowError):
+                pass
+        profile_data = pandas_profiling.ProfileReport(df)
+        # html_report = profiling_data.to_html()
+        from pandas_profiling.report.presentation.flavours import HTMLReport
+        from pandas_profiling.report.presentation.flavours.html import templates
 
-
-def csv(*args, **kwargs):
-    """ Convert dict to markdown
-    >>> csv([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])], lineterminator="\\n")
-    a,b
-    1,2
-    2,3
-    """
-    from csv import writer as cvs_writer
-
-    arr = args[-1]
-    if len(args) > 1:
-        args = [open(args[0](0), "w")]
-    else:
-        args = [sys.stdout]
-    r = cvs_writer(*args, **kwargs)
-    first = True
-    for row in map(result_cleaner, arr):
-        logger.info("Writing row %s", row)
-        if first:
-            r.writerow(row.keys())
-            first = False
-        r.writerow(row.values())
+        html_content = HTMLReport(profile_data).render()
+        html_report = templates.template("wrapper").render(content=html_content)
+        if len(args):
+            args[0].write(html_report + "\n")
+        else:
+            yield html_report
 
 
-def ipy(banner, data, fakerun=False):
-    """Start ipython with data-variable"""
-    from IPython import embed
+class browser(JFTransformation):
+    def _fn(self, arr):
+        """ Send output to browser (no unittesting available)
+        """
+        import webbrowser
+        import tempfile
+        import time
 
-    if not isinstance(banner, str):
-        banner = ""
-    banner += "\nJf instance is now dropping into IPython\n"
-    banner += "Your filtered dataset is loaded in a iterable variable "
-    banner += 'named "data"\n\ndata sample:\n'
-    head, data = peek(map(result_cleaner, data), 1)
-    if head:
-        banner += json.dumps(head[0], indent=2, sort_keys=True)
-    banner += "\n\n"
-    if not fakerun:
-        embed(banner1=banner)
+        with tempfile.NamedTemporaryFile("w") as f:
+            for line in arr:
+                f.write(line)
+            webbrowser.open(f.name, **self.kwargs)
+            time.sleep(1)  # Hack to give the browser some time
+
+
+class md(JFTransformation):
+    def _fn(self, arr):
+        """ Convert dict to markdown
+        >>> md().transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
+        a  |  b
+        ---|---
+        1  |  2
+        2  |  3
+        """
+        from csvtomd import md_table
+        from math import isnan
+
+        if len(self.args) > 1:
+            args = [open(self.args[0], "w")]
+        else:
+            args = []
+        table = []
+        first = True
+        for row in map(result_cleaner, arr):
+            logger.info("Writing row %s", row)
+            if first:
+                table.append([str(v) if v else "" for v in row.keys()])
+                first = False
+            table.append(
+                [str(v) if isinstance(v, str) or not isnan(v) else "" for v in row.values()]
+            )
+        if len(args):
+            args[0].write(md_table(table, **self.kwargs) + "\n")
+        else:
+            print(md_table(table, **self.kwargs))
+
+
+class csv(JFTransformation):
+    def _fn(self, arr):
+        """ Convert dict to markdown
+        >>> csv(lineterminator="\\n").transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
+        a,b
+        1,2
+        2,3
+        """
+        from csv import writer as cvs_writer
+
+        if len(self.args) > 1:
+            args = [open(self.args[0], "w")]
+        else:
+            args = [sys.stdout]
+        r = cvs_writer(*args, **self.kwargs)
+        first = True
+        for row in map(result_cleaner, arr):
+            logger.info("Writing row %s", row)
+            if first:
+                r.writerow(row.keys())
+                first = False
+            r.writerow(row.values())
+
+
+class ipy(JFTransformation):
+    def _fn(self, data):
+        """Start ipython with data-variable"""
+        from IPython import embed
+
+        banner = self.args[0]
+        fakerun = False
+        if 'fakerun' in self.kwargs:
+            fakerun = True
+            del self.kwargs['fakerun']
+        if not isinstance(banner, str):
+            banner = ""
+        banner += "\nJf instance is now dropping into IPython\n"
+        banner += "Your filtered dataset is loaded in a iterable variable "
+        banner += 'named "data"\n\ndata sample:\n'
+        head, data = peek(map(result_cleaner, data), 1)
+        if head:
+            banner += json.dumps(head[0], indent=2, sort_keys=True)
+        banner += "\n\n"
+        if not fakerun:
+            embed(banner1=banner)

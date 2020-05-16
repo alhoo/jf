@@ -54,4 +54,4 @@ class RESTful(JFTransformation):
                 return Response(json.dumps(results), 200)
                 # prediction = list(model.predict(data))
 
-        app.run(port="5002")
+        app.run(port=self.kwargs.get('port', 5002))

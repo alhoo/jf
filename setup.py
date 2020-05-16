@@ -52,8 +52,9 @@ setup(
         "csvtomd>=0.3.0",
         "pandas>=0.22.0",
         "pandas-profiling>=2.4.0,<2.5.0",
-        "scikit-learn==0.23.0",
+        "scikit-learn>0.22.0",
         "Flask==1.1.2",
+        "pyarrow==0.17.0",
     ],
     tests_require=[
         "nose>=1.3.0",
