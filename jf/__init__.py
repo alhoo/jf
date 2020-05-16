@@ -118,6 +118,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "profile": output.profile,
         "excel": output.excel,
         "flatten": process.flatten,
+        "parquet": output.parquet,
         "reduce": reduce,
         "map": jf.process.Map,
         "ml": jf.ml.import_resolver,

@@ -17,3 +17,4 @@ pytest
 pytest-flake8
 scikit-learn==0.23.0
 Flask==1.1.2
+pyarrow==0.17.0

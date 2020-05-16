@@ -90,6 +90,11 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
             logger.info("Got dict from xml %s", xmldict)
             yield xmldict
             return
+        elif args.files[0].endswith("parq") or args.files[0].endswith("parquet"):
+            from fastparquet import ParquetFile
+            for val in ParquetFile(args.files[0]).to_pandas().to_dict("records", into=OrderedDict):
+                yield val
+            return
         elif args.files[0].endswith("xlsx"):
             import xlrd
             import pandas
@@ -135,7 +140,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
 
     if args.yamli or args.files[0].endswith("yaml") or args.files[0].endswith("yml"):
 
-        inp = yaml.load
+        inp = yaml.safe_load
         data = "\n".join([l for l in inf])
     else:
         for val in yield_json_and_json_lines(inf):

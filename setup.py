@@ -54,6 +54,7 @@ setup(
         "pandas-profiling>=2.4.0,<2.5.0",
         "scikit-learn==0.23.0",
         "Flask==1.1.2",
+        "pyarrow==0.17.0",
     ],
     tests_require=[
         "nose>=1.3.0",

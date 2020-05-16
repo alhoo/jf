@@ -6,25 +6,9 @@ from datetime import datetime, timezone
 from itertools import islice
 from collections import deque, OrderedDict
 from jf.output import result_cleaner
-from jf.meta import to_struct_gen
+from jf.meta import to_struct_gen, JFTransformation
 
 logger = logging.getLogger(__name__)
-
-
-class JFTransformation:
-    def __init__(self, *args, fn=None, **kwargs):
-        self.args = args
-        self.gen = False
-        self.kwargs = kwargs
-        if fn is not None:
-            self._fn = fn
-
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X, y=None, gen=False, **kwargs):
-        self.gen = gen
-        return self._fn(X, **kwargs)
 
 
 def age(datecol):
@@ -215,6 +199,33 @@ class hide(JFTransformation):
         elements = self.args
         for item in arr:
             yield {k: v for k, v in item.items() if k not in elements}
+
+
+class parquet0(JFTransformation):
+    def _fn(self, arr):
+        ofn = self.args[0]
+        from fastparquet import write
+        import pandas as pd
+        def deep_struct_to_dict(arr):
+            if isinstance(arr, list):
+                return [deep_struct_to_dict(x) for x in arr]
+            if isinstance(arr, OrderedStruct):
+                return {k: deep_struct_to_dict(v) for k,v in arr.dict().items()}
+            return arr
+
+        data = deep_struct_to_dict(list(arr))
+        #df = pd.concat({
+        #    k: pd.DataFrame(v).T
+        #    for k,v in enumerate(data)
+        #    })
+        df = pd.io.json.json_normalize(data)
+        #with open(ofn, 'wb') as f:
+        #    write(f, df)
+        print(data)
+        print(df)
+        write(ofn, df)
+        for it in df.to_dict(orient='records', into=OrderedDict):
+            yield it
 
 
 class firstnlast(JFTransformation):
