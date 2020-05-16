@@ -19,7 +19,7 @@ setup(
     author="Lasse Hyyrynen",
     author_email="lasse.hyyrynen@pm.me",
     maintainer="Lasse Hyyrynen",
-    maintainer_email="leh@protonmail.com",
+    maintainer_email="lasse.hyyrynen@pm.me",
     license="MIT",
     keywords=["json", "jsonl", "yaml", "jq"],
     download_url="https://github.com/alhoo/jf/archive/%s.tar.gz" % version,

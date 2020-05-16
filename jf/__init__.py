@@ -63,14 +63,14 @@ def query_convert(query):
     query = keywordunpackingre.sub("(**x.dict())", query)
     logger.debug("After kw-unpacking: %s", json.dumps(query, indent=2))
     try:
-        jfkwre = re.compile(r"\.([a-z]+[.)><\!=, ])")
-        query = jfkwre.sub(r".__JFESCAPED_\1", query)
+        jfkwre = re.compile(r"\.([a-z]+)")
+        query = jfkwre.sub(r".__JFESCAPED__\1", query)
         logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
     except (TypeError, SyntaxError) as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
         query = colorize(ex)
-        ijfkwre = re.compile(r"\.__JFESCAPED_([a-z]+[.)><\!=, ])")
+        ijfkwre = re.compile(r"\.__JFESCAPED__([a-z]+)")
         query = ijfkwre.sub(r".\1", query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
         # raise SyntaxError
@@ -89,7 +89,10 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
 
     query = query_convert(query)
 
+    unknown = process.Col()
+
     globalscope = {
+        "x": unknown,
         "data": data,
         "gp": process.GenProcessor,
         "islice": process.jfislice,
@@ -101,7 +104,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "headntail": process.firstnlast,
         "last": process.last,
         "null": None,
-        "I": lambda arr: arr,
+        "I": jf.process.Identity,
         "age": process.age,
         "re": re,
         "date": process.parse_value,
@@ -110,11 +113,13 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "ipy": output.ipy,
         "csv": output.csv,
         "md": output.md,
+        "filter": jf.process.Filter,
         "browser": output.browser,
         "profile": output.profile,
         "excel": output.excel,
         "flatten": process.flatten,
         "reduce": reduce,
+        "map": jf.process.Map,
         "ml": jf.ml.import_resolver,
         "service": jf.service,
         "transpose": process.transpose,
@@ -124,7 +129,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "group": process.reduce_list,
         "group_by": process.group_by,
         "chain": process.reduce_list,
-        "sorted": lambda x, arr=None, **kwargs: sorted(arr, key=x, **kwargs),
+        "sorted": jf.process.Sorted,
         "datetime": datetime,
         "timezone": timezone,
     }

@@ -47,22 +47,14 @@ def merge_lambdas(arr):
     """Merge jf lambdas to mappers and filters"""
     logger.debug("merge lambdas: %s", arr)
     ret = ""
-    rest = False
     first = True
     for val, keep in arr:
-        if not keep and not rest:
-            ret += "), arr"
-            rest = True
         if not first:
             ret += ", "
         ret += val
         first = False
-    if ret == "":
-        return "arr"
-    if not rest:
-        ret += "), arr"
     logger.debug("ret: %s", ret)
-    return "lambda x, *rest: (" + ret
+    return ret
 
 
 kwargre = re.compile(r"[^!><(=]+=[^><=]+")
@@ -108,7 +100,7 @@ def make_param_list(part):
 
 def parse_part(function):
     """Parse a part of pipeline definition"""
-    ret = "lambda arr: "
+    ret = ""
     arr_set = False
     for part in function:
         logger.debug(part)
@@ -142,6 +134,8 @@ def parse_query(string):
         if maxdepth(func) < 3:
             logger.debug("Shallow: %s", func)
             ret += func[0]
+            if func[0] != ",":
+                ret += "()"
             continue
         if not isinstance(func[0][0], str):
             raise SyntaxError("Weird: %s" % repr(func[0][0]))

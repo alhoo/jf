@@ -238,14 +238,14 @@ JF is integrated with SKlearn for building fast prototype machine learning syste
 Building a machine learning model from your dataset:
 
     $ jf 'head(5000),
-          map([x.text, x.status]),
+          map([x.text, x.label]),
           ml.persistent_trainer("model.pkl",
              ml.make_pipeline(
                  ml.make_union(ml.CountVectorizer(),
                                ml.CountVectorizer(analyzer="char", ngram_range=(4,4))),
                  ml.LogisticRegression()))' dataset.jsonl.gz
 
-In the above script we take the first 5000 samples, select the "text"-column as the model features and "status"-column as the classifier target. We use the sklearn `CountVectorizer` to build both word and character level features, which we pass to the logistic regression. The ml.persistent_trainer
+In the above script we take the first 5000 samples, select the "text"-column as the model features and "status"-column as the classifier target. We use the sklearn `CountVectorizer` to build both word and character level features, which we pass to the logistic regression. The ml.persistent_trainer then takes your model and fits it using the jf transformation pipeline defined before the trainer. The trainer assumes you feed it with [sample, target]-pairs when fitting a supervised model.
 
 To further serve your models, you can use the jf-service-module to build an API from your model:
 
