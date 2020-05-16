@@ -2,7 +2,6 @@
 
 import sys
 import json
-from ruamel import yaml
 import logging
 from itertools import islice, chain
 from collections import deque, OrderedDict
@@ -30,6 +29,7 @@ def print_results(data, args):
     }
     outfmt = json.dumps
     if args.yaml and not args.json:
+        from ruamel import yaml
         yaml.RoundTripDumper.add_representer(
             OrderedDict, yaml.RoundTripRepresenter.represent_dict
         )

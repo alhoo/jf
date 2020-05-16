@@ -1,6 +1,4 @@
 from itertools import islice
-import numpy as np
-import pandas as pd
 
 import jf.sklearn_import
 
@@ -15,6 +13,7 @@ class ColumnSelector:
 
     def transform(self, X, y=None):
         if isinstance(X, (tuple, list)):
+            import pandas as pd
             X = pd.DataFrame(X)
         # Add selected columns to dataframe if needed
         if isinstance(self.column, (tuple, list)):
@@ -29,6 +28,7 @@ class ColumnSelector:
 
 class transform(jf.process.JFTransformation):
     def _fn(self, arr):
+        import numpy as np
         params = self.args[0]
         model = params
 

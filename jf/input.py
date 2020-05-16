@@ -4,8 +4,8 @@ import logging
 
 from collections import OrderedDict
 
-import json
 from ruamel import yaml
+import json
 
 from lxml import etree
 
@@ -141,10 +141,8 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         else:
             return loader.construct_scalar(node)
 
-    yaml.add_multi_constructor("", generic_constructor)
-
     if args.yamli or args.files[0].endswith("yaml") or args.files[0].endswith("yml"):
-
+        yaml.add_multi_constructor("", generic_constructor)
         inp = yaml.safe_load
         data = "\n".join([l for l in inf])
     else:
@@ -164,7 +162,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
                     yield val
             else:
                 yield ind
-        except yaml.parser.ParserError as ex:
+        except Exception as ex:
             logger.warning("%s while producing input data", UEE)
             logger.warning("Exception %s", repr(ex))
 
