@@ -5,6 +5,23 @@ from collections import OrderedDict
 logger = logging.getLogger(__name__)
 
 
+class JFTransformation:
+
+    def __init__(self, *args, fn=None, **kwargs):
+        self.args = [x.replace("__JFESCAPED__", "") if isinstance(x, str) else x for x in args]
+        self.gen = False
+        self.kwargs = kwargs
+        if fn is not None:
+            self._fn = fn
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None, gen=False, **kwargs):
+        self.gen = gen
+        return self._fn(X, **kwargs)
+
+
 class OrderedStruct:
     """Class representation of dict"""
 

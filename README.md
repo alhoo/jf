@@ -267,10 +267,16 @@ To further serve your models, you can use the jf-service-module to build an API 
 Features
 ==
 
-* json, jsonl and yaml files for input and output
-  * bz2 and gzip compressed input for json, jsonl and yaml
+supported formats:
+* json (uncompressed, gzip, bz2)
+* jsonl (uncompressed, gzip, bz2)
+* yaml (uncompressed, gzip, bz2)
 * csv and xlsx support if pandas and xlrd is installed
 * markdown table output support
+* xlsx (excel)
+* parquet
+
+transformations:
 * construct generator pipeline with map, hide, filter
 * access json dict as classes with dot-notation for attributes
 * datetime and timedelta comparison
@@ -283,6 +289,8 @@ Features
 * drop your filtered data to IPython for manual data exploration
 * pandas profiling support for quick data exploration
 * user --ordered\_dict to keep items in order
+* sklearn toolbox for machine learning
+* running restful service for the transformation pipeline
 
 Known bugs
 ==
