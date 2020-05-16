@@ -96,6 +96,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "data": data,
         "gp": process.GenProcessor,
         "islice": process.jfislice,
+        "limit": process.first,
         "head": process.first,
         "update": process.update,
         "tail": process.last,

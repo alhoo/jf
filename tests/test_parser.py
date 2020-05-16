@@ -1,4 +1,4 @@
-"""Tests for the PYQ tool"""
+"""Tests for the JF tool query parser"""
 # -*- coding: utf-8 -*-
 import unittest
 import json
