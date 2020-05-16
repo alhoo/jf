@@ -9,7 +9,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "0.6.6"
+version = "0.7.0"
 
 setup(
     name="jf",
@@ -19,7 +19,7 @@ setup(
     author="Lasse Hyyrynen",
     author_email="lasse.hyyrynen@pm.me",
     maintainer="Lasse Hyyrynen",
-    maintainer_email="leh@protonmail.com",
+    maintainer_email="lasse.hyyrynen@pm.me",
     license="MIT",
     keywords=["json", "jsonl", "yaml", "jq"],
     download_url="https://github.com/alhoo/jf/archive/%s.tar.gz" % version,
@@ -52,6 +52,8 @@ setup(
         "csvtomd>=0.3.0",
         "pandas>=0.22.0",
         "pandas-profiling>=2.4.0,<2.5.0",
+        "scikit-learn==0.23.0",
+        "Flask==1.1.2",
     ],
     tests_require=[
         "nose>=1.3.0",

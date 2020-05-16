@@ -22,8 +22,13 @@ class TestJfGenProcessor(unittest.TestCase):
     """Basic jf io testcases"""
 
     def test_param_list(self):
-        gp = process.GenProcessor((1, 2, 3), [lambda arr: map(lambda x: 2 * x, arr)])
-        gp.add_filter(lambda arr: map(lambda x: 2 * x, arr))
+        gp = process.GenProcessor(
+            (1, 2, 3),
+            [process.JFTransformation(fn=lambda arr: map(lambda x: 2 * x, arr))],
+        )
+        gp.add_filter(
+            process.JFTransformation(fn=lambda arr: map(lambda x: 2 * x, arr))
+        )
         self.assertEqual(list(gp.process()), [4, 8, 12])
 
 
@@ -58,7 +63,7 @@ class TestJfFunctions(unittest.TestCase):
 
     def test_unique(self):
         """Test date parsing"""
-        result = tolist(process.unique([1, 2, 4, 5, 5, 6, 7]))
+        result = tolist(process.unique().transform([1, 2, 4, 5, 5, 6, 7]))
         expected = tolist([1, 2, 4, 5, 6, 7])
         self.assertEqual(result, expected)
 
@@ -66,8 +71,7 @@ class TestJfFunctions(unittest.TestCase):
         """Test date parsing"""
         fieldsel = lambda x: x["b"]
         result = tolist(
-            process.unique(
-                fieldsel,
+            process.unique(fieldsel).transform(
                 [
                     {"a": 235, "b": 643},
                     {"a": 435, "b": 643},
@@ -85,8 +89,7 @@ class TestJfFunctions(unittest.TestCase):
         """Test date parsing"""
         fieldsel = lambda x: repr(x["b"] == x["a"])
         result = tolist(
-            process.unique(
-                fieldsel,
+            process.unique(fieldsel).transform(
                 [
                     {"a": 235, "b": 643},
                     {"a": 435, "b": 643},
@@ -129,44 +132,38 @@ class TestJfFunctions(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_yield_all(self):
-        result = list(process.yield_all(lambda x: x, [[1, 2], [3, 4]]))
+        result = list(process.yield_all(lambda x: x).transform([[1, 2], [3, 4]]))
         expected = [1, 2, 3, 4]
         self.assertEqual(result, expected)
 
     def test_last(self):
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.last(lambda x: 1, igen))
+        result = tolist(process.last(1).transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_last_str(self):
         """last() doesn't know how to handle strings"""
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.last(lambda x: "2", igen))
+        result = tolist(process.last("2").transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_first(self):
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.first(lambda x: 1, igen))
+        result = tolist(process.first(1).transform(igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
     def test_first_str(self):
         """first() doesn't know how to handle strings"""
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.first(lambda x: "2", igen))
+        result = tolist(process.first("2").transform(igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
-    def test_update(self):
-        igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.update(lambda x: {"b": x["a"] + 1}, igen))
-        expected = '[{"a": 1, "b": 2}, {"a": 2, "b": 3}]'
-        self.assertEqual(result, expected)
-
     def test_reduce_list(self):
-        result = process.reduce_list(None, [1, 2])
+        result = process.reduce_list().transform([1, 2])
         expected = [[1, 2]]
         self.assertEqual(result, expected)
 
@@ -186,7 +183,7 @@ class TestJfFunctions(unittest.TestCase):
 class TestJfquery(unittest.TestCase):
     """Basic jf testcases"""
 
-    unescapere = re.compile(r"__JFESCAPED_")
+    unescapere = re.compile(r"__JFESCAPED__")
 
     def test_query_converter(self):
         """Test simple query"""
@@ -195,8 +192,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [lambda arr: map(lambda x, " + "*rest: (x.id), arr)]).process()",
+            expr, "gp(data, [map(x.id)]).process()",
         )
 
     def test_py_while(self):
@@ -206,9 +202,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [lambda arr: map(lambda x, "
-            + "*rest: (x.while), arr)]).process()",
+            expr, "gp(data, [map(x.while)]).process()",
         )
 
     def test_py_if(self):
@@ -218,9 +212,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [lambda arr: map(lambda x, "
-            + "*rest: (x.if > 0), arr)]).process()",
+            expr, "gp(data, [map(x.if > 0)]).process()",
         )
 
     def test_py_else1(self):
@@ -230,10 +222,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [lambda arr: map(lambda x, "
-            + '*rest: (x.else != "expression"), arr)'
-            + "]).process()",
+            expr, 'gp(data, [map(x.else != "expression")]).process()',
         )
 
     def test_py_else(self):
@@ -243,10 +232,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [lambda arr: map(lambda x, "
-            + '*rest: (x.else != "expression"), arr)'
-            + "]).process()",
+            expr, 'gp(data, [map(x.else != "expression")]).process()',
         )
 
     def test_py_from(self):
@@ -256,9 +242,7 @@ class TestJfquery(unittest.TestCase):
         expr = jf.query_convert(query)
         expr = self.unescapere.sub(r"", expr)
         self.assertEqual(
-            expr,
-            "gp(data, [lambda arr: map(lambda x, "
-            + "*rest: (x.from, x.id), arr)]).process()",
+            expr, "gp(data, [map(x.from, x.id)]).process()",
         )
 
 
@@ -353,6 +337,45 @@ class TestJf(unittest.TestCase):
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
+    def test_filter_query1(self):
+        """Test complex query"""
+
+        data = [
+            {"a": 2, "b": {"c": 632, "d": [1, 2, 3, 4]}},
+            {"a": 1, "b": {"c": 632, "d": [3, 4, 5, 6]}},
+            {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
+        ]
+        cmd = "map({id: x.a, data: x.b.d[0]}), filter(.id == 1)"
+        expected = '[{"data": 3, "id": 1}]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_filter_query2(self):
+        """Test complex query"""
+
+        data = [
+            {"a": 2, "b": {"c": 632, "d": [1, 2, 3, 4]}},
+            {"a": 1, "b": {"c": 632, "d": [3, 4, 5, 6]}},
+            {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
+        ]
+        cmd = "map({id: x.a, data: x.b.d[0]}), filter(.id < 2)"
+        expected = '[{"data": 3, "id": 1}]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
+    def test_filter_query3(self):
+        """Test complex query"""
+
+        data = [
+            {"a": 2, "b": {"c": 632, "d": [1, 2, 3, 4]}},
+            {"a": 1, "b": {"c": 632, "d": [3, 4, 5, 6]}},
+            {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
+        ]
+        cmd = "map({id: x.a, data: x.b.d[0]}), filter(.id < .data)"
+        expected = '[{"data": 3, "id": 1}]'
+        result = tolist(list(jf.run_query(cmd, data)))
+        self.assertEqual(result, expected)
+
     def test_sorting_query(self):
         """Test complex query"""
 
@@ -362,9 +385,7 @@ class TestJf(unittest.TestCase):
             {"a": 5, "b": {"c": 632, "d": [5, 6, 7, 8]}},
         ]
         cmd = "map({id: x.a, data: x.b.d[0]}), sorted(.id, reverse=True)"
-        expected = (
-            '[{"data": 5, "id": 5}, {"data": 1, "id": 2}, ' + '{"data": 3, "id": 1}]'
-        )
+        expected = '[{"data": 5, "id": 5}, {"data": 1, "id": 2}, {"data": 3, "id": 1}]'
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
 
@@ -401,7 +422,7 @@ class TestJf(unittest.TestCase):
             {"a": 2, "b": "2018-01-30 16:28:40+00:00"},
             {"a": 1, "b": "2018-01-30 15:12:35+00:00"},
         ]
-        cmd = "map({id: x.a, date: x.b})," + "sorted(age(.date), reverse=True), first()"
+        cmd = "map({id: x.a, date: x.b}), sorted(age(.date), reverse=True), first()"
         expected = '[{"date": "2018-01-30 15:12:35+00:00", "id": 1}]'
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
@@ -561,10 +582,7 @@ class TestJf(unittest.TestCase):
             {"a": 3, "b": "2018-01-10 15:12:35+00:00"},
             {"a": 5, "b": "2018-01-30 16:06:59+03:00"},
         ]
-        cmd = (
-            "map({id: x.a, date: x.b}),"
-            + "sorted(age(.date), reverse=False), map(.id), first(2)"
-        )
+        cmd = "map({id: x.a, date: x.b}), sorted(age(.date), reverse=False), map(.id), first(2)"
         expected = "[2, 1]"
         result = tolist(list(jf.run_query(cmd, data)))
         self.assertEqual(result, expected)
