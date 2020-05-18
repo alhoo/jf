@@ -31,7 +31,7 @@ def set_loggers(debug=False):
 
 
 def main(args=None):
-    """Main PYQ execution function"""
+    """Main JF execution function"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "query",

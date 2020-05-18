@@ -1,8 +1,9 @@
-"""Tests for the PYQ tool"""
+"""Tests for the JF tool queries"""
 # -*- coding: utf-8 -*-
 import unittest
 import json
 import re
+import math
 
 from datetime import datetime, date
 
@@ -61,17 +62,17 @@ class TestJfFunctions(unittest.TestCase):
         self.assertEqual(head, [1, 2])
         self.assertEqual(list(data), [1, 2, 3])
 
-    def test_unique(self):
+    def test_Unique(self):
         """Test date parsing"""
-        result = tolist(process.unique().transform([1, 2, 4, 5, 5, 6, 7]))
+        result = tolist(process.Unique().transform([1, 2, 4, 5, 5, 6, 7]))
         expected = tolist([1, 2, 4, 5, 6, 7])
         self.assertEqual(result, expected)
 
-    def test_unique2(self):
+    def test_Unique2(self):
         """Test date parsing"""
         fieldsel = lambda x: x["b"]
         result = tolist(
-            process.unique(fieldsel).transform(
+            process.Unique(fieldsel).transform(
                 [
                     {"a": 235, "b": 643},
                     {"a": 435, "b": 643},
@@ -85,11 +86,11 @@ class TestJfFunctions(unittest.TestCase):
         )
         self.assertEqual(result, expected)
 
-    def test_unique3(self):
+    def test_Unique3(self):
         """Test date parsing"""
         fieldsel = lambda x: repr(x["b"] == x["a"])
         result = tolist(
-            process.unique(fieldsel).transform(
+            process.Unique(fieldsel).transform(
                 [
                     {"a": 235, "b": 643},
                     {"a": 435, "b": 643},
@@ -131,39 +132,39 @@ class TestJfFunctions(unittest.TestCase):
         expected = ""
         self.assertEqual(result, expected)
 
-    def test_yield_all(self):
-        result = list(process.yield_all(lambda x: x).transform([[1, 2], [3, 4]]))
+    def test_Yield_all(self):
+        result = list(process.YieldAll(lambda x: x).transform([[1, 2], [3, 4]]))
         expected = [1, 2, 3, 4]
         self.assertEqual(result, expected)
 
     def test_last(self):
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.last(1).transform(igen))
+        result = tolist(process.Last(1).transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_last_str(self):
         """last() doesn't know how to handle strings"""
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.last("2").transform(igen))
+        result = tolist(process.Last("2").transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_first(self):
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.first(1).transform(igen))
+        result = tolist(process.First(1).transform(igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
     def test_first_str(self):
         """first() doesn't know how to handle strings"""
         igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
-        result = tolist(process.first("2").transform(igen))
+        result = tolist(process.First("2").transform(igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
     def test_reduce_list(self):
-        result = process.reduce_list().transform([1, 2])
+        result = process.ReduceList().transform([1, 2])
         expected = [[1, 2]]
         self.assertEqual(result, expected)
 
@@ -265,6 +266,11 @@ class TestJf(unittest.TestCase):
 
         data = [{"a": 1}]
         self.assertEqual(tolist(jf.run_query("map(x.a)", data)), "[1]")
+
+    def test_math_query(self):
+        data = [{"a": "123"}]
+        query = 'update({y: math.log(len(.a) * len(.a))}), .y'
+        self.assertEqual(list(jf.run_query(query, data, "math")), [math.log(3*3)])
 
     def test_hide_many(self):
         """Test complex query"""

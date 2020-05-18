@@ -1,4 +1,4 @@
-"""Tests for the PYQ tool"""
+"""Tests for the JF tool input/output module"""
 # -*- coding: utf-8 -*-
 import sys
 import unittest

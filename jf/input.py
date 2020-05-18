@@ -79,52 +79,116 @@ def import_error():
     logger.warning("pip install xlrd")
 
 
-def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
-    """Read json, jsonl and yaml data from file defined in args"""
-    try:
-        # FIXME these only output from the first line
-        if args.files[0].endswith("xml"):
-            tree = etree.parse(args.files[0])
-            root = tree.getroot()
-            xmldict = format_xml(root)
-            logger.info("Got dict from xml %s", xmldict)
-            yield xmldict
+def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
+    # FIXME these only output from the first line
+    inp = json.loads
+    if fn.endswith("xml"):
+        tree = etree.parse(fn)
+        root = tree.getroot()
+        xmldict = format_xml(root)
+        logger.info("Got dict from xml %s", xmldict)
+        yield xmldict
+        return
+    elif fn.endswith("parq") or fn.endswith("parquet"):
+        import warnings
+        from numba import NumbaDeprecationWarning
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
+            from fastparquet import ParquetFile
+            for val in ParquetFile(fn).to_pandas().to_dict("records", into=OrderedDict):
+                yield val
             return
-        elif args.files[0].endswith("parq") or args.files[0].endswith("parquet"):
-            import warnings
-            from numba import NumbaDeprecationWarning
+    elif fn.endswith("xlsx"):
+        import xlrd
+        import pandas
 
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
-                from fastparquet import ParquetFile
-                for val in ParquetFile(args.files[0]).to_pandas().to_dict("records", into=OrderedDict):
-                    yield val
-                return
-        elif args.files[0].endswith("xlsx"):
-            import xlrd
-            import pandas
+        for val in pandas.read_excel(fn).to_dict(
+            "records", into=OrderedDict
+        ):
+            yield val
+        return
+    elif fn.endswith("csv"):
+        import pandas
 
-            for val in pandas.read_excel(args.files[0]).to_dict(
+        if ordered_dict:
+            for val in pandas.read_csv(fn, **kwargs).to_dict(
                 "records", into=OrderedDict
             ):
                 yield val
-            return
-        elif args.files[0].endswith("csv"):
-            import pandas
-
-            if ordered_dict:
-                for val in pandas.read_csv(args.files[0], **kwargs).to_dict(
-                    "records", into=OrderedDict
-                ):
+        else:
+            for val in pandas.read_csv(fn, **kwargs).to_dict("records"):
+                yield val
+        return
+    elif fn.endswith("yaml") or fn.endswith("yml"):
+        yaml.add_multi_constructor("", generic_constructor)
+        inp = yaml.safe_load
+        try:
+            ind = inp(data)
+            if isinstance(ind, list):
+                for val in ind:
                     yield val
             else:
-                for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records"):
-                    yield val
-            return
-    except ImportError:
-        # return import_error()
-        raise
+                yield ind
+        except Exception as ex:
+            logger.warning("%s while producing input data", UEE)
+            logger.warning("Exception %s", repr(ex))
+    else:
+        inf = (
+            x.decode("UTF-8")
+            for x in fileinput.input(files=[fn], openhook=openhook, mode="rb")
+        )
+        for val in yield_json_and_json_lines(inf):
+            try:
+                obj = json.loads(val)
+                yield obj
+            except json.JSONDecodeError as ex:
+                logger.warning("Exception %s", repr(ex))
+                jerr = colorize_json_error(ex)
+                logger.warning("Error at code marker q4eh\ndata:\n%s", jerr)
 
+
+def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
+    """Read json, jsonl and yaml data from file defined in args"""
+    # FIXME these only output from the first line
+    if args.files[0].endswith("xml"):
+        tree = etree.parse(args.files[0])
+        root = tree.getroot()
+        xmldict = format_xml(root)
+        logger.info("Got dict from xml %s", xmldict)
+        yield xmldict
+        return
+    elif args.files[0].endswith("parq") or args.files[0].endswith("parquet"):
+        import warnings
+        from numba import NumbaDeprecationWarning
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
+            from fastparquet import ParquetFile
+            for val in ParquetFile(args.files[0]).to_pandas().to_dict("records", into=OrderedDict):
+                yield val
+            return
+    elif args.files[0].endswith("xlsx"):
+        import xlrd
+        import pandas
+
+        for val in pandas.read_excel(args.files[0]).to_dict(
+            "records", into=OrderedDict
+        ):
+            yield val
+        return
+    elif args.files[0].endswith("csv"):
+        import pandas
+
+        if ordered_dict:
+            for val in pandas.read_csv(args.files[0], **kwargs).to_dict(
+                "records", into=OrderedDict
+            ):
+                yield val
+        else:
+            for val in pandas.read_csv(args.files[0], **kwargs).to_dict("records"):
+                yield val
+        return
     data = ""
     inp = json.loads
     inf = (
