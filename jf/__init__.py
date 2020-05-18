@@ -7,6 +7,7 @@ from functools import reduce
 from jf.query_parser import parse_query
 import jf.process as process
 import jf.output as output
+import jf.input as input
 import jf.ml
 import jf.service
 import json
@@ -63,15 +64,15 @@ def query_convert(query):
     query = keywordunpackingre.sub("(**x.dict())", query)
     logger.debug("After kw-unpacking: %s", json.dumps(query, indent=2))
     try:
-        jfkwre = re.compile(r"\.([a-z]+)")
-        query = jfkwre.sub(r".__JFESCAPED__\1", query)
+        jfkwre = re.compile(r"x\.([a-z]+)")
+        query = jfkwre.sub(r"x.__JFESCAPED__\1", query)
         logger.debug("Parsing: '%s'", query)
         query = parse_query(query).rstrip(",")
     except (TypeError, SyntaxError) as ex:
         logger.warning("Syntax error in query: %s", repr(ex.args[0]))
         query = colorize(ex)
-        ijfkwre = re.compile(r"\.__JFESCAPED__([a-z]+)")
-        query = ijfkwre.sub(r".\1", query)
+        ijfkwre = re.compile(r"x\.__JFESCAPED__([a-z]+)")
+        query = ijfkwre.sub(r"x.\1", query)
         sys.stderr.write("Error in query:\n\t%s\n\n" % query)
         # raise SyntaxError
         return
@@ -94,23 +95,27 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
     globalscope = {
         "x": unknown,
         "data": data,
+        "fn": process.Fn,
         "gp": process.GenProcessor,
-        "islice": process.jfislice,
-        "limit": process.first,
-        "head": process.first,
-        "update": process.update,
-        "tail": process.last,
-        "first": process.first,
-        "firstnlast": process.firstnlast,
-        "headntail": process.firstnlast,
-        "last": process.last,
+        "islice": process.Jfislice,
+        "limit": process.First,
+        "head": process.First,
+        "update": process.Update,
+        "tail": process.Last,
+        "first": process.First,
+        "firstnlast": process.Firstnlast,
+        "headntail": process.Firstnlast,
+        "last": process.Last,
         "null": None,
-        "I": jf.process.Identity,
+        "I": process.Identity,
         "age": process.age,
         "re": re,
+        "len": process.Len,
+        "str": process.Str,
+        "title": process.TitleCase,
         "date": process.parse_value,
-        "hide": process.hide,
-        "unique": process.unique,
+        "hide": process.Hide,
+        "unique": process.Unique,
         "ipy": output.ipy,
         "csv": output.csv,
         "print": process.Print,
@@ -119,20 +124,20 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "browser": output.browser,
         "profile": output.profile,
         "excel": output.excel,
-        "flatten": process.flatten,
+        "flatten": process.Flatten,
         "parquet": output.parquet,
         "reduce": reduce,
-        "map": jf.process.Map,
+        "map": process.Map,
         "ml": jf.ml.import_resolver,
         "service": jf.service,
-        "transpose": process.transpose,
-        "reduce_list": process.reduce_list,
-        "yield_all": process.yield_all,
-        "yield_from": process.yield_all,
-        "group": process.reduce_list,
-        "group_by": process.group_by,
-        "chain": process.reduce_list,
-        "sorted": jf.process.Sorted,
+        "transpose": process.Transpose,
+        "reduce_list": process.ReduceList,
+        "yield_all": process.YieldAll,
+        "yield_from": process.YieldAll,
+        "group": process.ReduceList,
+        "group_by": process.GroupBy,
+        "chain": process.ReduceList,
+        "sorted": process.Sorted,
         "datetime": datetime,
         "timezone": timezone,
     }
@@ -144,7 +149,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         if import_from:
             sys.path.append(os.path.dirname(import_from))
         globalscope.update(
-            {imp: importlib.import_module(imp) for imp in imports.split(",")}
+            {imp: process.fn_mod(importlib.import_module(imp)) for imp in imports.split(",")}
         )
 
     if ordered_dict:
