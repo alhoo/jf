@@ -59,6 +59,15 @@ class trainer(jf.process.JFTransformation):
         yield model
 
 
+class model_loader(jf.process.JFTransformation):
+    def _fn(self, arr):
+        import pickle
+
+        ifn = self.args[0]
+        ifn = ifn.replace("__JFESCAPED__", "")
+        yield pickle.load(open(ifn, 'rb'))
+
+
 class persistent_trainer(jf.process.JFTransformation):
     def _fn(self, arr):
         import pickle
@@ -98,6 +107,8 @@ class importResolver:
             return persistent_transformation
         if k == "persistent_trainer":
             return persistent_trainer
+        if k == "model_loader":
+            return model_loader
         if k == "print":
             return Print
         if k == "trainer":

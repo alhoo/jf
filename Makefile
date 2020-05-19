@@ -3,6 +3,11 @@ CFLAGS = -O3 -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
 LDFLAGS = -pthread -shared
 
 INCLUDE = $(shell pkg-config --cflags python3)
+SPHINXOPTS ?=
+SPHINXBUILD ?= python3 -m sphinx.cmd.build
+DOC_SOURCE_DIR ?= docs/source
+DOC_FILES := $(shell find $(DOC_SOURCE_DIR) -type f -name '*.rst')
+DOC_BUILD_DIR ?= docs/build
 #INCLUDE = -I/usr/include/python3.5m/
 
 
@@ -32,6 +37,13 @@ readme:
 
 README.rst: README.md
 	pandoc -f markdown -t rst $< >$@
+
+$(DOC_BUILD_DIR)/html/index.html: $(DOC_FILES)
+	@$(SPHINXBUILD) -M html "$(DOC_SOURCE_DIR)" "$(DOC_BUILD_DIR)" $(SPHINXOPTS)
+
+## Create HTML documentation based on Sphinx sources
+docs: $(DOC_BUILD_DIR)/html/index.html
+
 
 build35:
 	virtualenv local --python=python3.5
