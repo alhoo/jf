@@ -10,7 +10,7 @@ from datetime import datetime, date
 import jf
 import jf.process as process
 from jf.query_parser import parse_query
-from jf.meta import Struct, StructEncoder
+from jf.meta import StructEncoder
 import jf.output as output
 
 
@@ -38,13 +38,13 @@ class TestJfFunctions(unittest.TestCase):
 
     def test_result_cleaner(self):
         """Test peeking"""
-        st = Struct(**{"a": 3})
+        st = {"a": 3}
         res = output.result_cleaner([st])
         self.assertEqual(res, [{"a": 3}])
 
     def test_result_cleaner2(self):
         """Test peeking"""
-        st = Struct(**{"a": datetime(2018, 1, 1)})
+        st = {"a": datetime(2018, 1, 1)}
         res = output.result_cleaner([st])
         self.assertEqual(res, [{"a": "2018-01-01 00:00:00"}])
 
@@ -138,27 +138,27 @@ class TestJfFunctions(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_last(self):
-        igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
+        igen = ([{"a": 1}, {"a": 2}])
         result = tolist(process.Last(1).transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_last_str(self):
         """last() doesn't know how to handle strings"""
-        igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
+        igen = ([{"a": 1}, {"a": 2}])
         result = tolist(process.Last("2").transform(igen))
         expected = '[{"a": 2}]'
         self.assertEqual(result, expected)
 
     def test_first(self):
-        igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
+        igen = ([{"a": 1}, {"a": 2}])
         result = tolist(process.First(1).transform(igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)
 
     def test_first_str(self):
         """first() doesn't know how to handle strings"""
-        igen = process.to_struct_gen([{"a": 1}, {"a": 2}])
+        igen = ([{"a": 1}, {"a": 2}])
         result = tolist(process.First("2").transform(igen))
         expected = '[{"a": 1}]'
         self.assertEqual(result, expected)

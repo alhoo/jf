@@ -6,7 +6,7 @@ import logging
 from itertools import islice, chain
 from collections import deque, OrderedDict
 
-from jf.meta import OrderedStruct, StructEncoder, JFTransformation
+from jf.meta import StructEncoder, JFTransformation
 
 from pygments.lexers import get_lexer_by_name
 from pygments import highlight
@@ -54,11 +54,6 @@ def print_results(data, args):
                 if isinstance(out, list):
                     out = json.loads(
                         json.dumps(out, cls=StructEncoder),
-                        object_pairs_hook=OrderedDict,
-                    )
-                elif isinstance(out, OrderedStruct):
-                    out = json.loads(
-                        json.dumps(out.dict(), cls=StructEncoder),
                         object_pairs_hook=OrderedDict,
                     )
                 elif not isinstance(out, str):
@@ -120,15 +115,8 @@ def result_cleaner(val):
     """Cleanup the result
     >>> result_cleaner({'a': 1})
     {'a': 1}
-    >>> from pprint import pprint
-    >>> pprint(result_cleaner(OrderedStruct(OrderedDict([('b', 1), ('a', 2)]))))
-    OrderedDict([('b', 1), ('a', 2)])
     """
-    if isinstance(val, OrderedStruct):
-        return json.loads(
-            json.dumps(val.data, cls=StructEncoder), object_pairs_hook=OrderedDict
-        )
-    elif isinstance(val, OrderedDict):
+    if isinstance(val, OrderedDict):
         return json.loads(
             json.dumps(val, cls=StructEncoder), object_pairs_hook=OrderedDict
         )

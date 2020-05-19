@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from itertools import islice
 from collections import deque, OrderedDict
 from jf.output import result_cleaner
-from jf.meta import to_struct_gen, JFTransformation
+from jf.meta import JFTransformation
 
 logger = logging.getLogger(__name__)
 
@@ -138,16 +138,14 @@ class Flatten(JFTransformation):
 class Transpose(JFTransformation):
     """ Transpose input
 
-    >>> data = [{'a': 1, 'b': 2}, {'a': 2, 'b': 3}]
-    >>> arr = to_struct_gen(data)
+    >>> arr = [{'a': 1, 'b': 2}, {'a': 2, 'b': 3}]
     >>> list(sorted(map(lambda x: list(x.items()), Transpose().transform(arr)), key=lambda x: x[0][1]))
     [[(0, 1), (1, 2)], [(0, 2), (1, 3)]]
     """
     def _fn(self, X):
         import pandas as pd
 
-        arr = X
-        data = [x.dict() for x in arr]
+        data = X
         df = pd.DataFrame(data)
         for it in df.to_dict(into=OrderedDict).values():
             yield it

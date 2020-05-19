@@ -30,6 +30,7 @@ def format_xml(parent):
     as dicts and lists.
     Decision to add a list is to find the 'List' word
     in the actual parent tag.
+
     >>> tree = etree.fromstring('<doc><a>1</a></doc>')
     >>> format_xml(tree)
     {'a': '1'}
@@ -64,7 +65,7 @@ def format_xml(parent):
 
 
 def colorize_json_error(ex):
-    """Colorize syntax error"""
+    """Colorize input data syntax error"""
     string = [c for c in ex.doc]
     start = ex.pos
     stop = ex.pos + 1
@@ -74,12 +75,18 @@ def colorize_json_error(ex):
 
 
 def import_error():
+    """
+    Logging function for import errors
+    """
     logger.warning("Install pandas and xlrd to read csv and excel")
     logger.warning("pip install pandas")
     logger.warning("pip install xlrd")
 
 
 def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
+    """
+    Function for converting input file to a data source
+    """
     # FIXME these only output from the first line
     inp = json.loads
     if fn.endswith("xml"):
