@@ -71,14 +71,14 @@ package:
 	pip wheel .
 
 release: jf/jsonlgen.so README.rst
-	@echo git flow release start <version>
-	@echo update version to setup.py
-	@echo git add setup.py
-	@echo git commit -m "bump version to <version>"
-	@echo git flow release finish
-	@echo git push --all
-	@echo git push --tags
-	@echo python setup.py sdist upload -r pypi
+		@echo "git flow release start <version>"
+		@echo update version to setup.py
+		@echo git add setup.py
+		@echo 'git commit -m "bump version to <version>"'
+		@echo git flow release finish
+		@echo git push --all
+		@echo git push --tags
+		@echo python setup.py sdist upload -r pypi
 
 clean:
 	rm -Rf *.whl jf/*.o jf/*.so tests/*.pyc jf/*.pyc build dist
