@@ -1,4 +1,4 @@
-"""Pyq python json/yaml query engine"""
+"""JF python json/yaml query engine"""
 
 import sys
 import logging
