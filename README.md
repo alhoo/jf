@@ -261,7 +261,26 @@ To further serve your models, you can use the jf-service-module to build an API 
     $ curl --silent -X POST -d '["Donald Trump is a bit simple"]' localhost:5002/predict
     [ "TRUMP_RANT", [0.9532, 0.0468] ]
 
+# Using JF as a library
 
+JF can also be used as a library for building more persistent services. We have included an example of this under `examples/` in the git repository. The basic usage as illustrated below.
+
+```python3
+from pprint import pprint
+import jf
+from jf.process import Map, Col, Pipeline
+
+# Define the x that represents one sample in your dataset
+x = Col()
+
+dataset = jf.input.read_file("dataset.jsonl.gz")
+
+# Use the x as you would use it in your command lines
+transformations = [Map(dict(id=x.id, energy=x.energy))]
+
+transformed_dataset = jf.process.Pipeline(transformations).transform(dataset)
+pprint(transformed_dataset)
+```
 
 
 Features
