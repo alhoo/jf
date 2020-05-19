@@ -577,37 +577,6 @@ class Print(JFTransformation):
         return arr
 
 
-class OrderedGenProcessor:
-    """Make a generator pipeline"""
-
-    def __init__(self, igen, filters):
-        """Initialize item processor
-        >>> gp = OrderedGenProcessor(['a','21','3'], [JFTransformation(fn=lambda arr: map(len, arr))])
-        >>> gp.add_filter(JFTransformation(fn=lambda arr: filter(lambda x: x > 1, arr)))
-        >>> list(gp.process())
-        [2]
-        """
-        self.igen = igen
-        self._filters = filters
-
-    def add_filter(self, fun):
-        """Add filter to pipeline"""
-        self._filters.append(fun)
-
-    def process(self):
-        """Process items"""
-        pipeline = self.igen
-        for fun in self._filters:
-            pipeline = fun.transform(pipeline, gen=True)
-        return pipeline
-
-    def transform(self, X):
-        pipeline = X
-        for fun in self._filters:
-            pipeline = fun.transform(pipeline, gen=True)
-        return pipeline
-
-
 class Pipeline:
     """
     Make a pipeline from the transformations
@@ -638,7 +607,6 @@ class GenProcessor:
 
     def process(self):
         """Process items"""
-        pipeline = self.igen
-        for fun in self._filters:
-            pipeline = fun.transform(pipeline, gen=True)
-        return pipeline
+        pipeline = Pipeline(self._filters)
+        result = pipeline.transform(self.igen, gen=True)
+        return result

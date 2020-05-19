@@ -152,9 +152,6 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
             {imp: process.fn_mod(importlib.import_module(imp)) for imp in imports.split(",")}
         )
 
-    if ordered_dict:
-        globalscope["gp"] = process.OrderedGenProcessor
-
     try:
         res = eval(query, globalscope)
         for val in res:
