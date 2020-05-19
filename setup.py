@@ -67,7 +67,7 @@ setup(
     ],
     dev_require = [
         "recommonmark", "sphinx", "sphinx-rtd-theme"
-    ]
+    ],
     test_suite="tests",
     zip_safe=True,
     entry_points={"console_scripts": ["jf=jf.__main__:main"]},
