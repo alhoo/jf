@@ -20,9 +20,10 @@ def age(datecol):
     True
     """
     from dateparser import parse as parsedate
+        
+    logger.info("Calculating the age of a column (%s)", datecol)
 
-    def fn(d):
-        datestr = datecol._eval(d)
+    def fn(datestr):
         logger.debug("Calculating the age of '%s'", datestr)
         try:
             ret = datetime.now() - parsedate(str(datestr))
@@ -31,7 +32,8 @@ def age(datecol):
         logger.debug("Age of '%s' is %s", datestr, repr(ret))
         return ret
 
-    return fn
+    datecol._custom(fn)
+    return datecol
 
 
 def parse_value(val):
