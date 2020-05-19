@@ -1,4 +1,4 @@
-"""Pyq main executable"""
+"""JF main executable"""
 
 import sys
 import json

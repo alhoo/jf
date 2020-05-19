@@ -1,4 +1,7 @@
-"""Pyq python json/yaml query engine"""
+"""JF python json/yaml query engine
+
+This module contains the main functions used for using the JF command line query tool
+"""
 
 import sys
 import logging
@@ -151,9 +154,6 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         globalscope.update(
             {imp: process.fn_mod(importlib.import_module(imp)) for imp in imports.split(",")}
         )
-
-    if ordered_dict:
-        globalscope["gp"] = process.OrderedGenProcessor
 
     try:
         res = eval(query, globalscope)

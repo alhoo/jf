@@ -1,4 +1,4 @@
-"""Pyq python json/yaml query engine"""
+"""JF python json/yaml query engine"""
 
 import sys
 import json
@@ -6,7 +6,7 @@ import logging
 from itertools import islice, chain
 from collections import deque, OrderedDict
 
-from jf.meta import OrderedStruct, StructEncoder, JFTransformation
+from jf.meta import StructEncoder, JFTransformation
 
 from pygments.lexers import get_lexer_by_name
 from pygments import highlight
@@ -54,11 +54,6 @@ def print_results(data, args):
                 if isinstance(out, list):
                     out = json.loads(
                         json.dumps(out, cls=StructEncoder),
-                        object_pairs_hook=OrderedDict,
-                    )
-                elif isinstance(out, OrderedStruct):
-                    out = json.loads(
-                        json.dumps(out.dict(), cls=StructEncoder),
                         object_pairs_hook=OrderedDict,
                     )
                 elif not isinstance(out, str):
@@ -118,17 +113,11 @@ def peek(data, count=100):
 
 def result_cleaner(val):
     """Cleanup the result
+
     >>> result_cleaner({'a': 1})
     {'a': 1}
-    >>> from pprint import pprint
-    >>> pprint(result_cleaner(OrderedStruct(OrderedDict([('b', 1), ('a', 2)]))))
-    OrderedDict([('b', 1), ('a', 2)])
     """
-    if isinstance(val, OrderedStruct):
-        return json.loads(
-            json.dumps(val.data, cls=StructEncoder), object_pairs_hook=OrderedDict
-        )
-    elif isinstance(val, OrderedDict):
+    if isinstance(val, OrderedDict):
         return json.loads(
             json.dumps(val, cls=StructEncoder), object_pairs_hook=OrderedDict
         )
@@ -159,6 +148,7 @@ class pandas_writer(JFTransformation):
 
 class parquet(pandas_writer):
     """Convert input to parquet
+
     >>> list(parquet("/tmp/test.parq").transform([{'a': 1}, {'a': 3}]))
     ['data written to /tmp/test.parq']
     """
@@ -172,6 +162,7 @@ class parquet(pandas_writer):
 
 class excel(pandas_writer):
     """Convert input to parquet
+
     >>> list(excel("/tmp/test.xlsx").transform([{'a': 1}, {'a': 3}]))
     ['data written to /tmp/test.xlsx']
     """
@@ -188,11 +179,6 @@ class profile(JFTransformation):
         This function tries to convert strings to numeric values or datetime
         objects and makes a html profiling report as the only result to be yielded.
         Notice! This fails if used with ordered_dict output.
-
-        # >>> list(map(lambda x: len(x) > 100, profile([{'a': 1}, {'a': 3}, {'a': 4}])))
-        # [True]
-        # >>> list(profile(lambda x: "/tmp/excel.html", [{'a': 1}, {'a': 3}, {'a': 4}], nan='NA'))
-        # []
         """
         import pandas as pd
         from pandas.io.json import json_normalize
@@ -264,6 +250,7 @@ class browser(JFTransformation):
 class md(JFTransformation):
     def _fn(self, arr):
         """ Convert dict to markdown
+
         >>> md().transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
         a  |  b
         ---|---
@@ -296,6 +283,7 @@ class md(JFTransformation):
 class csv(JFTransformation):
     def _fn(self, arr):
         """ Convert dict to markdown
+
         >>> csv(lineterminator="\\n").transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
         a,b
         1,2
