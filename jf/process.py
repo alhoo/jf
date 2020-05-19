@@ -521,6 +521,7 @@ class Filter(JFTransformation):
 class Last(JFTransformation):
     """
     Show only the last (N) value(s)
+
     >>> Last().transform([{"id": 99, "a": 1}, {"id": 199, "a": 2}])
     [{'id': 199, 'a': 2}]
     """

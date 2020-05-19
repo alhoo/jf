@@ -1,4 +1,7 @@
-"""JF query parser"""
+"""JF query parser
+
+This module contains tools for parsing the input query when using the JF command line tool.
+"""
 import parser
 import re
 import logging
