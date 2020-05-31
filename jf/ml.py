@@ -35,8 +35,10 @@ class transform(jf.process.JFTransformation):
         print(model)
 
         y = None
-        data = list(zip(*list(arr)))
-        if len(data) == 2:
+        data = list(arr)
+        print(data)
+        if isinstance(data[0], list) and len(data[0]) == 2:
+            data = list(zip(*data))
             data, y = data
         try:
             yield from np.array(model.fit_transform(data).todense())
@@ -51,10 +53,17 @@ class trainer(jf.process.JFTransformation):
 
         y = None
         data = list(arr)
-        if len(data) > 0 and len(data[0]) == 2:
-            data, y = list(zip(*data))
+        if isinstance(data[0], (list, tuple)):
+            # Assume data = [[X, y=None]]
+            # Convert to data = X, y
+            data = list(zip(*data))
+
         print(f"Training the model ({model}):")
-        model.fit(data, y)
+        if len(data) == 2:
+            data, y = data
+            model.fit(data, y)
+        else:
+            model.fit(data)
 
         yield model
 
@@ -76,6 +85,7 @@ class persistent_trainer(jf.process.JFTransformation):
         ofn, model = params
         ofn = ofn.replace("__JFESCAPED__", "")
 
+        print("Fitting to", arr)
         model = next(trainer(model).transform(arr))
 
         print(f"Saving model to {ofn}")

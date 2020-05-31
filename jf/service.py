@@ -1,11 +1,22 @@
 import json
 import yaml
+import numpy
 from jf.process import JFTransformation
+
+def json_encodings(obj):
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        obj.isoformat()
+    if isinstance(obj, (np.int64)):
+        return int(obj)
+    if isinstance(obj, (np.float)):
+        return float(obj)
 
 
 class RESTful(JFTransformation):
     def _fn(self, arr):
         from flask import Flask, request, Response
+        from flask_cors import CORS
+
 
         base_path = ''
         if len(self.args) > 0:
@@ -51,7 +62,8 @@ class RESTful(JFTransformation):
                     return Response(json.dumps(list(zip(results, prediction))), 200)
                 except:
                     pass
-                return Response(json.dumps(results), 200)
+                return Response(json.dumps(list(results)), 200)
                 # prediction = list(model.predict(data))
 
+        CORS(app)
         app.run(port=self.kwargs.get('port', 5002))
