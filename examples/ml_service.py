@@ -37,5 +37,5 @@ transformations.append(
 )
 
 # Execute the JF pipeline
-for it in jf.process.Pipeline(transformations).transform(dataset, gen=True):
+for it in jf.process.Pipeline(*transformations).transform(dataset, gen=True):
     print(it)

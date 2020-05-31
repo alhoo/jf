@@ -146,7 +146,6 @@ class pandasWriter(JFTransformation):
             yield content
 
 
-
 class parquet(pandasWriter):
     """Convert input to parquet
 

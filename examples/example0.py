@@ -10,5 +10,5 @@ dataset = jf.input.read_file("dataset.jsonl.gz")
 # Use the x as you would use it in your command lines
 transformations = [Map(dict(id=x.id, energy=x.energy))]
 
-transformed_dataset = jf.process.Pipeline(transformations).transform(dataset)
+transformed_dataset = jf.process.Pipeline(*transformations).transform(dataset)
 pprint(transformed_dataset)

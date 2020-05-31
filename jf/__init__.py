@@ -133,6 +133,7 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "map": process.Map,
         "ml": jf.ml.import_resolver,
         "service": jf.service,
+        "pipeline": process.Pipeline,
         "transpose": process.Transpose,
         "reduce_list": process.ReduceList,
         "yield_all": process.YieldAll,

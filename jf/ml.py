@@ -50,9 +50,9 @@ class trainer(jf.process.JFTransformation):
         model = params
 
         y = None
-        data = list(zip(*list(arr)))
-        if len(data) == 2:
-            data, y = data
+        data = list(arr)
+        if len(data) > 0 and len(data[0]) == 2:
+            data, y = list(zip(*data))
         print(f"Training the model ({model}):")
         model.fit(data, y)
 
