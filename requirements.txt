@@ -17,4 +17,5 @@ pytest
 pytest-flake8
 scikit-learn>0.22.0
 Flask==1.1.2
+flask-cors
 pyarrow==0.17.0
