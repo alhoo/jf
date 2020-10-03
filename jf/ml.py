@@ -46,10 +46,18 @@ class transform(jf.process.JFTransformation):
             yield from np.array(model.fit_transform(data))
 
 
+class shuffle(jf.process.JFTransformation):
+    def _fn(self, arr):
+        import numpy as np
+        arr = list(arr)
+        np.random.shuffle(arr)
+        yield from arr
+
+
 class trainer(jf.process.JFTransformation):
     def _fn(self, arr):
-        params = self.args[0]
-        model = params
+        params = self.args
+        model = params[0]
 
         y = None
         data = list(arr)
@@ -121,6 +129,8 @@ class importResolver:
             return model_loader
         if k == "print":
             return Print
+        if k == "shuffle":
+            return shuffle
         if k == "trainer":
             return trainer
         if k == "transform":
