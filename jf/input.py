@@ -81,7 +81,7 @@ def import_error():
     logger.warning("Install pandas and xlrd to read csv and excel")
     logger.warning("pip install pandas")
     logger.warning("pip install xlrd")
-    
+
 
 def read_s3(fn):
     import boto3
@@ -91,9 +91,9 @@ def read_s3(fn):
     bucket = o.netloc
     key = o.path[1:]
 
-    s3 = boto3.resource('s3')
+    s3 = boto3.resource("s3")
     obj = s3.Object(bucket, key)
-    body_bytes = obj.get()['Body'].read()
+    body_bytes = obj.get()["Body"].read()
     body = body_bytes
     return body
 
@@ -107,6 +107,7 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
     if fn.startswith("s3://"):
         content = read_s3(fn)
         from tempfile import NamedTemporaryFile
+
         f = NamedTemporaryFile()
         f.write(content)
         fn = f.name
@@ -122,8 +123,9 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
         from numba import NumbaDeprecationWarning
 
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
+            warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
             from fastparquet import ParquetFile
+
             for val in ParquetFile(fn).to_pandas().to_dict("records", into=OrderedDict):
                 yield val
             return
@@ -131,9 +133,7 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
         import xlrd
         import pandas
 
-        for val in pandas.read_excel(fn).to_dict(
-            "records", into=OrderedDict
-        ):
+        for val in pandas.read_excel(fn).to_dict("records", into=OrderedDict):
             yield val
         return
     elif fn.endswith("csv"):
@@ -182,6 +182,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
     if args.files[0].startswith("s3://"):
         content = read_s3(args.files[0])
         from tempfile import NamedTemporaryFile
+
         f = NamedTemporaryFile()
         f.write(content)
         args.files[0] = f.name
@@ -197,9 +198,14 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         from numba import NumbaDeprecationWarning
 
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
+            warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
             from fastparquet import ParquetFile
-            for val in ParquetFile(args.files[0]).to_pandas().to_dict("records", into=OrderedDict):
+
+            for val in (
+                ParquetFile(args.files[0])
+                .to_pandas()
+                .to_dict("records", into=OrderedDict)
+            ):
                 yield val
             return
     elif args.files[0].endswith("xlsx"):
