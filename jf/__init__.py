@@ -125,7 +125,6 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         "md": output.md,
         "filter": jf.process.Filter,
         "browser": output.browser,
-        "profile": output.profile,
         "excel": output.excel,
         "flatten": process.Flatten,
         "parquet": output.parquet,

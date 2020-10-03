@@ -51,7 +51,6 @@ setup(
         "ipython>=6.2.0",
         "csvtomd>=0.3.0",
         "pandas>=0.22.0",
-        "pandas-profiling>=2.4.0,<2.5.0",
         "scikit-learn>0.22.0",
         "Flask==1.1.2",
         "pyarrow==0.17.0",

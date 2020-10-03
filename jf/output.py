@@ -171,67 +171,6 @@ class excel(pandasWriter):
         self.writefn = "to_excel"
 
 
-class profile(JFTransformation):
-    """
-    Make a profiling report from data
-
-    This function tries to convert strings to numeric values or datetime
-    objects and makes a html profiling report as the only result to be yielded.
-    Notice! This fails if used with ordered_dict output.
-    """
-    def _fn(self, arr):
-        import pandas as pd
-        from pandas.io.json import json_normalize
-        import pandas_profiling
-
-        def is_numeric(df_):
-            try:
-                counts = df_.value_counts()
-                if len(counts) > 100:
-                    # Only look a some of the values if we have a large input dataset
-                    pd.to_numeric(df.value_counts()[4:24].keys())
-                else:
-                    pd.to_numeric(df.value_counts().keys())
-                return True
-            except (ValueError, AttributeError):
-                pass
-            return False
-
-        if len(self.args) > 1:
-            args = [open(self.args[0], "w")]
-        else:
-            args = []
-        data = list(map(result_cleaner, arr))
-        df = pd.DataFrame(json_normalize(data))
-        # df = pd.DataFrame(data)
-        # df = pd.DataFrame([{k: str(v) for k, v in it.items()} for it in data])
-        # print(df)
-        na_value = None
-        if "nan" in self.kwargs:
-            na_value = self.kwargs["nan"]
-        for col in df.columns:
-            try:
-                if is_numeric(df[col]):
-                    if na_value:
-                        df[col] = df[col].str.replace(na_value, None)
-                    df[col] = pd.to_numeric(df[col].str.replace(",", "."), errors="coerce")
-                else:
-                    df[col] = pd.to_datetime(df[col].str.replace(",", "."))
-            except (AttributeError, KeyError, ValueError, OverflowError):
-                pass
-        profile_data = pandas_profiling.ProfileReport(df)
-        # html_report = profiling_data.to_html()
-        from pandas_profiling.report.presentation.flavours import HTMLReport
-        from pandas_profiling.report.presentation.flavours.html import templates
-
-        html_content = HTMLReport(profile_data).render()
-        html_report = templates.template("wrapper").render(content=html_content)
-        if len(args):
-            args[0].write(html_report + "\n")
-        else:
-            yield html_report
-
-
 class browser(JFTransformation):
     """ Send output to browser
     """
