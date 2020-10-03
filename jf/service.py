@@ -1,6 +1,7 @@
 import json
 import yaml
-import numpy
+import numpy as np
+import datetime
 from jf.process import JFTransformation
 
 def json_encodings(obj):

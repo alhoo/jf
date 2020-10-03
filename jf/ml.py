@@ -37,7 +37,7 @@ class transform(jf.process.JFTransformation):
         y = None
         data = list(arr)
         print(data)
-        if ifinstance(data[0], list) and len(data[0]) == 2:
+        if isinstance(data[0], list) and len(data[0]) == 2:
             data = list(zip(*data))
             data, y = data
         try:
