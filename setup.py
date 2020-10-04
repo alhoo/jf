@@ -52,6 +52,7 @@ setup(
         "ipython>=6.2.0",
         "csvtomd>=0.3.0",
         "pandas>=0.22.0",
+        "boto3>1.1.11",
         "scikit-learn>0.22.0",
         "Flask==1.1.2",
         "pyarrow==0.17.0",
