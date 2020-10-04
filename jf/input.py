@@ -9,8 +9,6 @@ import json
 
 from lxml import etree
 
-from jf import jsonlgen  # cpython from jsonlgen.cc
-
 logger = logging.getLogger(__name__)
 
 UEE = "Got an unexpected exception"
@@ -273,4 +271,5 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
 
 def yield_json_and_json_lines(inp):
     """Yield  json and json lines"""
+    from jf import jsonlgen  # cpython from jsonlgen.cc
     return jsonlgen.gen(iter(inp))
