@@ -189,7 +189,6 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         f.write(content)
         args.files[0] = f.name
         fn = f.name
-    print("ext", ext)
     if ext == "xml":
         tree = etree.parse(args.files[0])
         root = tree.getroot()
