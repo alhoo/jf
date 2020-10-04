@@ -9,7 +9,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "0.8.1"
+version = "0.8.2"
 
 setup(
     name="jf",
@@ -46,6 +46,7 @@ setup(
         "regex>=2016.3.2",
         "python-dateutil>=2.4.1",
         "ruamel.yaml>=0.16.10",
+        "pyyaml>=5.0.1",
         "lxml>=4.0.1",
         "dateparser>=0.6.0",
         "ipython>=6.2.0",
