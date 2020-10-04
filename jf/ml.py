@@ -35,8 +35,10 @@ class transform(jf.process.JFTransformation):
         print(model)
 
         y = None
-        data = list(zip(*list(arr)))
-        if len(data) == 2:
+        data = list(arr)
+        print(data)
+        if isinstance(data[0], list) and len(data[0]) == 2:
+            data = list(zip(*data))
             data, y = data
         try:
             yield from np.array(model.fit_transform(data).todense())
@@ -44,17 +46,32 @@ class transform(jf.process.JFTransformation):
             yield from np.array(model.fit_transform(data))
 
 
+class shuffle(jf.process.JFTransformation):
+    def _fn(self, arr):
+        import numpy as np
+        arr = list(arr)
+        np.random.shuffle(arr)
+        yield from arr
+
+
 class trainer(jf.process.JFTransformation):
     def _fn(self, arr):
-        params = self.args[0]
-        model = params
+        params = self.args
+        model = params[0]
 
         y = None
-        data = list(zip(*list(arr)))
+        data = list(arr)
+        if isinstance(data[0], (list, tuple)):
+            # Assume data = [[X, y=None]]
+            # Convert to data = X, y
+            data = list(zip(*data))
+
+        print(f"Training the model ({model}):")
         if len(data) == 2:
             data, y = data
-        print(f"Training the model ({model}):")
-        model.fit(data, y)
+            model.fit(data, y)
+        else:
+            model.fit(data)
 
         yield model
 
@@ -76,6 +93,7 @@ class persistent_trainer(jf.process.JFTransformation):
         ofn, model = params
         ofn = ofn.replace("__JFESCAPED__", "")
 
+        print("Fitting to", arr)
         model = next(trainer(model).transform(arr))
 
         print(f"Saving model to {ofn}")
@@ -111,6 +129,8 @@ class importResolver:
             return model_loader
         if k == "print":
             return Print
+        if k == "shuffle":
+            return shuffle
         if k == "trainer":
             return trainer
         if k == "transform":

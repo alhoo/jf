@@ -20,9 +20,10 @@ def age(datecol):
     True
     """
     from dateparser import parse as parsedate
+        
+    logger.info("Calculating the age of a column (%s)", datecol)
 
-    def fn(d):
-        datestr = datecol._eval(d)
+    def fn(datestr):
         logger.debug("Calculating the age of '%s'", datestr)
         try:
             ret = datetime.now() - parsedate(str(datestr))
@@ -31,7 +32,8 @@ def age(datecol):
         logger.debug("Age of '%s' is %s", datestr, repr(ret))
         return ret
 
-    return fn
+    datecol._custom(fn)
+    return datecol
 
 
 def parse_value(val):
@@ -174,7 +176,7 @@ class GroupBy(JFTransformation):
 
     >>> arr = [{'item': '1', 'v': 2},{'item': '2', 'v': 3},{'item': '1', 'v': 3}]
     >>> x = Col()
-    >>> list(sorted(map(lambda x: len(x['items']), GroupBy(x.item).transform(arr))))
+    >>> list(sorted(map(lambda x: len(x), list(GroupBy(x.item).transform(arr))[0].values())))
     [1, 2]
     """
     def _fn(self, arr):
@@ -185,8 +187,7 @@ class GroupBy(JFTransformation):
                 ret[val].append(item)
             else:
                 ret[val] = [item]
-        for k, v in ret.items():
-            yield {"key": k, "items": v}
+        yield {k:v for k, v in ret.items()}
 
 
 class Unique(JFTransformation):
@@ -287,13 +288,13 @@ class Col:
         >>> import pickle
         >>> x = Col()
         >>> col = x.v
-        >>> list(map(col._eval, [{"v": 5}]))
+        >>> list(map(col.transform, [{"v": 5}]))
         [5]
         >>> mb = pickle.dumps(col)
         >>> len(mb) > 0
         True
         >>> col2 = pickle.loads(mb)
-        >>> list(map(col2._eval, [{"v": 10}]))
+        >>> list(map(col2.transform, [{"v": 10}]))
         [10]
         """
         self._opstrings = state.get("opstrings", [])
@@ -312,7 +313,7 @@ class Col:
             self._opstrings = k
 
     def __call__(self, *args, **kwargs):
-        return self._eval(*args, **kwargs)
+        return self.transform(*args, **kwargs)
 
     def __mul__(self, val):
         self._opstrings.append(("*", val))
@@ -358,7 +359,7 @@ class Col:
         selfcopy = Col(self._opstrings + [k])
         return selfcopy
 
-    def _eval(self, *args, **kwargs):
+    def transform(self, *args, **kwargs):
         data = args[0]
         for s in self._opstrings:
             if data is None:
@@ -377,7 +378,7 @@ class Col:
             other = s[1]
             op = s[0]
             if isinstance(other, Col):
-                other = other._eval(args[0])
+                other = other.transform(args[0])
             if not isinstance(op, str):
                 data = op(data)
                 continue
@@ -422,7 +423,14 @@ class Col:
 def fn_mod(mod):
     class FnMod:
         def __getattribute__(self, x):
-            return Fn(getattr(mod, x))
+            # Keep classes with transform as they come
+            if hasattr(getattr(mod, x), "transform"):
+                return getattr(mod, x)
+            # Make transformations from callables
+            if callable(getattr(mod, x)):
+                return Fn(getattr(mod, x))
+            # Keep all the rest as they come
+            return getattr(mod, x)
     return FnMod()
 
 
@@ -439,7 +447,8 @@ def Fn(fn):
     """
     def _fn(it):
         if isinstance(it, Col):
-            return it._custom(fn)
+            itcopy = Col([x for x in it._opstrings])
+            return itcopy._custom(fn)
         return fn(it)
     return _fn
 
@@ -451,7 +460,7 @@ Len = Fn(len)
 
 def evaluate_col(col, x):
     if isinstance(col, Col):
-        return col._eval(x)
+        return col.transform(x)
     return col
 
 
@@ -472,7 +481,7 @@ class Map(JFTransformation):
             dct = fn
             fn = lambda x: {k: evaluate_col(col, x) for k, col in dct.items()}
         if isinstance(fn, Col):
-            fn = fn._eval
+            fn = fn.transform
         ret = map(fn, X)
         if self.gen:
             return ret
@@ -494,9 +503,13 @@ class Update(JFTransformation):
             dct = fn
             fn = lambda x: {k: evaluate_col(col, x) for k, col in dct.items()}
         if isinstance(fn, Col):
-            fn = fn._eval
+            fn = fn.transform
         for x in X:
-            x.update(fn(x))
+            v = fn(x)
+            if isinstance(v, dict):
+                x.update(**v)
+            else:
+                x.update(v)
             yield x
 
 
@@ -511,7 +524,7 @@ class Filter(JFTransformation):
     def _fn(self, X):
         fn = self.args[0]
         if isinstance(fn, Col):
-            fn = fn._eval
+            fn = fn.transform
         ret = filter(fn, X)
         if self.gen:
             return ret
@@ -552,7 +565,7 @@ class Sorted(JFTransformation):
         if len(self.args) == 1:
             keyget = self.args[0]
         if isinstance(keyget, Col):
-            keyget = keyget._eval
+            keyget = keyget.transform
         ret = sorted(X, key=keyget, **self.kwargs)
         if self.gen:
             return ret
@@ -585,12 +598,23 @@ class Pipeline:
     A pipeline in this context is a list of transformations that are applied, in order,
     to the input data stream.
     """
-    def __init__(self, transformations):
+    def __init__(self, *transformations):
+        if len(transformations) == 1 and isinstance(transformations[0], list):
+            transformations = transformations[0]
         self.transformations = transformations
 
+    def __call__(self, data, **kwargs):
+        return self.transform(data, **kwargs)
+
     def transform(self, data, **kwargs):
+        transform_one = False
+        if isinstance(data, dict):
+            transform_one = True
+            data = [data]
         for t in self.transformations:
             data = t.transform(data, **kwargs)
+        if transform_one:
+            data = data[0]
         return data
 
 
@@ -608,6 +632,6 @@ class GenProcessor:
 
     def process(self):
         """Process items"""
-        pipeline = Pipeline(self._filters)
+        pipeline = Pipeline(*self._filters)
         result = pipeline.transform(self.igen, gen=True)
         return result

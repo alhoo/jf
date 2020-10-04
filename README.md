@@ -16,6 +16,14 @@ Installing
 
     pip install jf
 
+Basic usage
+==
+
+Filter selected fields
+
+    $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject})'
+    {"id": "87086895", "subject": "Swedish children stories"}
+    {"id": "87114792", "subject": "New Finnish storybooks"}
 
 Features
 ==

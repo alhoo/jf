@@ -83,12 +83,34 @@ def import_error():
     logger.warning("pip install xlrd")
 
 
+def read_s3(fn):
+    import boto3
+    from urllib.parse import urlparse
+
+    o = urlparse(fn, allow_fragments=False)
+    bucket = o.netloc
+    key = o.path[1:]
+
+    s3 = boto3.resource("s3")
+    obj = s3.Object(bucket, key)
+    body_bytes = obj.get()["Body"].read()
+    body = body_bytes
+    return body
+
+
 def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
     """
     Function for converting input file to a data source
     """
     # FIXME these only output from the first line
     inp = json.loads
+    if fn.startswith("s3://"):
+        content = read_s3(fn)
+        from tempfile import NamedTemporaryFile
+
+        f = NamedTemporaryFile()
+        f.write(content)
+        fn = f.name
     if fn.endswith("xml"):
         tree = etree.parse(fn)
         root = tree.getroot()
@@ -101,8 +123,9 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
         from numba import NumbaDeprecationWarning
 
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
+            warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
             from fastparquet import ParquetFile
+
             for val in ParquetFile(fn).to_pandas().to_dict("records", into=OrderedDict):
                 yield val
             return
@@ -110,9 +133,7 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
         import xlrd
         import pandas
 
-        for val in pandas.read_excel(fn).to_dict(
-            "records", into=OrderedDict
-        ):
+        for val in pandas.read_excel(fn).to_dict("records", into=OrderedDict):
             yield val
         return
     elif fn.endswith("csv"):
@@ -158,6 +179,13 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
 def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
     """Read json, jsonl and yaml data from file defined in args"""
     # FIXME these only output from the first line
+    if args.files[0].startswith("s3://"):
+        content = read_s3(args.files[0])
+        from tempfile import NamedTemporaryFile
+
+        f = NamedTemporaryFile()
+        f.write(content)
+        args.files[0] = f.name
     if args.files[0].endswith("xml"):
         tree = etree.parse(args.files[0])
         root = tree.getroot()
@@ -170,9 +198,14 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         from numba import NumbaDeprecationWarning
 
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore",category=NumbaDeprecationWarning)
+            warnings.filterwarnings("ignore", category=NumbaDeprecationWarning)
             from fastparquet import ParquetFile
-            for val in ParquetFile(args.files[0]).to_pandas().to_dict("records", into=OrderedDict):
+
+            for val in (
+                ParquetFile(args.files[0])
+                .to_pandas()
+                .to_dict("records", into=OrderedDict)
+            ):
                 yield val
             return
     elif args.files[0].endswith("xlsx"):

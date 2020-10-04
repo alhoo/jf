@@ -124,7 +124,8 @@ def result_cleaner(val):
     return json.loads(json.dumps(val, cls=StructEncoder))
 
 
-class pandas_writer(JFTransformation):
+class pandasWriter(JFTransformation):
+    """General pandas writer"""
     def _fn(self, arr):
         import pandas as pd
 
@@ -145,8 +146,7 @@ class pandas_writer(JFTransformation):
             yield content
 
 
-
-class parquet(pandas_writer):
+class parquet(pandasWriter):
     """Convert input to parquet
 
     >>> list(parquet("/tmp/test.parq").transform([{'a': 1}, {'a': 3}]))
@@ -160,8 +160,8 @@ class parquet(pandas_writer):
         # self.kwargs.update({"compression": "GZIP"})
 
 
-class excel(pandas_writer):
-    """Convert input to parquet
+class excel(pandasWriter):
+    """Convert input to excel
 
     >>> list(excel("/tmp/test.xlsx").transform([{'a': 1}, {'a': 3}]))
     ['data written to /tmp/test.xlsx']
@@ -171,71 +171,10 @@ class excel(pandas_writer):
         self.writefn = "to_excel"
 
 
-class profile(JFTransformation):
-    def _fn(self, arr):
-        """
-        Make a profiling report from data
-
-        This function tries to convert strings to numeric values or datetime
-        objects and makes a html profiling report as the only result to be yielded.
-        Notice! This fails if used with ordered_dict output.
-        """
-        import pandas as pd
-        from pandas.io.json import json_normalize
-        import pandas_profiling
-
-        def is_numeric(df_):
-            try:
-                counts = df_.value_counts()
-                if len(counts) > 100:
-                    # Only look a some of the values if we have a large input dataset
-                    pd.to_numeric(df.value_counts()[4:24].keys())
-                else:
-                    pd.to_numeric(df.value_counts().keys())
-                return True
-            except (ValueError, AttributeError):
-                pass
-            return False
-
-        if len(self.args) > 1:
-            args = [open(self.args[0], "w")]
-        else:
-            args = []
-        data = list(map(result_cleaner, arr))
-        df = pd.DataFrame(json_normalize(data))
-        # df = pd.DataFrame(data)
-        # df = pd.DataFrame([{k: str(v) for k, v in it.items()} for it in data])
-        # print(df)
-        na_value = None
-        if "nan" in self.kwargs:
-            na_value = self.kwargs["nan"]
-        for col in df.columns:
-            try:
-                if is_numeric(df[col]):
-                    if na_value:
-                        df[col] = df[col].str.replace(na_value, None)
-                    df[col] = pd.to_numeric(df[col].str.replace(",", "."), errors="coerce")
-                else:
-                    df[col] = pd.to_datetime(df[col].str.replace(",", "."))
-            except (AttributeError, KeyError, ValueError, OverflowError):
-                pass
-        profile_data = pandas_profiling.ProfileReport(df)
-        # html_report = profiling_data.to_html()
-        from pandas_profiling.report.presentation.flavours import HTMLReport
-        from pandas_profiling.report.presentation.flavours.html import templates
-
-        html_content = HTMLReport(profile_data).render()
-        html_report = templates.template("wrapper").render(content=html_content)
-        if len(args):
-            args[0].write(html_report + "\n")
-        else:
-            yield html_report
-
-
 class browser(JFTransformation):
+    """ Send output to browser
+    """
     def _fn(self, arr):
-        """ Send output to browser (no unittesting available)
-        """
         import webbrowser
         import tempfile
         import time
@@ -244,19 +183,19 @@ class browser(JFTransformation):
             for line in arr:
                 f.write(line)
             webbrowser.open(f.name, **self.kwargs)
-            time.sleep(1)  # Hack to give the browser some time
+            time.sleep(1)  # Hack to give the browser some time to start
 
 
 class md(JFTransformation):
-    def _fn(self, arr):
-        """ Convert dict to markdown
+    """ Convert dict to markdown
 
-        >>> md().transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
-        a  |  b
-        ---|---
-        1  |  2
-        2  |  3
-        """
+    >>> md().transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
+    a  |  b
+    ---|---
+    1  |  2
+    2  |  3
+    """
+    def _fn(self, arr):
         from csvtomd import md_table
         from math import isnan
 
@@ -281,14 +220,14 @@ class md(JFTransformation):
 
 
 class csv(JFTransformation):
-    def _fn(self, arr):
-        """ Convert dict to markdown
+    """ Convert dict to csv
 
-        >>> csv(lineterminator="\\n").transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
-        a,b
-        1,2
-        2,3
-        """
+    >>> csv(lineterminator="\\n").transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
+    a,b
+    1,2
+    2,3
+    """
+    def _fn(self, arr):
         from csv import writer as cvs_writer
 
         if len(self.args) > 1:
@@ -306,8 +245,8 @@ class csv(JFTransformation):
 
 
 class ipy(JFTransformation):
+    """Start ipython with data-variable"""
     def _fn(self, data):
-        """Start ipython with data-variable"""
         from IPython import embed
 
         banner = self.args[0]
