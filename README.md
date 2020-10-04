@@ -48,7 +48,6 @@ transformations:
 * import your own modules for more complex filtering
   * Support stateful classes for complex interactions between items
 * drop your filtered data to IPython for manual data exploration
-* pandas profiling support for quick data exploration
 * use --ordered\_dict to keep items in order
 * sklearn toolbox for machine learning
 * running restful service for the transformation pipeline
