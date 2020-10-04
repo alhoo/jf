@@ -46,6 +46,7 @@ setup(
         "regex>=2016.3.2",
         "python-dateutil>=2.4.1",
         "ruamel.yaml>=0.16.10",
+        "pyyaml>=5.0.1",
         "lxml>=4.0.1",
         "dateparser>=0.6.0",
         "ipython>=6.2.0",
