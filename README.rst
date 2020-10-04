@@ -41,10 +41,9 @@ datetime and current time \* first(N), last(N), islice(start, stop,
 step) \* head and tail alias for last and first \* firstnlast(N) (or
 headntail(N)) \* import your own modules for more complex filtering \*
 Support stateful classes for complex interactions between items \* drop
-your filtered data to IPython for manual data exploration \* pandas
-profiling support for quick data exploration \* use --ordered\_dict to
-keep items in order \* sklearn toolbox for machine learning \* running
-restful service for the transformation pipeline
+your filtered data to IPython for manual data exploration \* use
+--ordered\_dict to keep items in order \* sklearn toolbox for machine
+learning \* running restful service for the transformation pipeline
 
 Known bugs
 ==========
