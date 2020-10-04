@@ -9,7 +9,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "0.8.2"
+version = "0.8.3"
 
 setup(
     name="jf",
@@ -52,6 +52,7 @@ setup(
         "ipython>=6.2.0",
         "csvtomd>=0.3.0",
         "pandas>=0.22.0",
+        "boto3>1.1.11",
         "scikit-learn>0.22.0",
         "Flask==1.1.2",
         "pyarrow==0.17.0",

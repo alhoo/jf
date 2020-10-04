@@ -1,4 +1,5 @@
 """JF io library"""
+import os
 import fileinput
 import logging
 
@@ -102,6 +103,7 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
     """
     # FIXME these only output from the first line
     inp = json.loads
+    ext = os.path.splitext(fn)[-1][1:]
     if fn.startswith("s3://"):
         content = read_s3(fn)
         from tempfile import NamedTemporaryFile
@@ -109,14 +111,14 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
         f = NamedTemporaryFile()
         f.write(content)
         fn = f.name
-    if fn.endswith("xml"):
+    if ext == "xml":
         tree = etree.parse(fn)
         root = tree.getroot()
         xmldict = format_xml(root)
         logger.info("Got dict from xml %s", xmldict)
         yield xmldict
         return
-    elif fn.endswith("parq") or fn.endswith("parquet"):
+    elif ext == "parq" or ext == "parquet":
         import warnings
         from numba import NumbaDeprecationWarning
 
@@ -127,14 +129,14 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
             for val in ParquetFile(fn).to_pandas().to_dict("records", into=OrderedDict):
                 yield val
             return
-    elif fn.endswith("xlsx"):
+    elif ext == "xlsx":
         import xlrd
         import pandas
 
         for val in pandas.read_excel(fn).to_dict("records", into=OrderedDict):
             yield val
         return
-    elif fn.endswith("csv"):
+    elif ext == "csv":
         import pandas
 
         if ordered_dict:
@@ -146,7 +148,7 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
             for val in pandas.read_csv(fn, **kwargs).to_dict("records"):
                 yield val
         return
-    elif fn.endswith("yaml") or fn.endswith("yml"):
+    elif ext == "yaml" or ext == "yml":
         yaml.add_multi_constructor("", generic_constructor)
         inp = yaml.safe_load
         try:
@@ -177,6 +179,8 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
 def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **kwargs):
     """Read json, jsonl and yaml data from file defined in args"""
     # FIXME these only output from the first line
+    fn = args.files[0]
+    ext = os.path.splitext(fn)[-1][1:]
     if args.files[0].startswith("s3://"):
         content = read_s3(args.files[0])
         from tempfile import NamedTemporaryFile
@@ -184,14 +188,16 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         f = NamedTemporaryFile()
         f.write(content)
         args.files[0] = f.name
-    if args.files[0].endswith("xml"):
+        fn = f.name
+    print("ext", ext)
+    if ext == "xml":
         tree = etree.parse(args.files[0])
         root = tree.getroot()
         xmldict = format_xml(root)
         logger.info("Got dict from xml %s", xmldict)
         yield xmldict
         return
-    elif args.files[0].endswith("parq") or args.files[0].endswith("parquet"):
+    elif ext == "parq" or ext == "parquet":
         import warnings
         from numba import NumbaDeprecationWarning
 
@@ -206,7 +212,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
             ):
                 yield val
             return
-    elif args.files[0].endswith("xlsx"):
+    elif ext == "xlsx":
         import xlrd
         import pandas
 
@@ -215,7 +221,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         ):
             yield val
         return
-    elif args.files[0].endswith("csv"):
+    elif ext == "csv":
         import pandas
 
         if ordered_dict:
@@ -243,7 +249,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         else:
             return loader.construct_scalar(node)
 
-    if args.yamli or args.files[0].endswith("yaml") or args.files[0].endswith("yml"):
+    if args.yamli or ext == "yaml" or ext == "yml":
         yaml.add_multi_constructor("", generic_constructor)
         inp = yaml.safe_load
         data = "\n".join([l for l in inf])
