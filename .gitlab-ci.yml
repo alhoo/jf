@@ -3,4 +3,5 @@ py36_nose:
   script:
     - pip install -r requirements.txt
     - pip install .
+    - pip install xlrd
     - make test
