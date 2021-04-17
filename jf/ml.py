@@ -14,6 +14,7 @@ class ColumnSelector:
     def transform(self, X, y=None):
         if isinstance(X, (tuple, list)):
             import pandas as pd
+
             X = pd.DataFrame(X)
         # Add selected columns to dataframe if needed
         if isinstance(self.column, (tuple, list)):
@@ -29,6 +30,7 @@ class ColumnSelector:
 class transform(jf.process.JFTransformation):
     def _fn(self, arr):
         import numpy as np
+
         params = self.args[0]
         model = params
 
@@ -49,6 +51,7 @@ class transform(jf.process.JFTransformation):
 class shuffle(jf.process.JFTransformation):
     def _fn(self, arr):
         import numpy as np
+
         arr = list(arr)
         np.random.shuffle(arr)
         yield from arr
@@ -82,7 +85,7 @@ class model_loader(jf.process.JFTransformation):
 
         ifn = self.args[0]
         ifn = ifn.replace("__JFESCAPED__", "")
-        yield pickle.load(open(ifn, 'rb'))
+        yield pickle.load(open(ifn, "rb"))
 
 
 class persistent_trainer(jf.process.JFTransformation):

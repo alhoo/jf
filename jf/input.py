@@ -133,7 +133,9 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
         import openpyxl
         import pandas
 
-        for val in pandas.read_excel(fn, engine='openpyxl').to_dict("records", into=OrderedDict):
+        for val in pandas.read_excel(fn, engine="openpyxl").to_dict(
+            "records", into=OrderedDict
+        ):
             yield val
         return
     elif ext == "csv":
@@ -215,7 +217,7 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
         import openpyxl
         import pandas
 
-        for val in pandas.read_excel(args.files[0], engine='openpyxl').to_dict(
+        for val in pandas.read_excel(args.files[0], engine="openpyxl").to_dict(
             "records", into=OrderedDict
         ):
             yield val
@@ -277,4 +279,5 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
 def yield_json_and_json_lines(inp):
     """Yield  json and json lines"""
     from jf import jsonlgen  # cpython from jsonlgen.cc
+
     return jsonlgen.gen(iter(inp))

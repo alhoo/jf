@@ -4,6 +4,7 @@ import numpy as np
 import datetime
 from jf.process import JFTransformation
 
+
 def json_encodings(obj):
     if isinstance(obj, (datetime.datetime, datetime.date)):
         obj.isoformat()
@@ -18,8 +19,7 @@ class RESTful(JFTransformation):
         from flask import Flask, request, Response
         from flask_cors import CORS
 
-
-        base_path = ''
+        base_path = ""
         if len(self.args) > 0:
             base_path = self.args[0]
         model = next(iter(arr))
@@ -67,4 +67,4 @@ class RESTful(JFTransformation):
                 # prediction = list(model.predict(data))
 
         CORS(app)
-        app.run(port=self.kwargs.get('port', 5002))
+        app.run(port=self.kwargs.get("port", 5002))
