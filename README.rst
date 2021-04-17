@@ -31,7 +31,7 @@ Features
 
 supported formats: \* json (uncompressed, gzip, bz2) \* jsonl
 (uncompressed, gzip, bz2) \* yaml (uncompressed, gzip, bz2) \* csv and
-xlsx support if pandas and xlrd is installed \* markdown table output
+xlsx support if pandas and openpyxl is installed \* markdown table output
 support \* xlsx (excel) \* parquet
 
 transformations: \* construct generator pipeline with map, hide, filter

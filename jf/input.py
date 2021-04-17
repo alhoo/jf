@@ -77,9 +77,9 @@ def import_error():
     """
     Logging function for import errors
     """
-    logger.warning("Install pandas and xlrd to read csv and excel")
+    logger.warning("Install pandas and openpyxl to read csv and excel")
     logger.warning("pip install pandas")
-    logger.warning("pip install xlrd")
+    logger.warning("pip install openpyxl")
 
 
 def read_s3(fn):
@@ -130,10 +130,10 @@ def read_file(fn, openhook=fileinput.hook_compressed, ordered_dict=False, **kwar
                 yield val
             return
     elif ext == "xlsx":
-        import xlrd
+        import openpyxl
         import pandas
 
-        for val in pandas.read_excel(fn).to_dict("records", into=OrderedDict):
+        for val in pandas.read_excel(fn, engine='openpyxl').to_dict("records", into=OrderedDict):
             yield val
         return
     elif ext == "csv":
@@ -212,10 +212,10 @@ def read_input(args, openhook=fileinput.hook_compressed, ordered_dict=False, **k
                 yield val
             return
     elif ext == "xlsx":
-        import xlrd
+        import openpyxl
         import pandas
 
-        for val in pandas.read_excel(args.files[0]).to_dict(
+        for val in pandas.read_excel(args.files[0], engine='openpyxl').to_dict(
             "records", into=OrderedDict
         ):
             yield val

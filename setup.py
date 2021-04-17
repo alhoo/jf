@@ -60,7 +60,6 @@ setup(
     tests_require=[
         "nose>=1.3.0",
         "pandas>=0.22.0",
-        "xlrd>=1.1.0",
         "openpyxl>=2.5.4",
         "pylint>=1.8.2",
         "pytest",
