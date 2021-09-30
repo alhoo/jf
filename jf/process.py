@@ -328,7 +328,7 @@ class Col:
             return self.transform(*args, **kwargs)
         except:
             attr = str(self._opstrings[-1])
-            self._opstrings[-1] = (lambda x: getattr(x, attr)(), None)
+            self._opstrings[-1] = (lambda x: getattr(x, attr)(*args, **kwargs), None)
             return self
 
     def __mul__(self, val):
