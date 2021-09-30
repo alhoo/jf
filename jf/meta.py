@@ -9,8 +9,11 @@ class JFTransformation:
     """
     Baseclass for JF transformations
     """
+
     def __init__(self, *args, fn=None, **kwargs):
-        self.args = [x.replace("__JFESCAPED__", "") if isinstance(x, str) else x for x in args]
+        self.args = [
+            x.replace("__JFESCAPED__", "") if isinstance(x, str) else x for x in args
+        ]
         self.gen = False
         self.kwargs = kwargs
         if fn is not None:

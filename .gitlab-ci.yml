@@ -1,6 +1,24 @@
-py36_nose:
-  image: python:3.6
+image: python:3.6
+
+test:
+  stage: test
   script:
+    - pip install -r test_requirements.txt
     - pip install -r requirements.txt
     - pip install .
     - make test
+  artifacts:
+    paths:
+      - coverage
+    expire_in: 1 week
+
+pages:
+  stage: deploy
+  dependencies:
+    - test
+  script:
+   - mkdir public
+   - mv coverage public
+  artifacts:
+    paths:
+      - public

@@ -9,7 +9,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "0.8.4"
+version = "0.8.5"
 
 setup(
     name="jf",
@@ -60,7 +60,6 @@ setup(
     tests_require=[
         "nose>=1.3.0",
         "pandas>=0.22.0",
-        "xlrd>=1.1.0",
         "openpyxl>=2.5.4",
         "pylint>=1.8.2",
         "pytest",

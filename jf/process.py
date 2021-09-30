@@ -20,7 +20,7 @@ def age(datecol):
     True
     """
     from dateparser import parse as parsedate
-        
+
     logger.info("Calculating the age of a column (%s)", datecol)
 
     def fn(datestr):
@@ -56,6 +56,7 @@ def parse_value(val):
 
 class Jfislice(JFTransformation):
     """jf wrapper for itertools.islice"""
+
     def _fn(self, arr):
         args = self.args
         start = None
@@ -129,6 +130,7 @@ class Flatten(JFTransformation):
     >>> pprint(list(Flatten().transform([{'a': 1, 'b':{'c': 2}}])))
     [{'a': 1, 'b.c': 2}]
     """
+
     def _fn(self, *args):
         logger.info("Flattening")
         arr = args[-1]
@@ -144,6 +146,7 @@ class Transpose(JFTransformation):
     >>> list(sorted(map(lambda x: list(x.items()), Transpose().transform(arr)), key=lambda x: x[0][1]))
     [[(0, 1), (1, 2)], [(0, 2), (1, 3)]]
     """
+
     def _fn(self, X):
         import pandas as pd
 
@@ -165,6 +168,7 @@ class YieldAll(JFTransformation):
     >>> list(YieldAll(Col().data).transform([{"data": [1,2,3]}]))
     [1, 2, 3]
     """
+
     def _fn(self, arr):
         for items in arr:
             for val in self.args[0](items):
@@ -179,6 +183,7 @@ class GroupBy(JFTransformation):
     >>> list(sorted(map(lambda x: len(x), list(GroupBy(x.item).transform(arr))[0].values())))
     [1, 2]
     """
+
     def _fn(self, arr):
         ret = {}
         for item in arr:
@@ -187,7 +192,7 @@ class GroupBy(JFTransformation):
                 ret[val].append(item)
             else:
                 ret[val] = [item]
-        yield {k:v for k, v in ret.items()}
+        yield {k: v for k, v in ret.items()}
 
 
 class Unique(JFTransformation):
@@ -198,8 +203,8 @@ class Unique(JFTransformation):
     >>> len(list(Unique(x.b).transform(data)))
     2
     """
-    def _fn(self, X):
 
+    def _fn(self, X):
         def fun(x):
             return repr(x)
 
@@ -222,9 +227,12 @@ class Hide(JFTransformation):
     >>> Hide("a").transform([{"a": 1, "id": 1}, {"a": 2, "id": 3}])
     [{'id': 1}, {'id': 3}]
     """
+
     def _fn(self, arr):
         elements = self.args
-        ret = map(lambda item: {k: v for k, v in item.items() if k not in elements}, arr)
+        ret = map(
+            lambda item: {k: v for k, v in item.items() if k not in elements}, arr
+        )
         if self.gen:
             return ret
         return list(ret)
@@ -237,6 +245,7 @@ class Firstnlast(JFTransformation):
     >>> Firstnlast(2).transform([1,2,3,4,5])
     [[1, 2], [4, 5]]
     """
+
     def _fn(self, arr):
         shown = 1
         if len(self.args) == 1:
@@ -253,6 +262,7 @@ class First(JFTransformation):
     >>> First().transform([{"id": 99, "a": 1}, {"id": 199, "a": 2}])
     [{'id': 99, 'a': 1}]
     """
+
     def _fn(self, arr):
         shown = 1
         if len(self.args) == 1:
@@ -281,6 +291,7 @@ class Col:
     >>> x.id({"id": 235})
     235
     """
+
     _opstrings = []
 
     def __setstate__(self, state):
@@ -313,7 +324,12 @@ class Col:
             self._opstrings = k
 
     def __call__(self, *args, **kwargs):
-        return self.transform(*args, **kwargs)
+        try:
+            return self.transform(*args, **kwargs)
+        except:
+            attr = str(self._opstrings[-1])
+            self._opstrings[-1] = (lambda x: getattr(x, attr)(*args, **kwargs), None)
+            return self
 
     def __mul__(self, val):
         self._opstrings.append(("*", val))
@@ -431,6 +447,7 @@ def fn_mod(mod):
                 return Fn(getattr(mod, x))
             # Keep all the rest as they come
             return getattr(mod, x)
+
     return FnMod()
 
 
@@ -445,11 +462,13 @@ def Fn(fn):
     >>> Fn(len)(x.id)({"id": "123"})
     3
     """
+
     def _fn(it):
         if isinstance(it, Col):
             itcopy = Col([x for x in it._opstrings])
             return itcopy._custom(fn)
         return fn(it)
+
     return _fn
 
 
@@ -472,6 +491,7 @@ class Map(JFTransformation):
     >>> list(Map(x.a).transform([{"a": 1}]))
     [1]
     """
+
     def _fn(self, X):
         fn = self.args[0]
         if isinstance(fn, (tuple, list)):
@@ -521,6 +541,7 @@ class Filter(JFTransformation):
     >>> Filter(x.id > 100).transform([{"id": 99, "a": 1}, {"id": 199, "a": 2}])
     [{'id': 199, 'a': 2}]
     """
+
     def _fn(self, X):
         fn = self.args[0]
         if isinstance(fn, Col):
@@ -538,6 +559,7 @@ class Last(JFTransformation):
     >>> Last().transform([{"id": 99, "a": 1}, {"id": 199, "a": 2}])
     [{'id': 199, 'a': 2}]
     """
+
     def _fn(self, X):
         """Show last (N) items"""
         shown = 1
@@ -560,6 +582,7 @@ class Sorted(JFTransformation):
     >>> Sorted(x.a, reverse=True).transform([{"id": 99, "a": 1}, {"id": 199, "a": 2}])
     [{'id': 199, 'a': 2}, {'id': 99, 'a': 1}]
     """
+
     def _fn(self, X):
         keyget = None
         if len(self.args) == 1:
@@ -581,13 +604,14 @@ class Print(JFTransformation):
     >>> Print().transform([1, 2, 3, 4])
     [1, 2, 3, 4]
     """
+
     def _fn(self, arr):
         n = 1
         if len(self.args) > 0:
             n = self.args[0]
         arr = list(arr)
         for it in islice(arr, 0, n):
-            sys.stderr.write(json.dumps(it)+"\n")
+            sys.stderr.write(json.dumps(it) + "\n")
         return arr
 
 
@@ -598,6 +622,7 @@ class Pipeline:
     A pipeline in this context is a list of transformations that are applied, in order,
     to the input data stream.
     """
+
     def __init__(self, *transformations):
         if len(transformations) == 1 and isinstance(transformations[0], list):
             transformations = transformations[0]

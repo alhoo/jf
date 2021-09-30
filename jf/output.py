@@ -30,6 +30,7 @@ def print_results(data, args):
     outfmt = json.dumps
     if args.yaml and not args.json:
         from ruamel import yaml
+
         yaml.RoundTripDumper.add_representer(
             OrderedDict, yaml.RoundTripRepresenter.represent_dict
         )
@@ -126,10 +127,13 @@ def result_cleaner(val):
 
 class pandasWriter(JFTransformation):
     """General pandas writer"""
+
     def _fn(self, arr):
         import pandas as pd
 
-        logger.info("Writing excel with args: %s and kwargs: %s", self.args, self.kwargs)
+        logger.info(
+            "Writing excel with args: %s and kwargs: %s", self.args, self.kwargs
+        )
         df = pd.DataFrame(list(map(result_cleaner, arr)))
         if len(self.args) > 0:
             fn = self.args[0]
@@ -137,11 +141,12 @@ class pandasWriter(JFTransformation):
             yield f"data written to {fn}"
         else:
             import tempfile
+
             f = tempfile.NamedTemporaryFile(delete=False)
             f.close()
             fn = f.name
             getattr(df, self.writefn)(fn, *self.args[1:], **self.kwargs)
-            with open(f.name, 'rb') as f:
+            with open(f.name, "rb") as f:
                 content = f.read()
             yield content
 
@@ -152,6 +157,7 @@ class parquet(pandasWriter):
     >>> list(parquet("/tmp/test.parq").transform([{'a': 1}, {'a': 3}]))
     ['data written to /tmp/test.parq']
     """
+
     def __init__(self, *args, **kwargs):
         super(parquet, self).__init__(*args, **kwargs)
 
@@ -166,6 +172,7 @@ class excel(pandasWriter):
     >>> list(excel("/tmp/test.xlsx").transform([{'a': 1}, {'a': 3}]))
     ['data written to /tmp/test.xlsx']
     """
+
     def __init__(self, *args, **kwargs):
         super(excel, self).__init__(*args, **kwargs)
         self.writefn = "to_excel"
@@ -174,6 +181,7 @@ class excel(pandasWriter):
 class browser(JFTransformation):
     """ Send output to browser
     """
+
     def _fn(self, arr):
         import webbrowser
         import tempfile
@@ -195,6 +203,7 @@ class md(JFTransformation):
     1  |  2
     2  |  3
     """
+
     def _fn(self, arr):
         from csvtomd import md_table
         from math import isnan
@@ -211,7 +220,10 @@ class md(JFTransformation):
                 table.append([str(v) if v else "" for v in row.keys()])
                 first = False
             table.append(
-                [str(v) if isinstance(v, str) or not isnan(v) else "" for v in row.values()]
+                [
+                    str(v) if isinstance(v, str) or not isnan(v) else ""
+                    for v in row.values()
+                ]
             )
         if len(args):
             args[0].write(md_table(table, **self.kwargs) + "\n")
@@ -227,6 +239,7 @@ class csv(JFTransformation):
     1,2
     2,3
     """
+
     def _fn(self, arr):
         from csv import writer as cvs_writer
 
@@ -246,14 +259,15 @@ class csv(JFTransformation):
 
 class ipy(JFTransformation):
     """Start ipython with data-variable"""
+
     def _fn(self, data):
         from IPython import embed
 
         banner = self.args[0]
         fakerun = False
-        if 'fakerun' in self.kwargs:
+        if "fakerun" in self.kwargs:
             fakerun = True
-            del self.kwargs['fakerun']
+            del self.kwargs["fakerun"]
         if not isinstance(banner, str):
             banner = ""
         banner += "\nJf instance is now dropping into IPython\n"

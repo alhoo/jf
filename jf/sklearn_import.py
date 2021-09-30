@@ -6,10 +6,11 @@ logger = logging.getLogger(__name__)
 
 mods = []
 
+
 def load_sklearn_modules():
-    sklearn = importlib.import_module('sklearn')
-    globals()['sklearn'] = sklearn
-    
+    sklearn = importlib.import_module("sklearn")
+    globals()["sklearn"] = sklearn
+
     classes = "pipeline,feature_extraction,calibration,cluster,compose,covariance,cross_decomposition,datasets,decomposition,experimental,ensemble,feature_selection,gaussian_process,impute,inspection,linear_model,manifold,metrics,mixture,model_selection,neighbors,neural_network,preprocessing,svm,tree,util,base".split(
         ","
     )

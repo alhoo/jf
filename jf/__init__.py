@@ -152,7 +152,10 @@ def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
         if import_from:
             sys.path.append(os.path.dirname(import_from))
         globalscope.update(
-            {imp: process.fn_mod(importlib.import_module(imp)) for imp in imports.split(",")}
+            {
+                imp: process.fn_mod(importlib.import_module(imp))
+                for imp in imports.split(",")
+            }
         )
 
     try:

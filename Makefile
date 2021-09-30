@@ -72,6 +72,7 @@ package:
 
 release: jf/jsonlgen.so README.rst
 		@echo "git flow release start <version>"
+		cat setup.py|grep version -m 1
 		@echo update version to setup.py
 		@echo git add setup.py
 		@echo 'git commit -m "bump version to <version>"'
