@@ -324,12 +324,9 @@ class Col:
             self._opstrings = k
 
     def __call__(self, *args, **kwargs):
-        try:
-            return self.transform(*args, **kwargs)
-        except:
-            attr = str(self._opstrings[-1])
-            self._opstrings[-1] = (lambda x: getattr(x, attr)(*args, **kwargs), None)
-            return self
+        attr = str(self._opstrings[-1])
+        self._opstrings[-1] = (lambda x: getattr(x, attr)(*args, **kwargs), None)
+        return self
 
     def __mul__(self, val):
         self._opstrings.append(("*", val))
