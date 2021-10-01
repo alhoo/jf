@@ -336,6 +336,11 @@ class Col:
         self._opstrings.append(("-", val))
         return self
 
+    def __radd__(self, val):
+        # self._opstrings.append(("+", val))
+        self._custom(lambda x: val + x)
+        return self
+
     def __add__(self, val):
         self._opstrings.append(("+", val))
         return self
