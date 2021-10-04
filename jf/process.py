@@ -324,9 +324,11 @@ class Col:
             self._opstrings = k
 
     def __call__(self, *args, **kwargs):
-        attr = str(self._opstrings[-1])
-        self._opstrings[-1] = ("attr_fn", attr, args, kwargs)
-        return self
+        if not args:
+            attr = str(self._opstrings[-1])
+            self._opstrings[-1] = ("attr_fn", attr, args, kwargs)
+            return self
+        return self.transform(*args, **kwargs)
 
     def __mul__(self, val):
         self._opstrings.append(("*", val))
@@ -397,7 +399,7 @@ class Col:
             op = s[0]
             if isinstance(other, Col):
                 other = other.transform(args[0])
-            elif not isinstance(op, str):
+            if not isinstance(op, str):
                 data = op(data)
                 continue
             elif op == "*":
