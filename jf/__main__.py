@@ -58,6 +58,9 @@ def main(args=None):
         "-s", "--sort_keys", action="store_true", help="sort json output values"
     )
     parser.add_argument(
+        "-P", "--processes", type=int, default=1, help="number of processes to use"
+    )
+    parser.add_argument(
         "--bw", action="store_true", default=False, help="remove colors"
     )
     parser.add_argument(
@@ -158,6 +161,7 @@ def main(args=None):
         imports=imports,
         import_from=args.import_from,
         ordered_dict=args.ordered_dict,
+        processes=args.processes,
     )
     if args.ipy or args.ipyfake:
         banner = ""

@@ -140,7 +140,7 @@ class Flatten(JFTransformation):
 
 
 class Transpose(JFTransformation):
-    """ Transpose input
+    """Transpose input
 
     >>> arr = [{'a': 1, 'b': 2}, {'a': 2, 'b': 3}]
     >>> list(sorted(map(lambda x: list(x.items()), Transpose().transform(arr)), key=lambda x: x[0][1]))
@@ -325,7 +325,7 @@ class Col:
 
     def __call__(self, *args, **kwargs):
         attr = str(self._opstrings[-1])
-        self._opstrings[-1] = (lambda x: getattr(x, attr)(*args, **kwargs), None)
+        self._opstrings[-1] = ("attr_fn", attr, args, kwargs)
         return self
 
     def __mul__(self, val):
@@ -397,31 +397,33 @@ class Col:
             op = s[0]
             if isinstance(other, Col):
                 other = other.transform(args[0])
-            if not isinstance(op, str):
+            elif not isinstance(op, str):
                 data = op(data)
                 continue
-            if op == "*":
+            elif op == "*":
                 data = data * other
-            if op == "+":
+            elif op == "+":
                 data = data + other
-            if op == "-":
+            elif op == "-":
                 data = data - other
-            if op == "<":
+            elif op == "<":
                 data = data < other
-            if op == ">":
+            elif op == ">":
                 data = data > other
-            if op == "==":
+            elif op == "==":
                 data = data == other
-            if op == "!=":
+            elif op == "!=":
                 data = data != other
-            if op == ">=":
+            elif op == ">=":
                 data = data >= other
-            if op == "<=":
+            elif op == "<=":
                 data = data <= other
-            if op == "__len__":
+            elif op == "__len__":
                 data = len(data)
-            if op == "__str__":
+            elif op == "__str__":
                 data = str(data)
+            elif op == "attr_fn":
+                data = getattr(data, s[1])(*s[2], **s[3])
         return data
 
     def _custom(self, fn, other=None):
@@ -662,3 +664,14 @@ class GenProcessor:
         pipeline = Pipeline(*self._filters)
         result = pipeline.transform(self.igen, gen=True)
         return result
+
+    def process_mp(self, processes=None):
+        """Process items"""
+        from multiprocessing import Pool, cpu_count
+        from functools import partial
+
+        pipeline = Pipeline(*self._filters)
+        with Pool(processes if processes else cpu_count()) as pool:
+            data = list(self.igen)
+            result = pool.map(partial(pipeline.transform, gen=True), data, 16)
+            return result
