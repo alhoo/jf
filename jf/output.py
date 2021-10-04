@@ -179,8 +179,7 @@ class excel(pandasWriter):
 
 
 class browser(JFTransformation):
-    """ Send output to browser
-    """
+    """Send output to browser"""
 
     def _fn(self, arr):
         import webbrowser
@@ -195,7 +194,7 @@ class browser(JFTransformation):
 
 
 class md(JFTransformation):
-    """ Convert dict to markdown
+    """Convert dict to markdown
 
     >>> md().transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
     a  |  b
@@ -232,7 +231,7 @@ class md(JFTransformation):
 
 
 class csv(JFTransformation):
-    """ Convert dict to csv
+    """Convert dict to csv
 
     >>> csv(lineterminator="\\n").transform([OrderedDict([("a", 1), ("b", 2)]),OrderedDict([("a", 2), ("b", 3)])])
     a,b

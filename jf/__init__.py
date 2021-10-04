@@ -44,10 +44,8 @@ def colorize(ex):
     return "".join(string)
 
 
-def query_convert(query):
-    """Convert query for evaluation
-
-    """
+def query_convert(query, processes=1):
+    """Convert query for evaluation"""
     import regex as re
 
     indentre = re.compile(r"\n *")
@@ -82,16 +80,21 @@ def query_convert(query):
     logger.debug("After query parse: %s", query)
     query = nowre.sub(r"datetime.now(timezone.utc)", query)
     logger.debug("After nowre: %s", query)
-    query = "gp(data, [" + query + "]).process()"
+    if processes > 1:
+        query = f"gp(data, [{query}]).process_mp({processes})"
+    else:
+        query = "gp(data, [" + query + "]).process()"
     logger.debug("Final query '%s'", query)
     return query
 
 
-def run_query(query, data, imports=None, import_from=None, ordered_dict=False):
+def run_query(
+    query, data, imports=None, import_from=None, ordered_dict=False, processes=1
+):
     """Run a query against given data"""
     import regex as re
 
-    query = query_convert(query)
+    query = query_convert(query, processes)
 
     unknown = process.Col()
 
