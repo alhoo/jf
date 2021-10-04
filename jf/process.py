@@ -18,6 +18,8 @@ def age(datecol):
     >>> x = Col()
     >>> isinstance(age(x.datetime)({"datetime": "2011-04-01T12:12"}), timedelta)
     True
+    >>> age("1 week ago").days > 5
+    True
     """
     from dateparser import parse as parsedate
 
@@ -32,6 +34,8 @@ def age(datecol):
         logger.debug("Age of '%s' is %s", datestr, repr(ret))
         return ret
 
+    if isinstance(datecol, str):
+        return fn(datecol)
     datecol._custom(fn)
     return datecol
 
