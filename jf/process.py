@@ -40,22 +40,31 @@ def age(datecol):
     return datecol
 
 
-def parse_value(val):
-    """Parse value to complex types"""
-    logger.debug("Parsing date from '%s'", val)
+def parse_value(datecol):
+    """Try to guess the age of datestr
+    
+    >>> x = Col()
+    >>> isinstance(parse_value(x.datetime)({"datetime": "2011-04-01T12:12"}), datetime)
+    True
+    >>> parse_value("2000-10-10")
+    datetime.datetime(2000, 10, 10, 0, 0)
+    """
     from dateutil import parser as dateutil
 
-    try:
-        if len(val) > 1:
-            time = dateutil.parse(val)
-        else:
-            return val
-        logger.debug("Got time '%s'", time)
-        return time
-    except ValueError as ex:
-        logger.debug("Not a date k7j5 value: %s", val)
-        logger.info(ex)
-        return val
+    logger.info("Calculating the age of a column (%s)", datecol)
+
+    def fn(datestr):
+        try:
+            ret = dateutil.parse(str(datestr))
+        except dateutil._parser.ParserError:
+            ret = datestr
+        return ret
+
+    if isinstance(datecol, str):
+        return fn(datecol)
+
+    datecol._custom(fn)
+    return datecol
 
 
 class Jfislice(JFTransformation):
