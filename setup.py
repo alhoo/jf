@@ -41,7 +41,7 @@ setup(
             extra_compile_args=["-std=c++11"],
         ),
     ],
-    install_requires = [
+    install_requires=[
         "pygments>=2.4.0",
         "regex>=2016.3.2",
         "python-dateutil>=2.4.1",
@@ -50,7 +50,7 @@ setup(
         "pandas>=0.22.0",
         "Click>=7.0.0",
     ],
-    tests_require = [
+    tests_require=[
         "nose>=1.3.0",
         "pandas>=0.22.0",
         "openpyxl>=2.5.4",
@@ -59,9 +59,7 @@ setup(
         "pytest-coverage",
         "pytest-flake8",
     ],
-    extras_require = {
-      "dev": ["recommonmark", "sphinx", "sphinx-rtd-theme"]
-    },
+    extras_require={"dev": ["recommonmark", "sphinx", "sphinx-rtd-theme"]},
     test_suite="tests",
     zip_safe=True,
     entry_points={"console_scripts": ["jf=jf.__main__:main"]},
