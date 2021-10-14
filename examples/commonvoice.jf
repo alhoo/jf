@@ -1,0 +1,8 @@
+#!/usr/bin/env jf
+#import pysox
+#import spacy
+#input csv,sep=\t
+#init nlp = spacy.load("en_core_web_sm")
+
+{audiometa: pysox.get_audioinfo(env.CORPUSPATH + "/clips/" + .path), ...}
+{audio: f"clips/{.path}", duration: pysox.get_duration(.audiometa.signal), text: " ".join(["/".join([str(token), token.pos_]) if token.pos_ in ("NOUN", ) else str(token) for token in nlp(.sentence)]), ...}

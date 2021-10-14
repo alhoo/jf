@@ -38,17 +38,17 @@ supported formats:
 * parquet
 
 transformations:
-* construct generator pipeline with map, hide, filter
+* import and use python modules with --import <module name>
+* import additional json for merging and joining using --import name=filename.json
+* initialize transformations with --init
 * access json dict as classes with dot-notation for attributes
 * datetime and timedelta comparison
   * age() for timedelta between datetime and current time
 * first(N), last(N), islice(start, stop, step)
   * head and tail alias for last and first
 * firstnlast(N) (or headntail(N))
-* import your own modules for more complex filtering
+* import your own modules for more complex filtering and transformations
   * Support stateful classes for complex interactions between items
-* drop your filtered data to IPython for manual data exploration
-* use --ordered\_dict to keep items in order
 * sklearn toolbox for machine learning
 * running restful service for the transformation pipeline
 

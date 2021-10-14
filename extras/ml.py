@@ -1,6 +1,7 @@
 from itertools import islice
+from jf.meta import JFTransformation
 
-import jf.sklearn_import
+import sklearn_import
 
 
 class ColumnSelector:
@@ -27,7 +28,7 @@ class ColumnSelector:
         return X[self.column]
 
 
-class transform(jf.process.JFTransformation):
+class transform(JFTransformation):
     def _fn(self, arr):
         import numpy as np
 
@@ -48,7 +49,7 @@ class transform(jf.process.JFTransformation):
             yield from np.array(model.fit_transform(data))
 
 
-class shuffle(jf.process.JFTransformation):
+class shuffle(JFTransformation):
     def _fn(self, arr):
         import numpy as np
 
@@ -57,7 +58,7 @@ class shuffle(jf.process.JFTransformation):
         yield from arr
 
 
-class trainer(jf.process.JFTransformation):
+class trainer(JFTransformation):
     def _fn(self, arr):
         params = self.args
         model = params[0]
@@ -79,7 +80,7 @@ class trainer(jf.process.JFTransformation):
         yield model
 
 
-class model_loader(jf.process.JFTransformation):
+class model_loader(JFTransformation):
     def _fn(self, arr):
         import pickle
 
@@ -88,7 +89,7 @@ class model_loader(jf.process.JFTransformation):
         yield pickle.load(open(ifn, "rb"))
 
 
-class persistent_trainer(jf.process.JFTransformation):
+class persistent_trainer(JFTransformation):
     def _fn(self, arr):
         import pickle
 
@@ -105,7 +106,7 @@ class persistent_trainer(jf.process.JFTransformation):
         yield model
 
 
-class persistent_transformation(jf.process.JFTransformation):
+class persistent_transformation(JFTransformation):
     def _fn(self, arr):
         import pickle
 
