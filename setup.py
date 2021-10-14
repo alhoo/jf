@@ -9,7 +9,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "0.8.10"
+version = "1.0.0"
 
 setup(
     name="jf",
@@ -46,16 +46,9 @@ setup(
         "regex>=2016.3.2",
         "python-dateutil>=2.4.1",
         "ruamel.yaml>=0.16.10",
-        "pyyaml>=5.0.1",
-        "lxml>=4.0.1",
         "dateparser>=0.6.0",
-        "ipython>=6.2.0",
-        "csvtomd>=0.3.0",
         "pandas>=0.22.0",
-        "boto3>1.1.11",
-        "scikit-learn>0.22.0",
-        "Flask==1.1.2",
-        "pyarrow==0.17.0",
+        "Click>=7.0.0",
     ],
     tests_require=[
         "nose>=1.3.0",
@@ -63,11 +56,10 @@ setup(
         "openpyxl>=2.5.4",
         "pylint>=1.8.2",
         "pytest",
+        "pytest-coverage",
         "pytest-flake8",
     ],
-    dev_require = [
-        "recommonmark", "sphinx", "sphinx-rtd-theme"
-    ],
+    extras_require={"dev": ["recommonmark", "sphinx", "sphinx-rtd-theme"]},
     test_suite="tests",
     zip_safe=True,
     entry_points={"console_scripts": ["jf=jf.__main__:main"]},

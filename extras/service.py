@@ -2,7 +2,7 @@ import json
 import yaml
 import numpy as np
 import datetime
-from jf.process import JFTransformation
+from jf.meta import JFTransformation
 
 
 def json_encodings(obj):

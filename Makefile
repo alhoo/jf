@@ -19,23 +19,23 @@ jf/jsonlgen.o: jf/jsonlgen.cc
 jf/jsonlgen.so: jf/jsonlgen.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
+test: jf/jsonlgen.so
+	pytest jf --doctest-modules --cov --cov-report html
+
+nosetest: jf/jsonlgen.so
+	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-doctest jf tests
+
 program.prof:
-	python3 -m cProfile -o program.prof jf/__main__.py 'sorted(.cmd)' ~/.zsh_fullhistory.jsonl >/dev/null 2>/dev/null
+	python3 -m cProfile -o program.prof jf/__main__.py 'sorted(.created_at)' issues.json >/dev/null 2>/dev/null
 
 profile: program.prof
 	pip install -U tuna==0.4.4
 	tuna program.prof
 
-test: jf/jsonlgen.so
-	nosetests --with-coverage --cover-html-dir=coverage --cover-package=jf --cover-html --with-doctest
-
-devinstall: README.rst
-	pip install -e .
-
 readme:
 	pandoc README.md | sed 's/<code/<code style="color:cyan;"/g'| elinks -dump -dump-color-mode 1 | sed -r 's/^/ /g;s/ *$$//' | (echo && cat && echo)
 
-README.rst: README.md
+%.rst: %.md
 	pandoc -f markdown -t rst $< >$@
 
 $(DOC_BUILD_DIR)/html/index.html: $(DOC_FILES)

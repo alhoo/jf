@@ -32,7 +32,6 @@ jsonlgen_dealloc(JSONLgenState *jfstate)
 
 void parsejsonl(string &str, JSONLgenState *s){
     for(char& c : str){
-//        if(c == '\n' or c == ' ') {c = iff.get(); continue; }
         s->pos++;
         s->data.push_back(c);
         if(DEBUG) cerr << c << " " << s->quote << s->escape << (int) s->obj << (int) s->list << " " << s->pos << " " << s->data.size() << endl;
@@ -49,8 +48,9 @@ void parsejsonl(string &str, JSONLgenState *s){
                 } else if (s->obj == 0){
                     if(DEBUG) cerr << "yielding 1" << endl;
                     s->items.push(string(s->data.begin() + s->item, s->data.begin() + s->pos + 1));
-                    s->item = -s->pos;
-                    //return ret;
+                    s->data.erase(s->data.begin(), s->data.begin() + s->pos + 1);
+                    s->pos = -1;
+                    s->item = -1;
                 }
             }
             s->quote = 1 - s->quote;
@@ -61,7 +61,9 @@ void parsejsonl(string &str, JSONLgenState *s){
             if (s->obj == 0 and (not (s->item < 0) and s->data[s->item] == '{')){
                 if(DEBUG) cerr << "yielding 2" << endl;
                 s->items.push(string(s->data.begin() + s->item, s->data.begin() + s->pos + 1));
-                s->item = -s->pos;
+                s->data.erase(s->data.begin(), s->data.begin() + s->pos + 1);
+                s->pos = -1;
+                s->item = -1;
             }
         }
         else if (c == '{'){
@@ -77,15 +79,12 @@ void parsejsonl(string &str, JSONLgenState *s){
             if (s->list == 1 and (not (s->item < 0) and s->data[s->item] == '[')){
                 if(DEBUG) cerr << "yielding 3" << endl;
                 s->items.push(string(s->data.begin() + s->item, s->data.begin() + s->pos + 1));
-                s->item = -s->pos;
+                s->data.erase(s->data.begin(), s->data.begin() + s->pos + 1);
+                s->pos = -1;
+                s->item = -1;
             }
         }
     }
-/*
-    if(s->item == -1 and s->item < s->pos)
-                    cerr << "yielding 4" << endl;
-        s->items.push(string(s->data.begin(), s->data.begin() + s->pos + 1));
-*/
 }
 
 
