@@ -3,7 +3,7 @@
 Selecting is done with `{key: value}`:
 
 ```bash
- $ head -n 1000 /media/lasse/853bf813-fe58-4786-9d4a-186d28bf36fe/Data/reddit/datascience_10.jsonl|jf '{body: .body}' -c 
+ $ head -n 1000 /media/.../datascience_10.jsonl|jf '{body: .body}' -c 
 {"body": "This is an excellent cautionary tale regarding internships.\n\nA company that doesn't have sufficient time or manpower to train interns in business essential processes and due to laws regarding internships can't make interns responsible for business essential processes. Make sure you are getting the right internship by asking how much time they have to give to you and not just what you can agree to do for them in exchange for an internship on a resume."}
 {"body": "Learn how to sex up your resume. That's what everyone else does."}
 {"body": "Was I the one swearing my head off... Nope and I definitely was not referring to you when I said that comment."}

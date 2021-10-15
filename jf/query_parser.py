@@ -82,6 +82,7 @@ def query_convert(query):
         [r"^(\.[a-zA-Z])", r"x\1"],
         [r"([ ({])(\.[a-zA-Z])", r"\1x\2"],
         [r'{"([^"]+)": ([^}]+ for ([^ ]+, ?)?\1(, ?[^ ]+)? in)', r"{\1: \2"],
+        [r"\bdel x.([^( ]+)", r'jf_del("\1")'],
     ]
     for fixre, sub in fixres:
         query = re.sub(fixre, sub, query)

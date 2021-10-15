@@ -28,7 +28,7 @@ Filter selected fields
 
 .. code-block:: bash
 
-    $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject})'
+    $ cat samples.jsonl | jf '{id: x.id, subject: x.fields.subject}'
     {"id": "87086895", "subject": "Swedish children stories"}
     {"id": "87114792", "subject": "New Finnish storybooks"}
 
@@ -47,6 +47,7 @@ For detailed information about specific JF components, consult the :ref:`modules
    docs/user_guide
    docs/modules
    docs/examples
+   docs/more_examples
 
 
 Indices and tables
