@@ -21,14 +21,16 @@ Basic usage
 
 Filter selected fields
 
-    $ cat samples.jsonl | jf 'map({id: x.id, subject: x.fields.subject})'
+    $ cat samples.jsonl | jf '{id: x.id, subject: x.fields.subject}'
     {"id": "87086895", "subject": "Swedish children stories"}
     {"id": "87114792", "subject": "New Finnish storybooks"}
+    ...
 
 Features
 ==
 
 supported formats:
+
 * json (uncompressed, gzip, bz2)
 * jsonl (uncompressed, gzip, bz2)
 * yaml (uncompressed, gzip, bz2)
@@ -38,6 +40,7 @@ supported formats:
 * parquet
 
 transformations:
+
 * import and use python modules with --import <module name>
 * import additional json for merging and joining using --import name=filename.json
 * initialize transformations with --init
@@ -51,8 +54,3 @@ transformations:
   * Support stateful classes for complex interactions between items
 * sklearn toolbox for machine learning
 * running restful service for the transformation pipeline
-
-Known bugs
-==
-
-* IPython doesn't launch perfectly with piped data
