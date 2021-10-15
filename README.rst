@@ -64,8 +64,8 @@ transformations:
 -  sklearn toolbox for machine learning
 -  running restful service for the transformation pipeline
 
-.. |Build Status| image:: https://travis-ci.org/alhoo/jf.svg?branch=master
-   :target: https://travis-ci.org/alhoo/jf
+.. |Build Status| image:: https://api.travis-ci.com/alhoo/jf.svg?branch=master
+   :target: https://travis-ci.com/alhoo/jf
 .. |Coverage| image:: https://codecov.io/github/alhoo/jf/coverage.svg?branch=master
    :target: https://codecov.io/github/alhoo/jf
 .. |PyPI| image:: https://img.shields.io/pypi/v/jf.svg
