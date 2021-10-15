@@ -86,7 +86,6 @@ def fetch_file(fn, f, additionals):
     try:
         fun = globals()[f"fetch_{proto}"](fn)
     except Exception as ex:
-        print(ex)
         fun = get_handler(proto, "fetch", additionals)
     if fun:
         f.write(fun(fn))
