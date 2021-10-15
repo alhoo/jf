@@ -4,34 +4,26 @@ jf package
 Submodules
 ----------
 
-jf.input module
+jf.jfio module
 ---------------
 
-.. automodule:: jf.input
+.. automodule:: jf.jfio
    :members:
    :undoc-members:
    :show-inheritance:
 
-jf.meta module
+jf.extra_functions module
 --------------
 
-.. automodule:: jf.meta
+.. automodule:: jf.extra_functions
    :members:
    :undoc-members:
    :show-inheritance:
 
-jf.ml module
+jf.main module
 ------------
 
-.. automodule:: jf.ml
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jf.output module
-----------------
-
-.. automodule:: jf.output
+.. automodule:: jf.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -48,22 +40,6 @@ jf.query\_parser module
 -----------------------
 
 .. automodule:: jf.query_parser
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jf.service module
------------------
-
-.. automodule:: jf.service
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-jf.sklearn\_import module
--------------------------
-
-.. automodule:: jf.sklearn_import
    :members:
    :undoc-members:
    :show-inheritance:

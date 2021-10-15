@@ -35,6 +35,23 @@ class Flatten(JFTransformation):
             yield self._flatten(it)
 
 
+class JfDel(JFTransformation):
+    """Yield all subitems of all item
+
+    >>> list(YieldFrom(lambda x: x["a"])([{"a": [1,2,3]}]))
+    [1, 2, 3]
+    """
+
+    def _fn(self, arr):
+        param = self.args[0](1).split(".")
+        for item in arr:
+            c = item
+            for p in param[:-1]:
+              c = getattr(c, p)
+            if param[-1] in c:
+                c.__delitem__(param[-1])
+            yield item
+
 class YieldFrom(JFTransformation):
     """Yield all subitems of all item
 
