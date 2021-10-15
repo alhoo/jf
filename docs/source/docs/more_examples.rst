@@ -1,3 +1,5 @@
+.. _moreexamples:
+
 Basics
 ------
 
@@ -5,7 +7,7 @@ Selecting is done with ``{key: value}``:
 
 .. code:: bash
 
-    $ head -n 1000 /media/lasse/853bf813-fe58-4786-9d4a-186d28bf36fe/Data/reddit/datascience_10.jsonl|jf '{body: .body}' -c 
+    $ head -n 1000 /media/.../datascience_10.jsonl|jf '{body: .body}' -c 
    {"body": "This is an excellent cautionary tale regarding internships.\n\nA company that doesn't have sufficient time or manpower to train interns in business essential processes and due to laws regarding internships can't make interns responsible for business essential processes. Make sure you are getting the right internship by asking how much time they have to give to you and not just what you can agree to do for them in exchange for an internship on a resume."}
    {"body": "Learn how to sex up your resume. That's what everyone else does."}
    {"body": "Was I the one swearing my head off... Nope and I definitely was not referring to you when I said that comment."}
@@ -330,18 +332,12 @@ open it from there.
 .. code:: bash
 
     $ jf --import users=users.json '{user: users.get(str(.uid)), ...}, flatten()' orders.json --output parquet 
-   PAR1 $L<{|{{     &�5uid��&{{, $L &�5amount��&,8<Lljuicemilkburgers,6(milkburgers
-   $$&�
-       5item��&�&�6(milkburgers, $L<bobalice,6(bobalice     &�
-
-   5   user.name��&�   &6(bobalice, $L<{|{{     &�
+    <bytes>
 
 .. code:: bash
 
     $ jf --import users=users.json '{user: users.get(str(.uid)), ...}, flatten()' orders.json --output excel
-   P=�KSAMb��docProps/app.xmlM�=
-                                1D��q��A�Bb@�R��{dC�B~�9��noF�
-   �+docProps/core.xml͒QK�0ǿ�佽�E���e�'���[Hn[Xӄ�ݷ7�[���1w���wp�B��/��d1݌���a�DA$}@�R�}n�|t��3�!(}T{�����!)�H�,�Bd�5Z舊|<�^��3v3�h�������P͜�;px~z��-l�H���d���e�[��l�����*8��F�{q��1���
+    <bytes>
 
 .. code:: bash
 
@@ -670,3 +666,7 @@ You now have access to input and output of ``.msg`` format
    {
      "hello": "world"
      ...
+
+.. toctree::
+   :maxdepth: 4
+

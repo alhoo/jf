@@ -86,7 +86,6 @@ def query_convert(query):
     ]
     for fixre, sub in fixres:
         query = re.sub(fixre, sub, query)
-        print(query)
     return query
 
 
