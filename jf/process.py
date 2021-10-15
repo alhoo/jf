@@ -32,11 +32,11 @@ class DotAccessible(dict):
         for arg in args:
             if isinstance(arg, dict):
                 for k, v in arg.items():
-                    self[k] = v
+                    self[k] = dotaccessible(v)
 
         if kwargs:
             for k, v in kwargs.items():
-                self[k] = v
+                self[k] = dotaccessible(v)
 
     def __getattr__(self, k):
         return dotaccessible(
