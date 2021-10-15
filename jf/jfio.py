@@ -240,10 +240,11 @@ def save_pandas(alldata, output, _highligh=None):
                 except TypeError:
                     import os
                     import tempfile
+
                     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
                         tmpfile.close()
                         getattr(df, f"to_{output}")(tmpfile.name)
-                        with open(tmpfile.name, 'rb') as f:
+                        with open(tmpfile.name, "rb") as f:
                             write_bytes(f.read())
                         os.unlink(tmpfile.name)
         return
@@ -290,7 +291,12 @@ def get_supported_formats():
 def print_results(ret, output, compact=False, raw=False, additionals={}):
     """
     Print array with various formats
+
     >>> data = [{"a": 1}]
+    >>> print_results(data, 'help')
+    - clipboard
+    - csv
+    ...
     >>> print_results(data, 'py', True)
     {'a': 1}
     >>> print_results(data, 'json', True)

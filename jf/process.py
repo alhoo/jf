@@ -15,7 +15,18 @@ class DotAccessible(dict):
     >>> it = DotAccessible({"a": 5})
     >>> it.a
     5
+    >>> it.b = 6
+    >>> it
+    {'a': 5, 'b': 6}
+    >>> del it.b
+    >>> isinstance(it.b, DotAccessibleNone)
+    True
+    >>> it
+    {'a': 5}
+    >>> DotAccessible({"a": 5}, b=1)
+    {'a': 5, 'b': 1}
     """
+
     def __init__(self, *args, **kwargs):
         super(DotAccessible, self).__init__(*args, **kwargs)
         for arg in args:
@@ -70,6 +81,12 @@ class JFREMOVED:
 def worker(x):
     """
     worker for multiprocessing
+    >>> worker_init([["map", lambda x: x],
+    ...              ["update", lambda x: x],
+    ...              ["function", lambda x: lambda y: y],
+    ...              ["filter", lambda x: x]])
+    >>> worker({"a": 1})
+    {'a': 1}
     """
     for op, _func in _funcs:
         if op == "map":

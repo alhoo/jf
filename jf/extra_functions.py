@@ -47,10 +47,11 @@ class JfDel(JFTransformation):
         for item in arr:
             c = item
             for p in param[:-1]:
-              c = getattr(c, p)
+                c = getattr(c, p)
             if param[-1] in c:
                 c.__delitem__(param[-1])
             yield item
+
 
 class YieldFrom(JFTransformation):
     """Yield all subitems of all item
