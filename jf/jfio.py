@@ -55,6 +55,18 @@ def get_handler(method, fntype, additionals):
             return getattr(it, fnname)
 
 
+def fetch_http(url):
+    import requests
+
+    return lambda url: requests.get(url).content
+
+
+def fetch_https(url):
+    import requests
+
+    return lambda url: requests.get(url).content
+
+
 def fetch_file(fn, f, additionals):
     """
     Fetch file with custom handler
@@ -71,7 +83,11 @@ def fetch_file(fn, f, additionals):
     from itertools import chain
 
     proto = fn.split("://")[0]
-    fun = get_handler(proto, "fetch", additionals)
+    try:
+        fun = globals()[f"fetch_{proto}"](fn)
+    except Exception as ex:
+        print(ex)
+        fun = get_handler(proto, "fetch", additionals)
     if fun:
         f.write(fun(fn))
         return
