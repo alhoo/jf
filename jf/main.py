@@ -34,6 +34,12 @@ def jf(
     >>> run_with_data([{"a": "myvalue"}], jffn(".a", [], [], False, True, None, 'json', False, False, []))
     "myvalue"
     "myvalue"
+    >>> run_with_data([{"a": "myvalue", "b": 1}], jffn("{a}", [], [], False, True, None, 'json', False, False, []))
+    {"a": "myvalue"}
+    {"a": "myvalue"}
+    >>> run_with_data([{"a": "myvalue", "b": 1}], jffn("{a, good: .b > 0}", [], [], False, True, None, 'json', False, False, []))
+    {"a": "myvalue", "good": true}
+    {"a": "myvalue", "good": true}
     >>> run_with_data([{"a": "myvalue"}], jffn("{b: .a}", [], [], False, True, None, 'json', False, False, []))
     {"b": "myvalue"}
     {"b": "myvalue"}
