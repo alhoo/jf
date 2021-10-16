@@ -138,6 +138,8 @@ def parse_query(
                             import_path = list(import_path) + parts[3:]
                 elif not line.startswith("#") and len(line) > 1:
                     query += line.rstrip()
+    if query == '.':
+        query = 'x'
 
     if not dosplit:
         return query_convert(query).replace("x.", "lambda x: x.")
