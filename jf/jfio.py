@@ -168,8 +168,10 @@ def data_input(files=None, additionals={}, inputfmt=None):
         )
         if "://" in fn:
             from tempfile import NamedTemporaryFile
-
-            tmpf = NamedTemporaryFile(suffix="." + fn.split(".")[-1], delete=False)
+            ext = fn.split(".")[-1]
+            if not len(ext) in (2,3,4):
+                ext = 'json'
+            tmpf = NamedTemporaryFile(suffix=f".{ext}", delete=False)
             fn = fetch_file(fn, tmpf, additionals)
             tmpf.close()
             fn = tmpf.name
