@@ -72,21 +72,24 @@ def withquerytype(query, is_function=False):
     return "map", query
 
 
-def query_convert(query):
+def query_convert(query, debug=False):
     import re
 
     fixres = [
         [r"([{,] ?)([a-z]+)(?=, |})", r"\1 \2: .\2"],
         [r"\|", r","],
         [r"\n *", r" "],
+        [r"([ ,\[])\.([ \]}])", r"\1x\2"],
         [r'([{,] *)([^{} "\[\]\',]+):', r'\1"\2":'],
         [r"^(\.[a-zA-Z])", r"x\1"],
-        [r"([ ({])(\.[a-zA-Z])", r"\1x\2"],
+        [r"([ ({\[])(\.[a-zA-Z])", r"\1x\2"],
         [r'{"([^"]+)": ([^}]+ for ([^ ]+, ?)?\1(, ?[^ ]+)? in)', r"{\1: \2"],
         [r"\bdel x.([^( ]+)", r'jf_del("\1")'],
     ]
     for fixre, sub in fixres:
         query = re.sub(fixre, sub, query)
+        if debug:
+            print(fixre, query)
     return query
 
 
@@ -108,6 +111,8 @@ def parse_query(
     >>> parse_query('{timestamps: t.get(f"train/{.audio}"), ...}')
     ('[["update", lambda x: {"timestamps": t.get(f"train/{x.audio}")}]]', [], None, None, [])
     >>> parse_query('{timestamps: t.get(f"train/{.audio}"), ...}', debug=True)
+    query_parse:
+    ...
     ('[["update", lambda x: {"timestamps": t.get(f"train/{x.audio}")}]]', [], None, None, [])
     >>> import tempfile
     >>> with tempfile.NamedTemporaryFile(suffix='.jf') as tmpfile:
@@ -117,6 +122,8 @@ def parse_query(
     True
     ('[["update", lambda x: {"hash": hashlib.md5(x.a).hexdigest()}]]', ['hashlib'], None, None, [])
     """
+    if debug:
+        print("query_parse:")
     if from_file or query.endswith(".jf"):
         with open(query, "r") as f:
             query = ""
@@ -141,7 +148,9 @@ def parse_query(
 
     if not dosplit:
         return query_convert(query).replace("x.", "lambda x: x.")
-    queries = list(split_query(query_convert(query)))
+    if query == ".":
+        query = "x"
+    queries = list(split_query(query_convert(query, debug)))
     queries = (
         "["
         + ", ".join([f'["{qtype}", lambda x: {query}]' for qtype, query in queries])
