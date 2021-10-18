@@ -2,13 +2,12 @@ CC = g++
 CFLAGS = -O3 -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
 LDFLAGS = -pthread -shared
 
-INCLUDE = $(shell pkg-config --cflags python3)
+INCLUDE = $(shell python3-config --includes)
 SPHINXOPTS ?=
 SPHINXBUILD ?= python3 -m sphinx.cmd.build
 DOC_SOURCE_DIR ?= docs/source
 DOC_FILES := $(shell find $(DOC_SOURCE_DIR) -type f -name '*.rst')
 DOC_BUILD_DIR ?= docs/build
-#INCLUDE = -I/usr/include/python3.5m/
 
 
 all: jf/jsonlgen.so

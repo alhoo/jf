@@ -157,6 +157,7 @@ def data_input(files=None, additionals={}, inputfmt=None):
             lambda x: x, map(try_json_loads, yield_json_and_json_lines(sys.stdin))
         )
     tmpf = None
+    pandas_fmt_map = {"xlsx": "excel"}
     for fn in files:
         inputfmt = fn.split(".")[-1] if inputfmt is None else inputfmt
         inputfmt = inputfmt.split(",", 1)
@@ -168,9 +169,10 @@ def data_input(files=None, additionals={}, inputfmt=None):
         )
         if "://" in fn:
             from tempfile import NamedTemporaryFile
+
             ext = fn.split(".")[-1]
-            if not len(ext) in (2,3,4):
-                ext = 'json'
+            if not len(ext) in (2, 3, 4):
+                ext = "json"
             tmpf = NamedTemporaryFile(suffix=f".{ext}", delete=False)
             fn = fetch_file(fn, tmpf, additionals)
             tmpf.close()
@@ -178,7 +180,9 @@ def data_input(files=None, additionals={}, inputfmt=None):
         if inputfmt in pandas_ext:
             import pandas
 
-            df = getattr(pandas, f"read_{inputfmt}")(fn, **inputkwargs)
+            df = getattr(pandas, f"read_{pandas_fmt_map.get(inputfmt, inputfmt)}")(
+                fn, **inputkwargs
+            )
             for it in df.to_dict(orient="records"):
                 yield it
             continue
