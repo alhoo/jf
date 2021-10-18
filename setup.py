@@ -9,7 +9,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "1.0.4"
+version = "1.0.5"
 
 setup(
     name="jf",
