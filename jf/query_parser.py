@@ -21,6 +21,13 @@ def split_query(q):
         elif level == 0:
             if q[pos] in " ," and not is_function:
                 start = start + 1
+            elif q[pos] in ",":
+                yield withquerytype(q[start:pos], is_function)
+                q = q[pos + 1 :]
+                pos = 0
+                start = 0
+                is_function = False
+                continue
             else:
                 is_function = True
         pos += 1
@@ -47,7 +54,7 @@ def withquerytype(query, is_function=False):
         if query.startswith("unique"):
             query = query[6:]
             return "function", f"unique(lambda x: {query})"
-        if query.startswith("sorted"):
+        elif query.startswith("sorted"):
             query = query[6:]
             return "function", f"sorted(lambda x: {query})"
         elif query.startswith("yield from "):
@@ -145,8 +152,8 @@ def parse_query(
                             import_path = list(import_path) + parts[3:]
                 elif not line.startswith("#") and len(line) > 1:
                     query += line.rstrip()
-    if query == '.':
-        query = 'x'
+    if query == ".":
+        query = "x"
 
     if not dosplit:
         return query_convert(query).replace("x.", "lambda x: x.")
