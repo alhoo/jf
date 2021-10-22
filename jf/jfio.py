@@ -1,3 +1,6 @@
+import json
+from jf.process import DotAccessible
+
 def yield_json_and_json_lines(inp):
     """Yield json and json lines
 
@@ -330,6 +333,30 @@ def get_supported_formats():
         + ["json", "jsonl", "yaml", "python", "py"]
     )
 
+def not_dotaccessible(it):
+    if isinstance(it, dict):
+        return {k: not_dotaccessible(v) for k, v in dict.items(it)}
+    if isinstance(it, list):
+        return [not_dotaccessible(v) for v in it]
+    return it
+
+class StructEncoder(json.JSONEncoder):
+    """
+    Try to convert everything to json
+
+    >>> from datetime import datetime
+    >>> import json
+    >>> len(json.dumps(datetime.now(), cls=StructEncoder)) > 10
+    True
+    """
+
+    def default(self, obj):
+        if isinstance(obj, DotAccessible):
+            obj = {k: v for k,v in dict.items(obj)}
+        try:
+            return super().default(obj)
+        except:
+            return str(obj)
 
 def print_results(ret, output, compact=False, raw=False, additionals={}):
     """
@@ -370,7 +397,6 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
     NotImplementedError: Cannot output not supported yet. Please consider making a PR!
     """
     import sys
-    import json
     from pygments.lexers import get_lexer_by_name
     from pygments import highlight
     from pygments.formatters import TerminalFormatter
@@ -382,22 +408,6 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
 
         print(yaml.dump(list(sorted(get_supported_formats()))))
         return
-
-    class StructEncoder(json.JSONEncoder):
-        """
-        Try to convert everything to json
-
-        >>> from datetime import datetime
-        >>> import json
-        >>> len(json.dumps(datetime.now(), cls=StructEncoder)) > 10
-        True
-        """
-
-        def default(self, obj):
-            try:
-                return obj.__dict__
-            except AttributeError:
-                return obj.__str__()
 
     _highligh = None
     try:
@@ -420,7 +430,8 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
             line = yaml.dump([dict(line)] if isinstance(line, dict) else line)
         elif output in ("json", "jsonl"):
             line = json.dumps(
-                line, ensure_ascii=False, cls=StructEncoder, **output_kwargs
+                not_dotaccessible(line), ensure_ascii=False, cls=StructEncoder, **output_kwargs
+                # not_dotaccessible(line), ensure_ascii=False, cls=StructEncoder, **output_kwargs
             )
         else:
             alldata = [line] + list(ret)
