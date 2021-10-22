@@ -1,3 +1,6 @@
+import json
+from jf.process import DotAccessible
+
 def yield_json_and_json_lines(inp):
     """Yield json and json lines
 
@@ -145,6 +148,7 @@ def data_input(files=None, additionals={}, inputfmt=None):
         "stata",
         "xml",
     )
+    pandas_fmt_map = {"xlsx": "excel"}
 
     def try_json_loads(it):
         try:
@@ -152,63 +156,84 @@ def data_input(files=None, additionals={}, inputfmt=None):
         except Exception as ex:
             pass
 
-    if not files:
-        yield from filter(
-            lambda x: x, map(try_json_loads, yield_json_and_json_lines(sys.stdin))
-        )
     tmpf = None
-    pandas_fmt_map = {"xlsx": "excel"}
-    for fn in files:
-        inputfmt = fn.split(".")[-1] if inputfmt is None else inputfmt
-        inputfmt = inputfmt.split(",", 1)
-        inputfmt, inputkwargs = inputfmt[0], inputfmt[1] if len(inputfmt) == 2 else ""
-        inputkwargs = (
-            dict([it.split("=") for it in inputkwargs.split(",")])
-            if len(inputkwargs)
-            else {}
-        )
-        if "://" in fn:
+    if not files:
+        if inputfmt is None or inputfmt.startswith("json"):
+            yield from filter(
+                lambda x: x, map(try_json_loads, yield_json_and_json_lines(sys.stdin))
+            )
+        else:
             from tempfile import NamedTemporaryFile
 
-            ext = fn.split(".")[-1]
-            if not len(ext) in (2, 3, 4):
-                ext = "json"
-            tmpf = NamedTemporaryFile(suffix=f".{ext}", delete=False)
-            fn = fetch_file(fn, tmpf, additionals)
-            tmpf.close()
-            fn = tmpf.name
-        if inputfmt in pandas_ext:
-            import pandas
-
-            df = getattr(pandas, f"read_{pandas_fmt_map.get(inputfmt, inputfmt)}")(
-                fn, **inputkwargs
+            tmpf = NamedTemporaryFile(
+                suffix=f".{pandas_fmt_map.get(inputfmt, inputfmt)}", delete=False
             )
-            for it in df.to_dict(orient="records"):
-                yield it
-            continue
-        if inputfmt in ("yml", "yaml"):
-            import yaml
+            for line in sys.stdin:
+                tmpf.write(line.encode())
+            tmpf.close()
+            files = [tmpf.name]
 
-            ma = MinimalAdapter()
+    try:
+        for fn in files:
+            inputfmt = fn.split(".")[-1] if inputfmt is None else inputfmt
+            inputfmt = inputfmt.split(",", 1)
+            inputfmt, inputkwargs = (
+                inputfmt[0],
+                inputfmt[1] if len(inputfmt) == 2 else "",
+            )
+            inputkwargs = (
+                dict([it.split("=") for it in inputkwargs.split(",")])
+                if len(inputkwargs)
+                else {}
+            )
+            if "://" in fn:
+                from tempfile import NamedTemporaryFile
+
+                ext = fn.split(".")[-1]
+                if not len(ext) in (2, 3, 4):
+                    ext = "json"
+                tmpf = NamedTemporaryFile(suffix=f".{ext}", delete=False)
+                fn = fetch_file(fn, tmpf, additionals)
+                tmpf.close()
+                fn = tmpf.name
+            if inputfmt in pandas_ext:
+                import pandas
+
+                df = getattr(pandas, f"read_{pandas_fmt_map.get(inputfmt, inputfmt)}")(
+                    fn, **inputkwargs
+                )
+                for it in df.to_dict(orient="records"):
+                    yield it
+                continue
+            if inputfmt in ("yml", "yaml"):
+                import yaml
+
+                ma = MinimalAdapter()
+                with fileinput.input(
+                    fn, openhook=fileinput.hook_compressed, mode="rb"
+                ) as f:
+                    ret = yaml.safe_load(ma(f))
+                    if isinstance(ret, list):
+                        yield from ret
+                    else:
+                        yield ret
+                continue
+            if not inputfmt in ("json", "jsonl"):
+                fun = get_handler(fn.split(".")[-1], "unserialize", additionals)
+                if fun:
+                    with open(fn, "rb") as f:
+                        yield from fun(f)
+                        continue
             with fileinput.input(
                 fn, openhook=fileinput.hook_compressed, mode="rb"
             ) as f:
-                ret = yaml.safe_load(ma(f))
-                if isinstance(ret, list):
-                    yield from ret
-                else:
-                    yield ret
-            continue
-        if not inputfmt in ("json", "jsonl"):
-            fun = get_handler(fn.split(".")[-1], "unserialize", additionals)
-            if fun:
-                with open(fn, "rb") as f:
-                    yield from fun(f)
-                    continue
-        with fileinput.input(fn, openhook=fileinput.hook_compressed, mode="rb") as f:
-            yield from map(
-                try_json_loads, yield_json_and_json_lines(map(lambda x: x.decode(), f))
-            )
+                yield from map(
+                    try_json_loads,
+                    yield_json_and_json_lines(map(lambda x: x.decode(), f)),
+                )
+    except Exception as ex:
+        raise ex
+    finally:
         if tmpf:
             import os
 
@@ -308,6 +333,30 @@ def get_supported_formats():
         + ["json", "jsonl", "yaml", "python", "py"]
     )
 
+def not_dotaccessible(it):
+    if isinstance(it, dict):
+        return {k: not_dotaccessible(v) for k, v in dict.items(it)}
+    if isinstance(it, list):
+        return [not_dotaccessible(v) for v in it]
+    return it
+
+class StructEncoder(json.JSONEncoder):
+    """
+    Try to convert everything to json
+
+    >>> from datetime import datetime
+    >>> import json
+    >>> len(json.dumps(datetime.now(), cls=StructEncoder)) > 10
+    True
+    """
+
+    def default(self, obj):
+        if isinstance(obj, DotAccessible):
+            obj = {k: v for k,v in dict.items(obj)}
+        try:
+            return super().default(obj)
+        except:
+            return str(obj)
 
 def print_results(ret, output, compact=False, raw=False, additionals={}):
     """
@@ -348,7 +397,6 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
     NotImplementedError: Cannot output not supported yet. Please consider making a PR!
     """
     import sys
-    import json
     from pygments.lexers import get_lexer_by_name
     from pygments import highlight
     from pygments.formatters import TerminalFormatter
@@ -360,22 +408,6 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
 
         print(yaml.dump(list(sorted(get_supported_formats()))))
         return
-
-    class StructEncoder(json.JSONEncoder):
-        """
-        Try to convert everything to json
-
-        >>> from datetime import datetime
-        >>> import json
-        >>> len(json.dumps(datetime.now(), cls=StructEncoder)) > 10
-        True
-        """
-
-        def default(self, obj):
-            try:
-                return obj.__dict__
-            except AttributeError:
-                return obj.__str__()
 
     _highligh = None
     try:
@@ -398,7 +430,8 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
             line = yaml.dump([dict(line)] if isinstance(line, dict) else line)
         elif output in ("json", "jsonl"):
             line = json.dumps(
-                line, ensure_ascii=False, cls=StructEncoder, **output_kwargs
+                not_dotaccessible(line), ensure_ascii=False, cls=StructEncoder, **output_kwargs
+                # not_dotaccessible(line), ensure_ascii=False, cls=StructEncoder, **output_kwargs
             )
         else:
             alldata = [line] + list(ret)
