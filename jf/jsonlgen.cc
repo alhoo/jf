@@ -58,7 +58,7 @@ void parsejsonl(string &str, JSONLgenState *s){
         else if (s->quote > 0) ;
         else if (c == '}'){
             s->obj--;
-            if (s->obj == 0 and (not (s->item < 0) and s->data[s->item] == '{')){
+            if (s->obj == 0 && (! (s->item < 0) && s->data[s->item] == '{')){
                 if(DEBUG) cerr << "yielding 2" << endl;
                 s->items.push(string(s->data.begin() + s->item, s->data.begin() + s->pos + 1));
                 s->data.erase(s->data.begin(), s->data.begin() + s->pos + 1);
@@ -72,11 +72,11 @@ void parsejsonl(string &str, JSONLgenState *s){
         }
         else if (c == '['){
             s->list++;
-            if(s->list > 1 and s->item < 0) { s->item = s->pos; }
+            if(s->list > 1 && s->item < 0) { s->item = s->pos; }
         }
         else if (c == ']') {
             s->list--;
-            if (s->list == 1 and (not (s->item < 0) and s->data[s->item] == '[')){
+            if (s->list == 1 && (! (s->item < 0) && s->data[s->item] == '[')){
                 if(DEBUG) cerr << "yielding 3" << endl;
                 s->items.push(string(s->data.begin() + s->item, s->data.begin() + s->pos + 1));
                 s->data.erase(s->data.begin(), s->data.begin() + s->pos + 1);
