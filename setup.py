@@ -38,7 +38,8 @@ setup(
         Extension(
             "jf.jsonlgen",
             sources=["jf/jsonlgen.cc"],
-            extra_compile_args=["-std=c++11"],
+            language='c++',
+            extra_compile_args="-std=c++11 -O3 -funroll-loops -march=native".split(),
         ),
     ],
     install_requires=[
