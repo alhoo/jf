@@ -10,6 +10,7 @@ def jf(
     import_path,
     from_file,
     compact,
+    listen,
     inputfmt,
     output,
     debug,
@@ -104,7 +105,7 @@ def jf(
     data = data_input(files, additionals, inputfmt)
 
     # processing
-    ret = run_query(query, data, additionals, from_file, processes)
+    ret = run_query(query, data, additionals, from_file, processes, listen)
 
     # output
     print_results(ret, output, compact, raw, additionals)
