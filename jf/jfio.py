@@ -1,6 +1,7 @@
 import json
 from jf.process import DotAccessible
 
+
 def yield_json_and_json_lines(inp):
     """Yield json and json lines
 
@@ -98,7 +99,7 @@ def fetch_file(fn, f, additionals):
     )
 
 
-def data_input(files=None, additionals={}, inputfmt=None):
+def data_input(files=None, additionals={}, inputfmt=None, listen=None):
     """
     Data input function
 
@@ -158,10 +159,13 @@ def data_input(files=None, additionals={}, inputfmt=None):
 
     tmpf = None
     if not files:
+        if listen:
+            return int(listen)
         if inputfmt is None or inputfmt.startswith("json"):
             yield from filter(
                 lambda x: x, map(try_json_loads, yield_json_and_json_lines(sys.stdin))
             )
+            return
         else:
             from tempfile import NamedTemporaryFile
 
@@ -333,12 +337,14 @@ def get_supported_formats():
         + ["json", "jsonl", "yaml", "python", "py"]
     )
 
+
 def not_dotaccessible(it):
     if isinstance(it, dict):
         return {k: not_dotaccessible(v) for k, v in dict.items(it)}
     if isinstance(it, list):
         return [not_dotaccessible(v) for v in it]
     return it
+
 
 class StructEncoder(json.JSONEncoder):
     """
@@ -352,11 +358,12 @@ class StructEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, DotAccessible):
-            obj = {k: v for k,v in dict.items(obj)}
+            obj = {k: v for k, v in dict.items(obj)}
         try:
             return super().default(obj)
         except:
             return str(obj)
+
 
 def print_results(ret, output, compact=False, raw=False, additionals={}):
     """
@@ -430,7 +437,10 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
             line = yaml.dump([dict(line)] if isinstance(line, dict) else line)
         elif output in ("json", "jsonl"):
             line = json.dumps(
-                not_dotaccessible(line), ensure_ascii=False, cls=StructEncoder, **output_kwargs
+                not_dotaccessible(line),
+                ensure_ascii=False,
+                cls=StructEncoder,
+                **output_kwargs
                 # not_dotaccessible(line), ensure_ascii=False, cls=StructEncoder, **output_kwargs
             )
         else:

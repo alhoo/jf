@@ -148,7 +148,33 @@ def camel_to_snake(name):
     return name
 
 
-def run_query(query, data, additionals={}, from_file=False, processes=1):
+def HttpServe(fs, listen, processes):
+    import json
+    import yaml
+    from flask import Flask, request
+
+    app = Flask(__name__)
+
+    @app.route("/", methods=["POST"])
+    def index():
+        arr = [request.json]
+        for op, _f in fs:
+            if op == "map":
+                arr = map(_f, map(dotaccessible, arr))
+            elif op == "update":
+                arr = map(dict_updater(_f), map(dotaccessible, arr))
+            elif op == "function":
+                arr = _f(1)(map(dotaccessible, arr))
+            elif op == "filter":
+                arr = filter(_f, map(dotaccessible, arr))
+        ret = next(arr)
+        print(yaml.dump(json.loads(json.dumps(ret))))
+        return json.dumps(ret)
+
+    app.run(host="0.0.0.0", port=listen)
+
+
+def run_query(query, data, additionals={}, from_file=False, processes=1, listen=False):
     """
     Run query. This function will utilize global imports if used as a library:
 
@@ -159,6 +185,8 @@ def run_query(query, data, additionals={}, from_file=False, processes=1):
     from .query_parser import parse_query
     from . import extra_functions
     import parser
+
+    print(listen)
 
     # query
     queries, imports, import_path, _, _ = parse_query(query, from_file, [], [], False)
@@ -192,10 +220,20 @@ def run_query(query, data, additionals={}, from_file=False, processes=1):
 
         world.update({k: v for k, v in superglobals().items() if "_" != k[0]})
 
-    for init in additionals.get("JF_init_codes", []):
-        eval(parser.suite(init).compile("myinit.py"), world)
+    if listen:
+        world.update({"HttpServe": HttpServe})
+        return eval(
+            parser.expr(f"HttpServe({queries}, {listen}, {processes})").compile(
+                "myquery.py"
+            ),
+            world,
+        )
+    else:
+        for init in additionals.get("JF_init_codes", []):
+            eval(parser.suite(init).compile("myinit.py"), world)
 
-    # process
-    return eval(
-        parser.expr(f"mymap({queries}, data, {processes})").compile("myquery.py"), world
-    )
+        # process
+        return eval(
+            parser.expr(f"mymap({queries}, data, {processes})").compile("myquery.py"),
+            world,
+        )

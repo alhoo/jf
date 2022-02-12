@@ -19,6 +19,7 @@ from .main import jf
     default=[],
 )
 @click.option("--compact", "-c", help="compact output.", is_flag=True)
+@click.option("--listen", help="listen to http input.")
 @click.option("--debug", help="show debug.", is_flag=True)
 @click.option("--init", help="run initialization code", multiple=True)
 @click.option("--raw", "-r", help="raw output.", is_flag=True)
@@ -42,6 +43,7 @@ def main(
     import_path,
     from_file,
     compact,
+    listen,
     inputfmt,
     output,
     debug,
@@ -55,6 +57,7 @@ def main(
         import_path,
         from_file,
         compact,
+        listen,
         inputfmt,
         output,
         debug,
