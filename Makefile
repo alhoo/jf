@@ -78,7 +78,8 @@ release: jf/jsonlgen.so README.rst
 		@echo git flow release finish
 		@echo git push --all
 		@echo git push --tags
-		@echo python setup.py sdist upload -r pypi
+		@echo python setup.py sdist build
+		@echo twine upload dist/*
 
 clean:
 	rm -Rf *.whl jf/*.o jf/*.so tests/*.pyc jf/*.pyc build dist
