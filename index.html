@@ -1,0 +1,73 @@
+<html>
+<head>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.0.0-rc.0-next-64223fed8-20220210/umd/react.production.min.js" integrity="sha512-nfnFrUw5IE/iB95ako0Ge3dBID2Rr+OMc3+yqGo1S/DWQBx6iU4nVJACs7qFt+E14Pd4rMK21F+DqNcG5lKxWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.0.0-rc.0-next-64223fed8-20220210/umd/react-dom.production.min.js" integrity="sha512-8Eghqp3aRzLxN2s1VGLHwLJf9TB5lFyOQ3TmRSD9w+VthXW6nwc6M+VPUNEO8u7hyuk2ayOVqKuPtvw2jb2jMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js" integrity="sha512-kp7YHLxuJDJcOzStgd6vtpxr4ZU9kjn77e6dBsivSz+pUuAuMlE2UTdKB7jjsWT84qbS8kdCWHPETnP/ctrFsA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+</head>
+<body>
+	<div id="app">
+	</div>
+	<script type="text/babel">
+class App extends React.Component {
+    constructor(props){
+    	super(props);
+        this.state = {data: []};
+    }
+
+    appendToData(e, thiscomponent) {
+    	const evdata = JSON.parse(e.data)
+		console.log("Got event", evdata)
+		console.log(thiscomponent);
+		const data = thiscomponent.state.data;
+		console.log(data);
+		data.push(evdata);
+		thiscomponent.setState({data: data})
+	}
+
+    componentDidMount() {
+     	fetch("/T")
+			.then((resp) => resp.json())
+			.then((data) => {
+				this.setState({data: data})
+				const source = new EventSource("/sse")
+				source.onmessage = (e) => this.appendToData(e, this)
+			})
+	}
+	mapData(it){
+		//const stringify = JSON.stringify
+		const stringify = jsyaml.dump
+		return <tr>{Object.keys(it.event).map((key) => <td><pre>{stringify(it.event[key])}</pre></td>)}</tr>
+	}
+	dataHeader(data){
+		if (data.length)
+			return Object.keys(data[0].event).map((key) => <td>{key}</td>)
+		return
+	}
+
+    render() { return <div style={{margin: "2em"}}><h1 style={{"text-align": "center", "padding": "2em"}}>JF</h1>
+		<table className={"table table-striped"}>
+		<caption>Captured events</caption>
+		<thead className={"thead-dark"}>
+			<tr>{this.dataHeader(this.state.data)}</tr>
+		</thead>
+		<tbody>
+			{ this.state.data.map(this.mapData) }
+		</tbody></table>
+    </div> }
+}
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('app')
+);
+	</script>
+</body>
+</html>

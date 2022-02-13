@@ -151,12 +151,43 @@ def camel_to_snake(name):
 def HttpServe(fs, listen, processes):
     import json
     import yaml
-    from flask import Flask, request
+    from flask import Flask, request, Response
+    from time import sleep
 
     app = Flask(__name__)
+    data = []
+    results = []
 
-    @app.route("/", methods=["POST"])
+    def format_sse(ev):
+        return f'data: {json.dumps(ev)}\n\n'
+
+    @app.route("/jf", methods=["GET"])
+    def ui():
+        with open("index.html") as f:
+            return f.read()
+
+    @app.route('/sse', methods=['GET'])
+    def sse():
+        def evstream():
+            pos = len(results)
+            while True:
+                while len(results) > pos:
+                    yield format_sse(results[pos])
+                    pos += 1
+                sleep(1)
+        return Response(evstream(), mimetype='text/event-stream')
+
+    @app.route("/I", methods=["GET"])
+    def get_data():
+        return json.dumps(data)
+
+    @app.route("/T", methods=["GET"])
+    def get_results():
+        return json.dumps(results)
+
+    @app.route("/", methods=["POST", "PUT"])
     def index():
+        data.append(request.json)
         arr = [request.json]
         for op, _f in fs:
             if op == "map":
@@ -168,6 +199,7 @@ def HttpServe(fs, listen, processes):
             elif op == "filter":
                 arr = filter(_f, map(dotaccessible, arr))
         ret = next(arr)
+        results.append(ret)
         print(yaml.dump(json.loads(json.dumps(ret))))
         return json.dumps(ret)
 
