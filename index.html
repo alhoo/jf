@@ -8,7 +8,6 @@
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-
 </head>
 <body>
 	<div id="app">
@@ -17,7 +16,7 @@
 class App extends React.Component {
     constructor(props){
     	super(props);
-        this.state = {data: []};
+        this.state = {data: [], search: ""};
     }
 
     appendToData(e, thiscomponent) {
@@ -42,7 +41,9 @@ class App extends React.Component {
 	mapData(it){
 		//const stringify = JSON.stringify
 		const stringify = jsyaml.dump
-		return <tr>{Object.keys(it.event).map((key) => <td><pre>{stringify(it.event[key])}</pre></td>)}</tr>
+		it.event['payload'] = it.event['payload'] || "None";
+		const keys = Object.keys(it.event);
+		return <tr>{keys.map((key) => <td><pre>{stringify(it.event[key])}</pre></td>)}</tr>
 	}
 	dataHeader(data){
 		if (data.length)
@@ -50,14 +51,22 @@ class App extends React.Component {
 		return
 	}
 
-    render() { return <div style={{margin: "2em"}}><h1 style={{"text-align": "center", "padding": "2em"}}>JF</h1>
-		<table className={"table table-striped"}>
+	searchUpdated(event, component_this) {
+		console.log(event.target.value );
+		this.setState({search: event.target.value});
+	}
+
+    render() {
+    	const filtre = new RegExp(this.state.search);
+    	return <div style={{margin: "2em"}}><h1 style={{"text-align": "center", "padding": "2em"}}>JF</h1>
+    	Search: <input type="text" id="search" onChange={(ev) => this.searchUpdated(ev, this)}></input>
+		<table id="myTable" className={"table table-striped"}>
 		<caption>Captured events</caption>
 		<thead className={"thead-dark"}>
 			<tr>{this.dataHeader(this.state.data)}</tr>
 		</thead>
 		<tbody>
-			{ this.state.data.map(this.mapData) }
+			{ this.state.data.sort((a, b) => { if (a.event.created < b.event.created) return 1; return -1; }).filter((it) => String(it.event.event_type).match(filtre)).map(this.mapData) }
 		</tbody></table>
     </div> }
 }
