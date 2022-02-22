@@ -56,8 +56,14 @@ class App extends React.Component {
 		this.setState({search: event.target.value});
 	}
 
+	get_filtre(query){
+		try {
+		    return new RegExp(query);
+		} catch(err) { return new RegExp(""); }
+	}
+
     render() {
-    	const filtre = new RegExp(this.state.search);
+    	const filtre = this.get_filtre(this.state.search);
     	return <div style={{margin: "2em"}}><h1 style={{"text-align": "center", "padding": "2em"}}>JF</h1>
     	Search: <input type="text" id="search" onChange={(ev) => this.searchUpdated(ev, this)}></input>
 		<table id="myTable" className={"table table-striped"}>
