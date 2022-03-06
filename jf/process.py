@@ -218,8 +218,6 @@ def run_query(query, data, additionals={}, from_file=False, processes=1, listen=
     from . import extra_functions
     import parser
 
-    print(listen)
-
     # query
     queries, imports, import_path, _, _ = parse_query(query, from_file, [], [], False)
 
