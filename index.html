@@ -62,10 +62,15 @@ class App extends React.Component {
 		} catch(err) { return new RegExp(""); }
 	}
 
+	empty(ev) {
+		fetch("/empty", {method: "POST", body: ""}).then(console.log);
+	}
+
     render() {
     	const filtre = this.get_filtre(this.state.search);
     	return <div style={{margin: "2em"}}><h1 style={{"text-align": "center", "padding": "2em"}}>JF</h1>
     	Search: <input type="text" id="search" onChange={(ev) => this.searchUpdated(ev, this)}></input>
+    	<button onClick={(ev) => this.empty(ev)}>empty</button>
 		<table id="myTable" className={"table table-striped"}>
 		<caption>Captured events</caption>
 		<thead className={"thead-dark"}>
