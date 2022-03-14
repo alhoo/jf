@@ -216,7 +216,6 @@ def run_query(query, data, additionals={}, from_file=False, processes=1, listen=
     """
     from .query_parser import parse_query
     from . import extra_functions
-    import parser
 
     # query
     queries, imports, import_path, _, _ = parse_query(query, from_file, [], [], False)
@@ -250,20 +249,12 @@ def run_query(query, data, additionals={}, from_file=False, processes=1, listen=
 
         world.update({k: v for k, v in superglobals().items() if "_" != k[0]})
 
+    for init in additionals.get("JF_init_codes", []):
+        eval(init, world)
+
     if listen:
         world.update({"HttpServe": HttpServe})
-        return eval(
-            parser.expr(f"HttpServe({queries}, {listen}, {processes})").compile(
-                "myquery.py"
-            ),
-            world,
-        )
+        return eval(f"HttpServe({queries}, {listen}, {processes})", world)
     else:
-        for init in additionals.get("JF_init_codes", []):
-            eval(parser.suite(init).compile("myinit.py"), world)
-
         # process
-        return eval(
-            parser.expr(f"mymap({queries}, data, {processes})").compile("myquery.py"),
-            world,
-        )
+        return eval(f"mymap({queries}, data, {processes})", world)
