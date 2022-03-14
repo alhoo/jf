@@ -74,6 +74,10 @@ class GroupBy(JFTransformation):
     """
 
     def _fn(self, arr):
+        if len(self.args) == 0:
+            yield list(arr)
+            return
+
         ret = {}
         for item in arr:
             val = self.args[0](item)
