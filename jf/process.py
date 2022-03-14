@@ -58,6 +58,14 @@ class DotAccessible(dict):
         del self.__dict__[key]
 
 
+def undotaccessible(it):
+    if isinstance(it, dict):
+        return {k: undotaccessible(v) for k, v in dict.items(it)}
+    if isinstance(it, list):
+        return [undotaccessible(v) for v in it]
+    return it
+
+
 def dotaccessible(it):
     if it is None:
         return DotAccessibleNone()
@@ -150,7 +158,6 @@ def camel_to_snake(name):
 
 def HttpServe(fs, listen, processes):
     import json
-    import yaml
     from flask import Flask, request, Response
     from time import sleep
 
@@ -159,12 +166,20 @@ def HttpServe(fs, listen, processes):
     results = []
 
     def format_sse(ev):
-        return f'data: {json.dumps(ev)}\n\n'
+        try:
+            data_json = json.dumps(ev)
+            return f'data: {data_json}\n\n'
+        except TypeError:
+            print(f"Failed to json encode {ev}")
 
     @app.route("/jf", methods=["GET"])
     def ui():
         with open("index.html") as f:
             return f.read()
+
+    @app.route("/v0/analytics-events-definitions", methods=["GET"])
+    def mf_get_analytics_definitions():
+        return '{"blacklist": ["dummy:blocked"], "enable_client_analytics": true, "enable_server_analytics": true, "build_version": "missing"}'
 
     @app.route('/sse', methods=['GET'])
     def sse():
@@ -172,9 +187,13 @@ def HttpServe(fs, listen, processes):
             pos = len(results)
             while True:
                 while len(results) > pos:
-                    yield format_sse(results[pos])
+                    it = format_sse(results[pos])
+                    if it:
+                        yield it
                     pos += 1
-                sleep(1)
+                if len(results) < pos:
+                    pos = len(results)
+                sleep(.2)
         return Response(evstream(), mimetype='text/event-stream')
 
     @app.route("/I", methods=["GET"])
@@ -183,7 +202,19 @@ def HttpServe(fs, listen, processes):
 
     @app.route("/T", methods=["GET"])
     def get_results():
-        return json.dumps(results)
+        try:
+            data_json = json.dumps(results)
+            return data_json
+        except TypeError:
+            print(f"Failed to json encode {results}")
+
+    @app.route("/empty", methods=["POST"])
+    def clear_results():
+        rlen = len(results)
+        while rlen > 0:
+            del results[rlen - 1]
+            rlen = len(results)
+        return "ok"
 
     @app.route("/", methods=["POST", "PUT"])
     def index():
@@ -198,9 +229,8 @@ def HttpServe(fs, listen, processes):
                 arr = _f(1)(map(dotaccessible, arr))
             elif op == "filter":
                 arr = filter(_f, map(dotaccessible, arr))
-        ret = next(arr)
+        ret = undotaccessible(next(arr))
         results.append(ret)
-        print(yaml.dump(json.loads(json.dumps(ret))))
         return json.dumps(ret)
 
     app.run(host="0.0.0.0", port=listen)
