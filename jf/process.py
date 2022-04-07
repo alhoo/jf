@@ -63,6 +63,8 @@ def undotaccessible(it):
         return {k: undotaccessible(v) for k, v in dict.items(it)}
     if isinstance(it, list):
         return [undotaccessible(v) for v in it]
+    if isinstance(it, DotAccessibleNone):
+        return None
     return it
 
 
@@ -168,7 +170,7 @@ def HttpServe(fs, listen, processes):
     def format_sse(ev):
         try:
             data_json = json.dumps(ev)
-            return f'data: {data_json}\n\n'
+            return f"data: {data_json}\n\n"
         except TypeError:
             print(f"Failed to json encode {ev}")
 
@@ -181,7 +183,7 @@ def HttpServe(fs, listen, processes):
     def mf_get_analytics_definitions():
         return '{"blacklist": ["dummy:blocked"], "enable_client_analytics": true, "enable_server_analytics": true, "build_version": "missing"}'
 
-    @app.route('/sse', methods=['GET'])
+    @app.route("/sse", methods=["GET"])
     def sse():
         def evstream():
             pos = len(results)
@@ -193,8 +195,9 @@ def HttpServe(fs, listen, processes):
                     pos += 1
                 if len(results) < pos:
                     pos = len(results)
-                sleep(.2)
-        return Response(evstream(), mimetype='text/event-stream')
+                sleep(0.2)
+
+        return Response(evstream(), mimetype="text/event-stream")
 
     @app.route("/I", methods=["GET"])
     def get_data():

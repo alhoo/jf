@@ -39,7 +39,7 @@ setup(
             "jf.jsonlgen",
             sources=["jf/jsonlgen.cc"],
             language='c++',
-            extra_compile_args="-std=c++11 -O3 -funroll-loops -march=native".split(),
+            extra_compile_args="-std=c++11 -O3 -funroll-loops -march=native -fPIC".split(),
         ),
     ],
     install_requires=[
