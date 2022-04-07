@@ -1,4 +1,4 @@
-image: python:3.6
+image: python:3.10
 test:
   stage: test
   script:
@@ -6,7 +6,6 @@ test:
   - pipenv sync --dev
   - make jf/jsonlgen.so
   - pipenv run pytest jf --doctest-modules --cov --cov-report html
-  - make test
   artifacts:
     paths:
     - coverage
