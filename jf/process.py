@@ -233,7 +233,6 @@ def HttpServe(fs, listen, processes):
     @app.route("/", methods=["POST", "PUT"])
     def index():
         data.append(request.json)
-        # logger.info("Event: {}", request.json["Data"].get("event_type"))
         arr = [request.json]
         for op, _f in fs:
             if op == "map":
@@ -244,9 +243,12 @@ def HttpServe(fs, listen, processes):
                 arr = _f(1)(map(dotaccessible, arr))
             elif op == "filter":
                 arr = filter(_f, map(dotaccessible, arr))
-        ret = undotaccessible(next(arr))
-        results.append(ret)
-        return json.dumps(ret)
+        new_results = []
+        for it in arr:
+            ret = undotaccessible(it)
+            results.append(ret)
+            new_results.append(ret)
+        return json.dumps(new_results)
 
     app.run(host="0.0.0.0", port=listen)
 
