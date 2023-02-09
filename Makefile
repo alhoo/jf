@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -O3 -pthread -fwrapv -Wall -Wno-unused-result -fPIC -std=c++11
+CFLAGS = -std=c++11 -O3 -funroll-loops -march=native -fPIC
 LDFLAGS = -pthread -shared
 
 INCLUDE = $(shell python3-config --includes)

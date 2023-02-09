@@ -1,5 +1,5 @@
 import json
-from jf.process import DotAccessible
+from jf.process import DotAccessible, undotaccessible
 
 
 def yield_json_and_json_lines(inp):
@@ -10,7 +10,7 @@ def yield_json_and_json_lines(inp):
     Notice: Results are still json strings, so you most likely want to json.loads them.
 
     """
-    from jf import jsonlgen
+    from . import jsonlgen
 
     return jsonlgen.gen(iter(inp))
 
@@ -213,9 +213,7 @@ def data_input(files=None, additionals={}, inputfmt=None, listen=None):
                 import yaml
 
                 ma = MinimalAdapter()
-                with fileinput.input(
-                    fn, openhook=fileinput.hook_compressed, mode="rb"
-                ) as f:
+                with fileinput.input(fn, mode="rb") as f:
                     ret = yaml.safe_load(ma(f))
                     if isinstance(ret, list):
                         yield from ret
@@ -228,8 +226,14 @@ def data_input(files=None, additionals={}, inputfmt=None, listen=None):
                     with open(fn, "rb") as f:
                         yield from fun(f)
                         continue
+
+            import os
+
+            ext = os.path.splitext(fn)[1]
             with fileinput.input(
-                fn, openhook=fileinput.hook_compressed, mode="rb"
+                fn,
+                openhook=(fileinput.hook_compressed if ext in ("bz2", "gz") else None),
+                mode="rb",
             ) as f:
                 yield from map(
                     try_json_loads,
@@ -385,7 +389,7 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
       "a": 1
     }
     >>> print_results(data, 'yaml')
-    - a: 1
+    a: 1
     <BLANKLINE>
     >>> print_results(data, 'csv')
     ,a
@@ -429,12 +433,20 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
     except:
         pass
     ret = iter(ret)
+    if output == "yaml":
+        ret = list(ret)
+        if len(ret) == 1:
+            ret = ret[0]
+        line = yaml.dump(
+            undotaccessible(ret),
+            sort_keys=False,
+        )
+        return print(_highligh(line)) if _highligh else print(line)
+
     for line in ret:
         out = line
         if output in ("python", "py"):
             line = repr(line)
-        elif output == "yaml":
-            line = yaml.dump([dict(line)] if isinstance(line, dict) else line)
         elif output in ("json", "jsonl"):
             line = json.dumps(
                 not_dotaccessible(line),

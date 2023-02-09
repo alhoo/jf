@@ -1,23 +1,29 @@
-image: python:3.6
-
+image: python:3.10
 test:
   stage: test
   script:
-    - pip install -r test_requirements.txt
-    - pip install -r requirements.txt
-    - pip install .
-    - make test
+  - pip install pipenv
+  - pipenv sync --dev
+  - make jf/jsonlgen.so
+  - pipenv run pytest jf --doctest-modules --cov --cov-report html
   artifacts:
     paths:
-      - coverage
+    - coverage
     expire_in: 1 week
-
-pages:
+release:
   stage: deploy
-  dependencies:
-    - test
   script:
-   - mkdir public
+  - pip install pipenv
+  - pip install twine
+  - pipenv sync --dev
+  - make jf/jsonlgen.so
+  - pipenv run python setup.py sdist build
+  - twine upload dist/*
   artifacts:
     paths:
-      - public
+    - coverage
+    expire_in: 1 week
+  dependencies:
+  - test
+  only:
+  - master

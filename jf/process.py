@@ -65,6 +65,8 @@ def undotaccessible(it):
         return {k: undotaccessible(v) for k, v in dict.items(it)}
     if isinstance(it, list):
         return [undotaccessible(v) for v in it]
+    if isinstance(it, DotAccessibleNone):
+        return None
     return it
 
 
@@ -177,7 +179,7 @@ def HttpServe(fs, listen, processes):
     def format_sse(ev):
         try:
             data_json = json.dumps(ev)
-            return f'data: {data_json}\n\n'
+            return f"data: {data_json}\n\n"
         except TypeError:
             print(f"Failed to json encode {ev}")
 

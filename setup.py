@@ -9,7 +9,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "1.1.1"
+version = "1.1.2"
 
 setup(
     name="jf",
@@ -39,7 +39,7 @@ setup(
             "jf.jsonlgen",
             sources=["jf/jsonlgen.cc"],
             language='c++',
-            extra_compile_args="-std=c++11 -O3 -funroll-loops -march=native".split(),
+            extra_compile_args="-std=c++11 -O3 -funroll-loops -march=native -fPIC".split(),
         ),
     ],
     install_requires=[
