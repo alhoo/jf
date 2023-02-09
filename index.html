@@ -16,7 +16,7 @@
 class App extends React.Component {
     constructor(props){
     	super(props);
-        this.state = {data: [], search: ""};
+        this.state = {data: [], search: "^(?!system:log)", yaml: 1};
     }
 
     appendToData(e, thiscomponent) {
@@ -38,9 +38,8 @@ class App extends React.Component {
 				source.onmessage = (e) => this.appendToData(e, this)
 			})
 	}
-	mapData(it){
-		//const stringify = JSON.stringify
-		const stringify = jsyaml.dump
+	mapData(it, yaml){
+		const stringify = yaml?jsyaml.dump:((it) => JSON.stringify(it, null, 2))
 		it.event['payload'] = it.event['payload'] || "None";
 		const keys = Object.keys(it.event);
 		return <tr>{keys.map((key) => <td><pre>{stringify(it.event[key])}</pre></td>)}</tr>
@@ -69,16 +68,18 @@ class App extends React.Component {
 
     render() {
     	const filtre = this.get_filtre(this.state.search);
+    	console.log(filtre)
     	return <div style={{margin: "2em"}}><h1 style={{"text-align": "center", "padding": "2em"}}>JF</h1>
-    	Search: <input type="text" id="search" onChange={(ev) => this.searchUpdated(ev, this)}></input>
+    	Search: <input type="text" id="search" onChange={(ev) => this.searchUpdated(ev, this)} value={this.state.search}></input>
     	<button onClick={(ev) => this.empty(this, ev)}>empty</button>
+    	<button onClick={(ev) => this.setState({yaml: !this.state.yaml})}>{this.state.yaml?"json":"yaml"}</button>
 		<table id="myTable" className={"table table-striped"}>
 		<caption>Captured events</caption>
 		<thead className={"thead-dark"}>
 			<tr>{this.dataHeader(this.state.data)}</tr>
 		</thead>
 		<tbody>
-			{ this.state.data.sort((a, b) => { if (a.event.created < b.event.created) return 1; return -1; }).filter((it) => String(it.event.event_type).match(filtre)).map(this.mapData) }
+			{ this.state.data.sort((a, b) => { if (a.event.created < b.event.created) return 1; return -1; }).filter((it) => String(it.event.event_type).match(filtre)).map((it) => this.mapData(it, this.state.yaml)) }
 		</tbody></table>
     </div> }
 }

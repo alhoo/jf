@@ -1,3 +1,5 @@
+import random
+
 _funcs = None
 
 
@@ -112,7 +114,13 @@ def worker(x):
 
 def dict_updater(_f):
     def _update_dict(x):
-        return dict(x, **_f(x))
+        res = x
+        try:
+            res = _f(x)
+            return dict(x, **res)
+        except:
+            print("Error: ", res)
+            return x
 
     return _update_dict
 
@@ -159,6 +167,7 @@ def camel_to_snake(name):
 def HttpServe(fs, listen, processes):
     import json
     from flask import Flask, request, Response
+    from loguru import logger
     from time import sleep
 
     app = Flask(__name__)
@@ -179,7 +188,10 @@ def HttpServe(fs, listen, processes):
 
     @app.route("/v0/analytics-events-definitions", methods=["GET"])
     def mf_get_analytics_definitions():
-        return '{"blacklist": ["dummy:blocked"], "enable_client_analytics": true, "enable_server_analytics": true, "build_version": "missing"}'
+        return json.dumps({"blacklist": ["dummy:blocked"],
+                           "enable_client_analytics": True,
+                           "enable_server_analytics": True,
+                           "build_version": "missing"})
 
     @app.route('/sse', methods=['GET'])
     def sse():
@@ -219,6 +231,7 @@ def HttpServe(fs, listen, processes):
     @app.route("/", methods=["POST", "PUT"])
     def index():
         data.append(request.json)
+        # logger.info("Event: {}", request.json["Data"].get("event_type"))
         arr = [request.json]
         for op, _f in fs:
             if op == "map":
