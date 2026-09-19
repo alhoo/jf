@@ -1,5 +1,5 @@
 import json
-from jf.process import DotAccessible, undotaccessible
+from jf.process import DotAccessible, DotAccessibleNone, undotaccessible
 
 
 def yield_json_and_json_lines(inp):
@@ -268,7 +268,12 @@ def save_pandas(alldata, output, _highligh=None):
 
     df = None
     try:
-        df = pd.DataFrame([dict(it) for it in alldata])
+        df = pd.DataFrame(
+            [
+                undotaccessible(it) if isinstance(it, dict) else dict(it)
+                for it in alldata
+            ]
+        )
         if output == "xlsx":
             output = "excel"
         res = BytesIO()
@@ -342,14 +347,6 @@ def get_supported_formats():
     )
 
 
-def not_dotaccessible(it):
-    if isinstance(it, dict):
-        return {k: not_dotaccessible(v) for k, v in dict.items(it)}
-    if isinstance(it, list):
-        return [not_dotaccessible(v) for v in it]
-    return it
-
-
 class StructEncoder(json.JSONEncoder):
     """
     Try to convert everything to json
@@ -358,9 +355,13 @@ class StructEncoder(json.JSONEncoder):
     >>> import json
     >>> len(json.dumps(datetime.now(), cls=StructEncoder)) > 10
     True
+    >>> json.dumps(DotAccessibleNone(), cls=StructEncoder)
+    'null'
     """
 
     def default(self, obj):
+        if isinstance(obj, DotAccessibleNone):
+            return None
         if isinstance(obj, DotAccessible):
             obj = {k: v for k, v in dict.items(obj)}
         try:
@@ -382,6 +383,13 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
     {'a': 1}
     >>> print_results(data, 'json', True)
     {"a": 1}
+    >>> from jf.process import dotaccessible
+    >>> print_results([dotaccessible({"a": None, "b": {"c": None}})], 'json', True)
+    {"a": null, "b": {"c": null}}
+    >>> print_results([dotaccessible({"a": None})], 'py', True)
+    {'a': None}
+    >>> print_results([dotaccessible({"a": None})], 'jsonl', True)
+    {"a": null}
     >>> print_results(["hello"], 'json', True, raw=True)
     hello
     >>> print_results(data, 'json', False)
@@ -446,14 +454,13 @@ def print_results(ret, output, compact=False, raw=False, additionals={}):
     for line in ret:
         out = line
         if output in ("python", "py"):
-            line = repr(line)
+            line = repr(undotaccessible(line))
         elif output in ("json", "jsonl"):
             line = json.dumps(
-                not_dotaccessible(line),
+                undotaccessible(line),
                 ensure_ascii=False,
                 cls=StructEncoder,
                 **output_kwargs
-                # not_dotaccessible(line), ensure_ascii=False, cls=StructEncoder, **output_kwargs
             )
         else:
             alldata = [line] + list(ret)

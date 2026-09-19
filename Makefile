@@ -2,6 +2,14 @@ CC = g++
 CFLAGS = -std=c++11 -O3 -funroll-loops -march=native -fPIC
 LDFLAGS = -pthread -shared
 
+# On macOS the Python symbols are provided by the interpreter at import time, so the
+# linker must be told to allow them to be resolved dynamically (on Linux this is the
+# default behaviour for shared libraries).
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+LDFLAGS += -undefined dynamic_lookup
+endif
+
 INCLUDE = $(shell python3-config --includes)
 SPHINXOPTS ?=
 SPHINXBUILD ?= python3 -m sphinx.cmd.build

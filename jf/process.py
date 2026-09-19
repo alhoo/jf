@@ -119,6 +119,24 @@ def dict_updater(_f):
     return _update_dict
 
 
+def mp_context():
+    """Multiprocessing context that can run our query functions.
+
+    Query functions are lambdas built at runtime with ``eval`` (see
+    ``query_parser``), so they cannot be pickled.  The ``fork`` start method
+    inherits them from the parent process instead of pickling them.  That is the
+    default on Linux, but macOS has defaulted to ``spawn`` since Python 3.8,
+    which fails with ``PicklingError``.  Override with JF_MP_START_METHOD.
+    """
+    import multiprocessing
+    import os
+
+    method = os.environ.get("JF_MP_START_METHOD") or (
+        "fork" if "fork" in multiprocessing.get_all_start_methods() else None
+    )
+    return multiprocessing.get_context(method)
+
+
 def mymap(fs, arr, processes=1):
     """My mapping function
 
@@ -126,9 +144,9 @@ def mymap(fs, arr, processes=1):
 
     """
     if processes > 1:
-        from multiprocessing import Pool
+        pool_class = mp_context().Pool
 
-        with Pool(
+        with pool_class(
             processes,
             initializer=worker_init,
             initargs=([(op, f) for op, f in fs if op != "function"],),
